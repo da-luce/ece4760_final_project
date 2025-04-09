@@ -50,6 +50,9 @@ typedef struct
 
 volatile Point active_point;
 
+volatile float current_angle; // Current angle of the motor in radians
+#define RAD_PER_STEP 0.0534
+
 // PWM wrap value and clock divide value
 // For a CPU rate of 125 MHz, this gives
 // a PWM frequency of 1 kHz.
@@ -71,11 +74,16 @@ void on_pwm_wrap() {
     // Clear the interrupt flag that brought us here
     pwm_clear_irq(pwm_gpio_to_slice_num(PWM_OUT));
 
-    // Collect point and add to array
+    // 1. Step the motor
+    // TODO: step motor
+    current_angle += RAD_PER_STEP;
+
+    // 2. Read data from ToF
+    // TODO: read from i2c
     active_point.distance += 1;
     active_point.angle += 0.01;
 
-    // Signal VGA to draw
+    // 3. Signal VGA to draw
     PT_SEM_SIGNAL(pt, &vga_semaphore);
 }
 
