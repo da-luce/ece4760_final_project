@@ -36,7 +36,7 @@
 #define CENTER_Y 240
 
 // Constants
-#define PX_PER_MM 30 // How many pixels make up a millimeters
+#define PX_PER_MM 2 // How many pixels make up a millimeters
 
 // VGA semaphore
 static struct pt_sem vga_semaphore;
@@ -72,7 +72,7 @@ void on_pwm_wrap() {
     pwm_clear_irq(pwm_gpio_to_slice_num(PWM_OUT));
 
     // Collect point and add to array
-    active_point.distance = 500;
+    active_point.distance = 10;
     active_point.angle = M_PI;
 
     // Signal VGA to draw
