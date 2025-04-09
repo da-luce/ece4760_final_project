@@ -29,15 +29,26 @@
 #include "vga16_graphics.h"
 #include "pt_cornell_rp2040_v1_3.h"
 
+// Screen parameters
+#define SCREEN_Y 480 // screen height
+#define SCREEN_X 640 // screen width
+#define CENTER_X 321
+#define CENTER_Y 240
+
+// Constants
+#define PX_PER_MM 30 // How many pixels make up a millimeters
+
 // VGA semaphore
 static struct pt_sem vga_semaphore;
 
 // Store points in polar form
 typedef struct 
 {
-    float distance;
-    float angle;
-} point;
+    int distance; // In millimeters
+    float angle;  // In radians
+} Point;
+
+volatile Point active_point;
 
 // PWM wrap value and clock divide value
 // For a CPU rate of 125 MHz, this gives
@@ -61,6 +72,8 @@ void on_pwm_wrap() {
     pwm_clear_irq(pwm_gpio_to_slice_num(PWM_OUT));
 
     // Collect point and add to array
+    active_point.distance = 500;
+    active_point.angle = M_PI;
 
     // Signal VGA to draw
     PT_SEM_SIGNAL(pt, &vga_semaphore);
@@ -96,6 +109,12 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         // Wait on semaphore
         PT_SEM_WAIT(pt, &vga_semaphore);
 
+        // Draw active point
+        int dist = active_point.distance;
+        int angle = active_point.angle;
+        int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
+        int y_pixel = CENTER_Y + (int) (dist * PX_PER_MM * sin(angle));
+        drawPixel(x_pixel, y_pixel, BLUE);
     }
 
     // Indicate end of thread
