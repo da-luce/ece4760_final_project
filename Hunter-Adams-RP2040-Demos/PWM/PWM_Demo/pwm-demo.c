@@ -98,6 +98,9 @@ static PT_THREAD (protothread_serial(struct pt *pt))
     PT_END(pt) ;
 }
 
+// character array
+char screentext[200];
+
 // Thread that draws to VGA display
 static PT_THREAD (protothread_vga(struct pt *pt))
 {
@@ -115,6 +118,18 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y + (int) (dist * PX_PER_MM * sin(angle));
         drawPixel(x_pixel, y_pixel, BLUE);
+
+        float angle_deg = angle * 180.0 / M_PI;
+
+        // Display textual info
+        setTextColor2(WHITE, BLACK);
+        setTextSize(1);
+        sprintf(screentext, "Distance (mm): %d      ", dist);
+        setCursor(10, 10) ;
+        writeString(screentext) ;
+        sprintf(screentext, "Angle (deg):   %f      ", angle_deg) ;
+        setCursor(10, 20);
+        writeString(screentext);
     }
 
     // Indicate end of thread
