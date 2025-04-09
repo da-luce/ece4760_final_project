@@ -72,8 +72,8 @@ void on_pwm_wrap() {
     pwm_clear_irq(pwm_gpio_to_slice_num(PWM_OUT));
 
     // Collect point and add to array
-    active_point.distance = 10;
-    active_point.angle = M_PI;
+    active_point.distance += 1;
+    active_point.angle += 0.01;
 
     // Signal VGA to draw
     PT_SEM_SIGNAL(pt, &vga_semaphore);
@@ -111,7 +111,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         // Draw active point
         int dist = active_point.distance;
-        int angle = active_point.angle;
+        float angle = active_point.angle;
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y + (int) (dist * PX_PER_MM * sin(angle));
         drawPixel(x_pixel, y_pixel, BLUE);
@@ -128,6 +128,9 @@ int main() {
 
     // Initialize VGA
     initVGA() ;
+
+    active_point.distance = 0;
+    active_point.angle = 0.0;
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////// PWM CONFIGURATION ////////////////////////////
