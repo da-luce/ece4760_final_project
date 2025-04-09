@@ -9,18 +9,35 @@
  *   - GPIO 4 ---> PWM output
  * 
  */
+// STD Libraries
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
+// PICO libraries
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 
+// Hardware libraries
 #include "hardware/pwm.h"
 #include "hardware/irq.h"
+#include "hardware/pio.h"
+#include "hardware/i2c.h"
 
+// Class libraries
+#include "vga16_graphics.h"
 #include "pt_cornell_rp2040_v1_3.h"
+
+// VGA semaphore
+static struct pt_sem vga_semaphore;
+
+// Store points in polar form
+typedef struct 
+{
+    float distance;
+    float angle;
+} point;
 
 // PWM wrap value and clock divide value
 // For a CPU rate of 125 MHz, this gives
@@ -42,11 +59,11 @@ volatile int old_control ;
 void on_pwm_wrap() {
     // Clear the interrupt flag that brought us here
     pwm_clear_irq(pwm_gpio_to_slice_num(PWM_OUT));
-    // Update duty cycle
-    if (control!=old_control) {
-        old_control = control ;
-        pwm_set_chan_level(slice_num, PWM_CHAN_A, control);
-    }
+
+    // Collect point and add to array
+
+    // Signal VGA to draw
+    PT_SEM_SIGNAL(pt, &vga_semaphore);
 }
 
 // User input thread
@@ -68,10 +85,30 @@ static PT_THREAD (protothread_serial(struct pt *pt))
     PT_END(pt) ;
 }
 
+// Thread that draws to VGA display
+static PT_THREAD (protothread_vga(struct pt *pt))
+{
+    // Indicate start of thread
+    PT_BEGIN(pt) ;
+
+    while (true) {
+
+        // Wait on semaphore
+        PT_SEM_WAIT(pt, &vga_semaphore);
+
+    }
+
+    // Indicate end of thread
+    PT_END(pt);
+}
+
 int main() {
 
     // Initialize stdio
     stdio_init_all();
+
+    // Initialize VGA
+    initVGA() ;
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////// PWM CONFIGURATION ////////////////////////////
@@ -109,6 +146,7 @@ int main() {
     ///////////////////////////// ROCK AND ROLL ////////////////////////////
     ////////////////////////////////////////////////////////////////////////
     pt_add_thread(protothread_serial) ;
+    pt_add_thread(protothread_vga) ;
     pt_schedule_start ;
 
 }
