@@ -2,6 +2,18 @@
 
 Currently working in PWM_Demo.
 
+## VGA + Motor Control
+
+- VGA uses `pio0`
+  - Three programs: `rgb.pio`, `hysync.pio`, and `vsync.pio`
+- Control of a single motor requires three `pio` programs:
+  - `pacer.pio`
+  - `stepper.pio`
+  - `counter.pio`
+
+Since we only have two PIO blocks (`pio0` and `pio1`), with four state machines
+for each, **all motor PIO programs must go on `pio1`**.
+
 ## Important Links
 
 - [Course Webpage](https://ece4760.github.io/)

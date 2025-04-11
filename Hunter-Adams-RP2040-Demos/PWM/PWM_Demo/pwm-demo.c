@@ -50,7 +50,7 @@ typedef struct
 
 volatile Point active_point;
 
-volatile float current_angle; // Current angle of the motor in radians
+volatile float current_angle; // Track the current angle of the motor in radians
 #define RAD_PER_STEP 0.0534
 
 // PWM wrap value and clock divide value
@@ -61,6 +61,8 @@ volatile float current_angle; // Current angle of the motor in radians
 
 // GPIO we're using for PWM
 #define PWM_OUT 4
+//GPIO for timing the ISR
+#define ISR_GPIO 2
 
 // Variable to hold PWM slice number
 uint slice_num ;
@@ -71,6 +73,10 @@ volatile int old_control ;
 
 // PWM interrupt service routine
 void on_pwm_wrap() {
+
+    // Assert a GPIO when we enter the interrupt
+    gpio_put(ISR_GPIO, 1) ;
+
     // Clear the interrupt flag that brought us here
     pwm_clear_irq(pwm_gpio_to_slice_num(PWM_OUT));
 
@@ -85,6 +91,9 @@ void on_pwm_wrap() {
 
     // 3. Signal VGA to draw
     PT_SEM_SIGNAL(pt, &vga_semaphore);
+
+    // De-assert the GPIO when we leave the interrupt
+    gpio_put(ISR_GPIO, 0) ;
 }
 
 // User input thread
@@ -151,6 +160,11 @@ int main() {
 
     // Initialize VGA
     initVGA() ;
+
+    // Setup the ISR-timing GPIO
+    gpio_init(ISR_GPIO) ;
+    gpio_set_dir(ISR_GPIO, GPIO_OUT);
+    gpio_put(ISR_GPIO, 0) ;
 
     active_point.distance = 0;
     active_point.angle = 0.0;
