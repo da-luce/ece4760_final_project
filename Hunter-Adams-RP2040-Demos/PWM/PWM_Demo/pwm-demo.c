@@ -37,7 +37,8 @@
 #define CENTER_Y 240
 
 // Constants
-#define PX_PER_MM 2 // How many pixels make up a millimeters
+#define PX_PER_MM 1 // How many pixels make up a millimeters
+#define RAD_PER_STEP 0.0015339807878818 // AKA Stride Angle for 28BYJ-48
 
 // VGA semaphore
 static struct pt_sem vga_semaphore;
@@ -52,7 +53,6 @@ typedef struct
 volatile Point active_point;
 
 volatile float current_angle; // Track the current angle of the motor in radians
-#define RAD_PER_STEP 0.0534
 
 // GPIO for timing the ISR
 #define ISR_GPIO 15
@@ -79,6 +79,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         float angle = active_point.angle;
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y + (int) (dist * PX_PER_MM * sin(angle));
+
         drawPixel(x_pixel, y_pixel, BLUE);
 
         float angle_deg = angle * 180.0 / M_PI;
@@ -105,8 +106,12 @@ void pio1_interrupt_handler() {
 
     // 1. Read data from ToF
     // TODO: read from i2c
-    active_point.distance += 1;
-    active_point.angle += 0.01;
+    active_point.distance += (rand() % 7) - 3; // 0 to 6000
+    active_point.angle += RAD_PER_STEP;
+    if (active_point.angle >= 2 * M_PI)
+    {
+        active_point.angle = 0.0;
+    }
 
     // 2. Signal VGA to draw
     PT_SEM_SIGNAL(pt, &vga_semaphore);
@@ -129,7 +134,7 @@ int main() {
     // VGA CONFIGURATION -------------------------------------------------------
     initVGA();
 
-    active_point.distance = 0;
+    active_point.distance = 30;
     active_point.angle = 0.0;
 
     ////////////////////////////////////////////////////////////////////////
