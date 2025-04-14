@@ -152,7 +152,6 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 void pio1_interrupt_handler() {
     pio_interrupt_clear(pio_1, 0) ;
 
-    printf("EEEEEE");
     // 1. Read data from ToF
     // TODO: read from i2c
     active_point.distance += 1;
@@ -163,7 +162,7 @@ void pio1_interrupt_handler() {
 
     // 3. Move motor again
     current_angle += RAD_PER_STEP;
-    MOVE_STEPS_MOTOR_2(0xFF) ;
+    MOVE_STEPS_MOTOR_2(1);
 }
 
 int main() {
@@ -226,7 +225,7 @@ int main() {
     // IMPORTANT: start the motor!
     pio1_interrupt_handler();
 
-    pt_add_thread(protothread_serial) ;
+    // pt_add_thread(protothread_serial) ;
     pt_add_thread(protothread_vga) ;
     pt_schedule_start ;
 
