@@ -6,8 +6,17 @@
  * user-specified value.
  * 
  * HARDWARE CONNECTIONS
- *   - GPIO 4 ---> PWM output
+ *     MOTOR
+ *   - GPIO 2 -> IN1
+ *   - GPIO 3 -> IN2
+ *   - GPIO 3 -> IN3
+ *   - GPIO 3 -> IN4
+ *   - +3.3 V or 5V power supply to + terminal on driver
+ *   - REMEMBER TO GROUND DRIVER
  * 
+ *     VGA (as usual)
+ * 
+ *   - GPIO 28 -> Button -> Ground
  */
 // STD Libraries
 #include <stdio.h>
@@ -59,10 +68,69 @@ volatile float current_angle; // Track the current angle of the motor in radians
 // GPIO for motor
 // IMPORTANT: Uses this + subsequent 3 pins, so this uses GPIO 2,3,4,5
 #define MOTOR2_IN1 2
+#define BUTTON_PIN 28 // GPIO Pin for BUTTON
+
+// Program states (controlled by button)
+typedef enum {
+  ACTIVE,
+  RESET
+} ProgState;
+volatile ProgState program_state = ACTIVE;
+
+typedef enum {
+  NOT_PRESSED,
+  MAYBE_PRESSED,
+  PRESSED,
+  MAYBE_NOT_PRESSED
+} ButtonState;
+ButtonState button_state = NOT_PRESSED;
+
+/* Debounce the button press
+ */
+bool check_button()
+{
+  bool button_reading = gpio_get(BUTTON_PIN);
+
+  switch (button_state) {
+    case NOT_PRESSED:
+      if (button_reading == 0) {
+        button_state = MAYBE_PRESSED;
+      }
+      break;
+
+    case MAYBE_PRESSED:
+      if (button_reading == 0) {
+        button_state = PRESSED;
+
+        // Reset
+        program_state = RESET;
+
+      } else {
+        button_state = NOT_PRESSED;
+      }
+      break;
+
+    case PRESSED:
+      if (button_reading == 1) {
+        button_state = MAYBE_NOT_PRESSED;
+      }
+      break;
+
+    case MAYBE_NOT_PRESSED:
+      if (button_reading == 0) {
+        button_state = PRESSED;
+      } else {
+        button_state = NOT_PRESSED;
+      }
+      break;
+
+    default:
+        button_state = NOT_PRESSED;
+  }
+}
 
 // character array
 char screentext[200];
-
 // Thread that draws to VGA display
 static PT_THREAD (protothread_vga(struct pt *pt))
 {
@@ -73,6 +141,15 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         // Wait on semaphore
         PT_SEM_WAIT(pt, &vga_semaphore);
+
+        // Check button for presses
+        check_button();
+
+        if (program_state == RESET)
+        {
+            fillRect(0, 0, SCREEN_X, SCREEN_Y, BLACK);
+            program_state = ACTIVE;
+        }
 
         // Draw active point
         int dist = active_point.distance;
@@ -108,6 +185,10 @@ void pio1_interrupt_handler() {
     // TODO: read from i2c
     active_point.distance += (rand() % 7) - 3; // 0 to 6000
     active_point.angle += RAD_PER_STEP;
+    if (active_point.distance < 0)
+    {
+        active_point.distance = 0;
+    }
     if (active_point.angle >= 2 * M_PI)
     {
         active_point.angle = 0.0;
@@ -136,6 +217,11 @@ int main() {
 
     active_point.distance = 30;
     active_point.angle = 0.0;
+
+    // Map BUTTON to GPIO port, make it low
+    gpio_init(BUTTON_PIN);
+    gpio_set_dir(BUTTON_PIN, GPIO_IN);
+    gpio_pull_up(BUTTON_PIN);
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////////// ROCK AND ROLL ////////////////////////////
