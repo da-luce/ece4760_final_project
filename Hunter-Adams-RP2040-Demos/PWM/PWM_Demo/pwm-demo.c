@@ -27,6 +27,7 @@
 
 // Class libraries
 #include "vga16_graphics.h"
+#include "motor_library.h"
 #include "pt_cornell_rp2040_v1_3.h"
 
 // Screen parameters
@@ -61,8 +62,11 @@ volatile float current_angle; // Track the current angle of the motor in radians
 
 // GPIO we're using for PWM
 #define PWM_OUT 4
-//GPIO for timing the ISR
-#define ISR_GPIO 2
+// GPIO for timing the ISR
+#define ISR_GPIO 15
+// GPIO for Motor, + subsequent 3 pins
+// So this uses GPIO 2,3,4,5
+#define MOTOR2_IN1 2
 
 // Variable to hold PWM slice number
 uint slice_num ;
@@ -80,17 +84,7 @@ void on_pwm_wrap() {
     // Clear the interrupt flag that brought us here
     pwm_clear_irq(pwm_gpio_to_slice_num(PWM_OUT));
 
-    // 1. Step the motor
-    // TODO: step motor
-    current_angle += RAD_PER_STEP;
-
-    // 2. Read data from ToF
-    // TODO: read from i2c
-    active_point.distance += 1;
-    active_point.angle += 0.01;
-
-    // 3. Signal VGA to draw
-    PT_SEM_SIGNAL(pt, &vga_semaphore);
+    // PT_SEM_SIGNAL(pt, &vga_semaphore);
 
     // De-assert the GPIO when we leave the interrupt
     gpio_put(ISR_GPIO, 0) ;
@@ -153,13 +147,37 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     PT_END(pt);
 }
 
+// NOTE: This is called every time the motor finishes executing a command.
+// Thus, we call our measurement stuff here...
+void pio1_interrupt_handler() {
+    pio_interrupt_clear(pio_1, 0) ;
+
+    printf("EEEEEE");
+    // 1. Read data from ToF
+    // TODO: read from i2c
+    active_point.distance += 1;
+    active_point.angle += 0.01;
+
+    // 2. Signal VGA to draw
+    PT_SEM_SIGNAL(pt, &vga_semaphore);
+
+    // 3. Move motor again
+    current_angle += RAD_PER_STEP;
+    MOVE_STEPS_MOTOR_2(0xFF) ;
+}
+
 int main() {
 
     // Initialize stdio
     stdio_init_all();
 
-    // Initialize VGA
-    initVGA() ;
+    // NOTE: this needs to be called before VGA setup! This will use DMA 
+    // channels 0 - 9, and VGA will claim the remaining 2
+    // STEPPER CONFIGURATION ---------------------------------------------------
+    setupMotor2(MOTOR2_IN1, pio1_interrupt_handler) ;
+
+    // VGA CONFIGURATION -------------------------------------------------------
+    initVGA();
 
     // Setup the ISR-timing GPIO
     gpio_init(ISR_GPIO) ;
@@ -172,40 +190,46 @@ int main() {
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////// PWM CONFIGURATION ////////////////////////////
     ////////////////////////////////////////////////////////////////////////
-    // Tell GPIO PWM_OUT that it is allocated to the PWM
-    gpio_set_function(PWM_OUT, GPIO_FUNC_PWM);
+    // // Tell GPIO PWM_OUT that it is allocated to the PWM
+    // gpio_set_function(PWM_OUT, GPIO_FUNC_PWM);
 
-    // Find out which PWM slice is connected to GPIO PWM_OUT (it's slice 2)
-    slice_num = pwm_gpio_to_slice_num(PWM_OUT);
+    // // Find out which PWM slice is connected to GPIO PWM_OUT (it's slice 2)
+    // slice_num = pwm_gpio_to_slice_num(PWM_OUT);
 
-    // Mask our slice's IRQ output into the PWM block's single interrupt line,
-    // and register our interrupt handler
-    pwm_clear_irq(slice_num);
-    pwm_set_irq_enabled(slice_num, true);
-    irq_set_exclusive_handler(PWM_IRQ_WRAP, on_pwm_wrap);
-    irq_set_enabled(PWM_IRQ_WRAP, true);
+    // // Mask our slice's IRQ output into the PWM block's single interrupt line,
+    // // and register our interrupt handler
+    // pwm_clear_irq(slice_num);
+    // pwm_set_irq_enabled(slice_num, true);
+    // irq_set_exclusive_handler(PWM_IRQ_WRAP, on_pwm_wrap);
+    // irq_set_enabled(PWM_IRQ_WRAP, true);
 
-    // This section configures the period of the PWM signals
-    pwm_set_wrap(slice_num, WRAPVAL) ;
-    pwm_set_clkdiv(slice_num, CLKDIV) ;
-    
-    // Invert?
-    // First argument is slice number.
-    // If second argument is true, channel A is inverted.
-    // If third argument is true, channel B is inverted.
-    pwm_set_output_polarity (slice_num, 0, 1);
+    // // This section configures the period of the PWM signals
+    // pwm_set_wrap(slice_num, WRAPVAL) ;
+    // pwm_set_clkdiv(slice_num, CLKDIV) ;
 
-    // This sets duty cycle
-    pwm_set_chan_level(slice_num, PWM_CHAN_A, 3125);
+    // // Invert?
+    // // First argument is slice number.
+    // // If second argument is true, channel A is inverted.
+    // // If third argument is true, channel B is inverted.
+    // pwm_set_output_polarity (slice_num, 0, 1);
 
-    // Start the channel
-    pwm_set_mask_enabled((1u << slice_num));
+    // // This sets duty cycle
+    // pwm_set_chan_level(slice_num, PWM_CHAN_A, 3125);
+
+    // // Start the channel
+    // pwm_set_mask_enabled((1u << slice_num));
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////////// ROCK AND ROLL ////////////////////////////
     ////////////////////////////////////////////////////////////////////////
+
+    // IMPORTANT: start the motor!
+    pio1_interrupt_handler();
+
     pt_add_thread(protothread_serial) ;
     pt_add_thread(protothread_vga) ;
     pt_schedule_start ;
 
+    while (true) {
+    }
 }
