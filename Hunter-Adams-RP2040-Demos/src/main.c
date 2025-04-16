@@ -188,17 +188,20 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     PT_END(pt);
 }
 
-// RX interrupt handler
+volatile uint8_t float_buf[4];
+volatile int float_buf_index = 0;
+volatile float received_float = 0.0f;
 void on_uart_rx() {
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
-        // Can we send it back?
-        if (uart_is_writable(UART_ID)) {
-            // Change it slightly first!
-            ch++;
-            uart_putc(UART_ID, ch);
+        float_buf[float_buf_index++] = ch;
+        if (float_buf_index == 4) {
+            // Convert 4 bytes to float
+            memcpy((void*)&received_float, float_buf, sizeof(float));
+            float_buf_index = 0;
+            // Now you can use `received_float` elsewhere
+            printf("Received float: %f\n", received_float);
         }
-        // do something!! 
     }
 }
 
@@ -250,6 +253,7 @@ int main() {
     uart_set_hw_flow(UART_ID, false, false);
     // Set our data format
     uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+    // FIXME: do we want this or not?
     // Turn off FIFO's - we want to do this character by character
     uart_set_fifo_enabled(UART_ID, false);
     // Set up a RX interrupt
