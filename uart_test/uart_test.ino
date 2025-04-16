@@ -1,11 +1,10 @@
 float x = 3.14;
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.write(x);
+  Serial.write((uint8_t*)&x, sizeof(float));  // Send 4 bytes
+  delay(1000); // just to avoid spamming too fast
 }
