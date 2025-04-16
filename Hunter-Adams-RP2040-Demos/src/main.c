@@ -41,15 +41,15 @@
 #include "pt_cornell_rp2040_v1_3.h"
 
 // UART Setup
-#define UART_ID uart0
+#define UART_ID uart1 // Need to use uart1 since debugger probe is uart0
 #define BAUD_RATE 115200
 #define DATA_BITS 8
 #define STOP_BITS 1
 #define PARITY    UART_PARITY_NONE
 
 // Only certain GPIO may be used for UART
-#define UART_TX_PIN 12
-#define UART_RX_PIN 13
+#define UART_TX_PIN 8
+#define UART_RX_PIN 9
 
 // Screen parameters
 #define SCREEN_Y 480 // screen height
@@ -188,19 +188,23 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     PT_END(pt);
 }
 
-volatile uint8_t float_buf[4];
-volatile int float_buf_index = 0;
-volatile float received_float = 0.0f;
+volatile uint8_t byte_buf[4];
+volatile int byte_buf_index = 0;
+volatile int32_t received_int = 0;
+
 void on_uart_rx() {
+    printf("GOT SOMETHING!!!\n");
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
-        float_buf[float_buf_index++] = ch;
-        if (float_buf_index == 4) {
-            // Convert 4 bytes to float
-            memcpy((void*)&received_float, float_buf, sizeof(float));
-            float_buf_index = 0;
-            // Now you can use `received_float` elsewhere
-            printf("Received float: %f\n", received_float);
+        byte_buf[byte_buf_index++] = ch;
+
+        if (byte_buf_index == 4) {
+            // Convert 4 bytes to int
+            memcpy((void*)&received_int, byte_buf, sizeof(int32_t));
+            byte_buf_index = 0;
+
+            // Now you can use `received_int` elsewhere
+            printf("Received int: %d\n", received_int);
         }
     }
 }
@@ -245,7 +249,7 @@ int main() {
     initVGA();
 
     // UART CONFIGURATION
-    uart_init(UART_ID, 2400); // Set up our UART with a basic baud rate.
+    uart_init(UART_ID, 9600); // Set up our UART with a basic baud rate.
     // Set the TX and RX pins by using the function select on the GPIO
     gpio_set_function(UART_TX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
     gpio_set_function(UART_RX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_RX_PIN));
