@@ -4,6 +4,8 @@ Currently working in PWM_Demo.
 
 ## VGA + Motor Control
 
+### PIO Conflicts
+
 - VGA uses `pio0`
   - Three programs: `rgb.pio`, `hysync.pio`, and `vsync.pio`
 - Control of a single motor requires three `pio` programs:
@@ -13,6 +15,19 @@ Currently working in PWM_Demo.
 
 Since we only have two PIO blocks (`pio0` and `pio1`), with four state machines
 for each, **all motor PIO programs must go on `pio1`**.
+
+Thus, we have the current PIO setup:
+
+| Block  | Function      | Used state machines (out of 4) |
+| ------ | ------------- | ------------------------------ |
+| `pio0` | VGA           | 3                              |
+| `pio1` | Stepper Motor | 3                              |
+
+### DMA Conflicts
+
+- 12 total DMA channels on RP2040
+- Stepper control is hard coded to use channels 0-9
+- VGA claims two unused channels (10 and 11)
 
 ## Important Links
 
