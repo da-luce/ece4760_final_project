@@ -33,11 +33,23 @@
 #include "hardware/irq.h"
 #include "hardware/pio.h"
 #include "hardware/i2c.h"
+#include "hardware/uart.h"
 
 // Class libraries
 #include "vga16_graphics.h"
 #include "motor_library.h"
 #include "pt_cornell_rp2040_v1_3.h"
+
+// UART Setup
+#define UART_ID uart0
+#define BAUD_RATE 115200
+#define DATA_BITS 8
+#define STOP_BITS 1
+#define PARITY    UART_PARITY_NONE
+
+// Only certain GPIO may be used for UART
+#define UART_TX_PIN 12
+#define UART_RX_PIN 13
 
 // Screen parameters
 #define SCREEN_Y 480 // screen height
@@ -176,6 +188,20 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     PT_END(pt);
 }
 
+// RX interrupt handler
+void on_uart_rx() {
+    while (uart_is_readable(UART_ID)) {
+        uint8_t ch = uart_getc(UART_ID);
+        // Can we send it back?
+        if (uart_is_writable(UART_ID)) {
+            // Change it slightly first!
+            ch++;
+            uart_putc(UART_ID, ch);
+        }
+        // do something!! 
+    }
+}
+
 // NOTE: This is called every time the motor finishes executing a command.
 // Thus, we call our measurement stuff here...
 void pio1_interrupt_handler() {
@@ -214,6 +240,27 @@ int main() {
 
     // VGA CONFIGURATION -------------------------------------------------------
     initVGA();
+
+    // UART CONFIGURATION
+    uart_init(UART_ID, 2400); // Set up our UART with a basic baud rate.
+    // Set the TX and RX pins by using the function select on the GPIO
+    gpio_set_function(UART_TX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
+    gpio_set_function(UART_RX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_RX_PIN));
+    // Set UART flow control CTS/RTS, we don't want these, so turn them off
+    uart_set_hw_flow(UART_ID, false, false);
+    // Set our data format
+    uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+    // Turn off FIFO's - we want to do this character by character
+    uart_set_fifo_enabled(UART_ID, false);
+    // Set up a RX interrupt
+    // We need to set up the handler first
+    // Select correct interrupt for the UART we are using
+    int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
+    // And set up and enable the interrupt handlers
+    irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
+    irq_set_enabled(UART_IRQ, true);
+    // Now enable the UART to send interrupts - RX only
+    uart_set_irq_enables(UART_ID, true, false);
 
     active_point.distance = 30;
     active_point.angle = 0.0;
