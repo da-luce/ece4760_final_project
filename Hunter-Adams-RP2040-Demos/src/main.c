@@ -188,24 +188,11 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     PT_END(pt);
 }
 
-volatile uint8_t byte_buf[4];
-volatile int byte_buf_index = 0;
-volatile int32_t received_int = 0;
-
 void on_uart_rx() {
     printf("GOT SOMETHING!!!\n");
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
-        byte_buf[byte_buf_index++] = ch;
-
-        if (byte_buf_index == 4) {
-            // Convert 4 bytes to int
-            memcpy((void*)&received_int, byte_buf, sizeof(int32_t));
-            byte_buf_index = 0;
-
-            // Now you can use `received_int` elsewhere
-            printf("Received int: %d\n", received_int);
-        }
+        printf("Received int: %c\n", ch);
     }
 }
 
