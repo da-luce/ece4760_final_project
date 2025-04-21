@@ -43,7 +43,7 @@
 // UART Setup
 #define UART_ID uart1   // Need to use uart1 since debugger probe is uart0
 #define BAUD_RATE 9600  // IMPORTANT: make sure this matches the Arduino baud rate
-#define DATA_BITS 8
+#define DATA_BITS 8     // These are Arduino default settings:
 #define STOP_BITS 1
 #define PARITY    UART_PARITY_NONE
 
@@ -188,11 +188,22 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     PT_END(pt);
 }
 
+uint8_t rx_buf[4];
+int recieved = 0;
 void on_uart_rx() {
-    printf("GOT SOMETHING!!!\n");
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
+        rx_buf[recieved] = ch;
+        recieved += 1;
         printf("Received int: %c\n", ch);
+        if (recieved >= 4) {
+        uint32_t value = (rx_buf[0]) |
+                 (rx_buf[1] << 8)   |
+                 (rx_buf[2] << 16)  |
+                 (rx_buf[3] << 24);
+        printf("Received int: %d\n", value);
+        recieved = 0;
+        }
     }
 }
 
