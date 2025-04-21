@@ -1,10 +1,10 @@
 /**
  * V. Hunter Adams (vha3@cornell.edu)
  * PWM demo code with serial input
- *
+ * 
  * This demonstration sets a PWM duty cycle to a
  * user-specified value.
- *
+ * 
  * HARDWARE CONNECTIONS
  *     MOTOR
  *   - GPIO 2 -> IN1
@@ -13,9 +13,9 @@
  *   - GPIO 3 -> IN4
  *   - +3.3 V or 5V power supply to + terminal on driver
  *   - REMEMBER TO GROUND DRIVER
- *
+ * 
  *     VGA (as usual)
- *
+ * 
  *   - GPIO 28 -> Button -> Ground
  */
 // STD Libraries
@@ -61,13 +61,11 @@
 #define PX_PER_MM 1 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 // AKA Stride Angle for 28BYJ-48
 
-
-
 // VGA semaphore
 static struct pt_sem vga_semaphore;
 
 // Store points in polar form
-typedef struct
+typedef struct 
 {
     int distance; // In millimeters
     float angle;  // In radians
@@ -224,81 +222,12 @@ void pio1_interrupt_handler() {
     MOVE_STEPS_MOTOR_2(1);
 }
 
-#define BUF_SIZE 4
-int rx_dma_chan;
-// Called every time DMA fills rx_buf
-uint8_t rx_buf[BUF_SIZE];
-void dma_handler() {
-    // Clear the interrupt request
-    dma_hw->ints0 = 1u << rx_dma_chan;
-
-    // Process received 4 bytes
-    for (int i = 0; i < BUF_SIZE; i++) {
-        printf("Byte %d: %02X\n", i, rx_buf[i]);
-    }
-
-    uint32_t value =
-        ((uint32_t)rx_buf[0] << 24) |
-        ((uint32_t)rx_buf[1] << 16) |
-        ((uint32_t)rx_buf[2] << 8)  |
-        ((uint32_t)rx_buf[3]);
-    printf("Got int: %d", value);
-
-    // Reconfigure DMA for next 4 bytes
-    dma_channel_set_read_addr(rx_dma_chan, &uart_get_hw(UART_ID)->dr, false);
-    dma_channel_set_write_addr(rx_dma_chan, rx_buf, false);
-    dma_channel_set_trans_count(rx_dma_chan, BUF_SIZE, true);
-}
-
-void init_uart()
-{
-    uart_init(UART_ID, BAUD_RATE);
-
-    // Set the TX and RX pins by using the function select on the GPIO
-    gpio_set_function(UART_TX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
-    gpio_set_function(UART_RX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_RX_PIN));
-
-    // Set UART flow control CTS/RTS, we don't want these, so turn them off
-    uart_set_hw_flow(UART_ID, false, false);
-
-    // Set our data format
-    uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
-
-    // Turn on UART FIFO
-    uart_set_fifo_enabled(UART_ID, true);
-
-    // Get a new DMA channel
-    rx_dma_chan = dma_claim_unused_channel(true);
-    dma_channel_config cfg = dma_channel_get_default_config(rx_dma_chan);
-
-    channel_config_set_read_increment(&cfg, false); // No read increment (always pop off top of the FIFO)
-    channel_config_set_write_increment(&cfg, true); // Yes write increment into buffer
-    channel_config_set_dreq(&cfg, uart_get_dreq(UART_ID, false)); // false = RX
-
-    dma_channel_configure(
-        rx_dma_chan,
-        &cfg,
-        rx_buf,                     // destination
-        &uart_get_hw(UART_ID)->dr,  // source (UART RX FIFO)
-        BUF_SIZE,                   // number of bytes to copy
-        false                       // don't start yet
-    );
-
-    // Enable DMA IRQ
-    dma_channel_set_irq0_enabled(rx_dma_chan, true);
-    irq_set_exclusive_handler(DMA_IRQ_0, dma_handler);
-    irq_set_enabled(DMA_IRQ_0, true);
-
-    // Start DMA
-    dma_channel_start(rx_dma_chan);
-}
-
 int main() {
 
     // Initialize stdio
     stdio_init_all();
 
-    // NOTE: this needs to be called before VGA setup! This will use DMA
+    // NOTE: this needs to be called before VGA setup! This will use DMA 
     // channels 0 - 9, and VGA will claim the remaining 2
     // STEPPER CONFIGURATION ---------------------------------------------------
     setupMotor2(MOTOR2_IN1, pio1_interrupt_handler) ;
@@ -307,7 +236,26 @@ int main() {
     initVGA();
 
     // UART CONFIGURATION
-    init_uart();
+    uart_init(UART_ID, 9600); // Set up our UART with a basic baud rate.
+    // Set the TX and RX pins by using the function select on the GPIO
+    gpio_set_function(UART_TX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
+    gpio_set_function(UART_RX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_RX_PIN));
+    // Set UART flow control CTS/RTS, we don't want these, so turn them off
+    uart_set_hw_flow(UART_ID, false, false);
+    // Set our data format
+    uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+    // FIXME: do we want this or not?
+    // Turn off FIFO's - we want to do this character by character
+    uart_set_fifo_enabled(UART_ID, false);
+    // Set up a RX interrupt
+    // We need to set up the handler first
+    // Select correct interrupt for the UART we are using
+    int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
+    // And set up and enable the interrupt handlers
+    irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
+    irq_set_enabled(UART_IRQ, true);
+    // Now enable the UART to send interrupts - RX only
+    uart_set_irq_enables(UART_ID, true, false);
 
     active_point.distance = 30;
     active_point.angle = 0.0;
