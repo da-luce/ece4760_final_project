@@ -41,8 +41,8 @@
 #include "pt_cornell_rp2040_v1_3.h"
 
 // UART Setup
-#define UART_ID uart1 // Need to use uart1 since debugger probe is uart0
-#define BAUD_RATE 115200
+#define UART_ID uart1   // Need to use uart1 since debugger probe is uart0
+#define BAUD_RATE 9600  // IMPORTANT: make sure this matches the Arduino baud rate
 #define DATA_BITS 8
 #define STOP_BITS 1
 #define PARITY    UART_PARITY_NONE
@@ -236,7 +236,7 @@ int main() {
     initVGA();
 
     // UART CONFIGURATION
-    uart_init(UART_ID, 9600); // Set up our UART with a basic baud rate.
+    uart_init(UART_ID, BAUD_RATE); // Set up our UART with a basic baud rate.
     // Set the TX and RX pins by using the function select on the GPIO
     gpio_set_function(UART_TX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
     gpio_set_function(UART_RX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_RX_PIN));
