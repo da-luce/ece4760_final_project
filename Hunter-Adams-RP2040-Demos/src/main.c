@@ -58,7 +58,7 @@
 #define CENTER_Y 240
 
 // Constants
-#define PX_PER_MM 1 // How many pixels make up a millimeters
+#define PX_PER_MM 0.1 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
 
 // VGA semaphore
@@ -166,8 +166,9 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         // Draw active point
         int dist = current_distance;
         float angle = current_angle;
+        // FIXME: is this correct. WTH is going on here.
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
-        int y_pixel = CENTER_Y + (int) (dist * PX_PER_MM * sin(angle));
+        int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
 
         drawPixel(x_pixel, y_pixel, BLUE);
 
@@ -197,7 +198,7 @@ void on_uart_rx() {
         if (ch == '\n') {
             if (received == 2) {
                 int16_t val = (rx_buf[0]) | (rx_buf[1] << 8);
-                current_distance = val - 1000;
+                current_distance = val;
                 printf("Received int: %d\n", val);
             }
             received = 0;
@@ -285,7 +286,7 @@ int main() {
     // Now enable the UART to send interrupts - RX only
     uart_set_irq_enables(UART_ID, true, false);
 
-    current_direction = CLOCKWISE;
+    current_direction = COUNTERCLOCKWISE; // Is this correct?
     current_distance = 0;
     current_angle = 0.0;
 
