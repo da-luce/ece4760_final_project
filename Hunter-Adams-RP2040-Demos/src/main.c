@@ -59,7 +59,7 @@
 
 // Constants
 #define PX_PER_MM 1 // How many pixels make up a millimeters
-#define RAD_PER_STEP 0.0015339807878818 // AKA Stride Angle for 28BYJ-48
+#define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
 
 // VGA semaphore
 static struct pt_sem vga_semaphore;
@@ -71,9 +71,9 @@ typedef struct
     float angle;  // In radians
 } Point;
 
-volatile Point active_point;
-
-volatile float current_angle; // Track the current angle of the motor in radians
+volatile int16_t current_distance;  // Track the current distance measurement
+volatile float current_angle;       // Track the current angle of the motor in radians
+volatile int current_direction;     // Track the current direction of the motor
 
 // GPIO for timing the ISR
 #define ISR_GPIO 15
@@ -164,8 +164,8 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         }
 
         // Draw active point
-        int dist = active_point.distance;
-        float angle = active_point.angle;
+        int dist = current_distance;
+        float angle = current_angle;
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y + (int) (dist * PX_PER_MM * sin(angle));
 
@@ -197,6 +197,7 @@ void on_uart_rx() {
         if (ch == '\n') {
             if (received == 2) {
                 int16_t val = (rx_buf[0]) | (rx_buf[1] << 8);
+                current_distance = val - 1000;
                 printf("Received int: %d\n", val);
             }
             received = 0;
@@ -216,22 +217,36 @@ void pio1_interrupt_handler() {
 
     // 1. Read data from ToF
     // TODO: read from i2c
-    active_point.distance += (rand() % 7) - 3; // 0 to 6000
-    active_point.angle += RAD_PER_STEP;
-    if (active_point.distance < 0)
+    // current_distance += (rand() % 7) - 3; // 0 to 6000
+    if (current_direction == CLOCKWISE)
     {
-        active_point.distance = 0;
+        current_angle -= RAD_PER_STEP;
+        if (current_angle <= 0)
+        {
+            current_direction = COUNTERCLOCKWISE;
+            SET_DIRECTION_MOTOR_2(current_direction);
+            current_angle = 0.0;
+        }
+    } else
+    {
+        current_angle += RAD_PER_STEP;
+        if (current_angle >= 2 * M_PI)
+        {
+            current_angle = 2 * M_PI;
+            current_direction = CLOCKWISE;
+            SET_DIRECTION_MOTOR_2(current_direction);
+        }
     }
-    if (active_point.angle >= 2 * M_PI)
+
+    if (current_distance < 0)
     {
-        active_point.angle = 0.0;
+        current_distance = 0;
     }
 
     // 2. Signal VGA to draw
     PT_SEM_SIGNAL(pt, &vga_semaphore);
 
     // 3. Move motor again
-    current_angle += RAD_PER_STEP;
     MOVE_STEPS_MOTOR_2(1);
 }
 
@@ -270,8 +285,9 @@ int main() {
     // Now enable the UART to send interrupts - RX only
     uart_set_irq_enables(UART_ID, true, false);
 
-    active_point.distance = 30;
-    active_point.angle = 0.0;
+    current_direction = CLOCKWISE;
+    current_distance = 0;
+    current_angle = 0.0;
 
     // Map BUTTON to GPIO port, make it low
     gpio_init(BUTTON_PIN);
@@ -283,6 +299,7 @@ int main() {
     ////////////////////////////////////////////////////////////////////////
 
     // IMPORTANT: start the motor!
+    SET_DIRECTION_MOTOR_2(current_direction);
     pio1_interrupt_handler();
 
     // pt_add_thread(protothread_serial) ;
