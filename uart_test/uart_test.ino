@@ -46,6 +46,10 @@
  * pin 5 (GPIO1) of the VL53L4CD satellite connected to pin A2 of the Nucleo board
  * pin 6 (XSHUT) of the VL53L4CD satellite connected to pin A1 of the Nucleo board
  */
+
+/* IMPORTANT: NOTE THAT PRINTING IN THE SERIAL TERMINAL WILL ALSO SEND OVER UART!!!
+ */
+
 /* Includes ------------------------------------------------------------------*/
 #include <Arduino.h>
 #include <Wire.h>
@@ -85,6 +89,8 @@ void setup()
   // Configure VL53L4CX satellite component.
   sensor_vl53l4cx_sat.begin();
 
+  sensor_vl53l4cx_sat.VL53L4CX_SetDistanceMode(VL53L4CX_DISTANCEMODE_SHORT);
+
   // Switch off VL53L4CX satellite component.
   sensor_vl53l4cx_sat.VL53L4CX_Off();
 
@@ -95,6 +101,7 @@ void setup()
   sensor_vl53l4cx_sat.VL53L4CX_StartMeasurement();
 }
 
+/* Send a new line terminated int16_t */
 void sendInt16(int16_t value) {
   // Send each byte, LSB first (little-endian)
   Serial.write((uint8_t)value & 0xFF);
@@ -124,22 +131,7 @@ void loop()
     snprintf(report, sizeof(report), "VL53L4CX Satellite: Count=%d, #Objs=%1d ", pMultiRangingData->StreamCount, no_of_object_found);
     // SerialPort.print(report);
     for (j = 0; j < no_of_object_found; j++) {
-      if (j != 0) {
-        // SerialPort.print("\r\n                               ");
-      }
-      // SerialPort.print("status=");
-      // SerialPort.print(pMultiRangingData->RangeData[j].RangeStatus);
-      // SerialPort.print(", D=");
-      // SerialPort.print(pMultiRangingData->RangeData[j].RangeMilliMeter);
-      // SerialPort.print("mm");
-      // SerialPort.print(", Signal=");
-      // SerialPort.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
-      // SerialPort.print(" Mcps, Ambient=");
-      // SerialPort.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
-      // SerialPort.print(" Mcps");
       int16_t range_val = pMultiRangingData->RangeData[j].RangeMilliMeter;
-      // SerialPort.print("\n");
-      // SerialPort.println(range_val);
       sendInt16(range_val);
     }
     // SerialPort.println("");
