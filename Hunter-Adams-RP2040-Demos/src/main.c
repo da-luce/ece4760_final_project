@@ -43,6 +43,10 @@
 // Local libraries
 #include "button.h"
 
+////////////////////////////////////////////////////////////////////////////////
+//  Defines
+////////////////////////////////////////////////////////////////////////////////
+
 // UART Setup
 #define UART_ID uart1     // Need to use uart1 since debugger probe is uart0
 #define BAUD_RATE 115200  // IMPORTANT: make sure this matches the Arduino baud rate
@@ -90,6 +94,10 @@ ProgramState prog_state = WAITING1;
 void pio1_interrupt_handler() {
     pio_interrupt_clear(pio_1, 0);
 
+    // 1. Signal VGA to draw
+    // IMPORTANT: we must keep calling this thread as it also checks button presses
+    PT_SEM_SIGNAL(pt, &vga_semaphore);
+
     if (prog_state == ZEROING)
     {
         // If zeroing, just move, nothing else
@@ -103,7 +111,7 @@ void pio1_interrupt_handler() {
         return;
     }
 
-    // 1. Increment angle representation (switch direction if required)
+    // 2. Increment angle representation (switch direction if required)
     if (current_direction == CLOCKWISE)
     {
         current_angle -= RAD_PER_STEP;
@@ -131,9 +139,6 @@ void pio1_interrupt_handler() {
     {
         current_distance = 0;
     }
-
-    // 2. Signal VGA to draw
-    PT_SEM_SIGNAL(pt, &vga_semaphore);
 
     // 3. Signal motor to move one step again
     MOVE_STEPS_MOTOR_2(1);
@@ -222,6 +227,12 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         {
             fillRect(0, 0, SCREEN_X, SCREEN_Y, BLACK);
             clear_screen = false;
+        }
+
+        // If we are not in LiDAR mode, don't draw any points
+        if (prog_state != LIDAR)
+        {
+            continue;
         }
 
         // Draw active point
