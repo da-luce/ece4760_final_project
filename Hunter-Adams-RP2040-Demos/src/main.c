@@ -191,21 +191,25 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
 uint8_t rx_buf[2];
 int received = 0;
-
+#define TERMINATING_CHAR '\n' // This is what sendInt16() in the Arduino program uses
+/* This is called every time we recieve a byte over the UART channel. Here, we are
+ * only recieving two bytes that form a int16_t (current distance reading in mm).
+ */ 
 void on_uart_rx() {
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
         if (ch == '\n') {
-            if (received == 2) {
-                int16_t val = (rx_buf[0]) | (rx_buf[1] << 8);
-                current_distance = val;
-                printf("Received int: %d\n", val);
+            if (received == TERMINATING_CHAR) {
+                int16_t dist = (rx_buf[0]) | (rx_buf[1] << 8);
+                current_distance = dist;
+                printf("Received int: %d\n", dist);
             }
             received = 0;
         } else if (received < 2) {
-            rx_buf[received++] = ch;
+            rx_buf[received] = ch;
+            received += 1;
         } else {
-            // Error: more than 2 bytes before newline
+            printf("Error, more than 2 bytes recieved before newline.");
             received = 0;
         }
     }
@@ -216,9 +220,7 @@ void on_uart_rx() {
 void pio1_interrupt_handler() {
     pio_interrupt_clear(pio_1, 0) ;
 
-    // 1. Read data from ToF
-    // TODO: read from i2c
-    // current_distance += (rand() % 7) - 3; // 0 to 6000
+    // 1. Increment angle representation (switch direction if required)
     if (current_direction == CLOCKWISE)
     {
         current_angle -= RAD_PER_STEP;
@@ -239,6 +241,9 @@ void pio1_interrupt_handler() {
         }
     }
 
+    // Normalize distance.
+    // TODO: what does a negative distance mean? It appears the sensor may output
+    // such a number
     if (current_distance < 0)
     {
         current_distance = 0;
@@ -247,7 +252,7 @@ void pio1_interrupt_handler() {
     // 2. Signal VGA to draw
     PT_SEM_SIGNAL(pt, &vga_semaphore);
 
-    // 3. Move motor again
+    // 3. Signal motor to move one step again
     MOVE_STEPS_MOTOR_2(1);
 }
 
