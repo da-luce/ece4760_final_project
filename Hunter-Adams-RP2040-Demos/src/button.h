@@ -1,3 +1,14 @@
+
+/* Button resources. NOTE: cannot include this in more than one file since function
+ * defines are in here.
+ */
+
+// STD Libraries
+#include <stdbool.h>
+
+// PICO libraries
+#include "pico/stdlib.h"
+
 typedef enum {
   NOT_PRESSED,
   MAYBE_PRESSED,

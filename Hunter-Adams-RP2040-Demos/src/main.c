@@ -50,8 +50,8 @@
 // UART Setup
 #define UART_ID uart1     // Need to use uart1 since debugger probe is uart0
 #define BAUD_RATE 115200  // IMPORTANT: make sure this matches the Arduino baud rate
-#define DATA_BITS 8       // These are Arduino default settings:
-#define STOP_BITS 1
+#define DATA_BITS 8       // These are Arduino default settings
+#define STOP_BITS 1       // ''
 #define PARITY    UART_PARITY_NONE
 
 // Only certain GPIO may be used for UART
@@ -75,17 +75,17 @@
 // VGA semaphore
 static struct pt_sem vga_semaphore;
 
-volatile int16_t current_distance = COUNTERCLOCKWISE;   // Track the current distance measurement
+volatile int16_t current_distance = 0;                  // Track the current distance measurement
 volatile float current_angle      = 0.0;                // Track the current angle of the motor in radians
-volatile int current_direction    = 0;                  // Track the current direction of the motor
+volatile int current_direction    = COUNTERCLOCKWISE;   // Track the current direction of the motor
 
 /* Overall program states
  */
 typedef enum {
-  WAITING1,         // Boot into this state, this is when we could be calibrating the sensor
-  ZEROING,          // Hold button to move to zero (TODO: OR USE A SWITCH TO DETERMINE ZERO)
-  WAITING2,         // Wait to statt collecting data
-  LIDAR             // Start collecting data, next button press goes back to waiting
+  WAITING1, // Boot into this state, this is when we could be calibrating the sensor
+  ZEROING,  // Upon button hold, move to zero (TODO: OR USE A SWITCH TO DETERMINE ZERO)
+  WAITING2, // Upon button release, wait to start collecting data
+  LIDAR     // Upon button press, start collecting data, next button press goes back to WAITING1
 } ProgramState;
 ProgramState prog_state = WAITING1;
 

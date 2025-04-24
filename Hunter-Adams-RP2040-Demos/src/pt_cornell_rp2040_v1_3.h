@@ -940,8 +940,8 @@ char pt_serial_in_buffer[pt_buffer_size];
 char pt_serial_out_buffer[pt_buffer_size];
 // thread pointers
 static struct pt pt_serialin, pt_serialout ;
-// uart
-#define UART_ID uart0
+// uart (NOTE: this is modified, used to be just UART_ID)
+#define LIB_UART_ID uart0
 //
 #define pt_backspace 0x7f // make sure your backspace matches this!
 //
@@ -953,31 +953,31 @@ static PT_THREAD (pt_serialin_polled(struct pt *pt)){
       memset(pt_serial_in_buffer, 0, pt_buffer_size);
       pt_current_char_count = 0 ;
       // clear uart fifo
-      while(uart_is_readable(UART_ID)){uart_getc(UART_ID);}
+      while(uart_is_readable(LIB_UART_ID)){uart_getc(LIB_UART_ID);}
       // build the output string
       while(pt_current_char_count < pt_buffer_size) {   
-        PT_YIELD_UNTIL(pt, (int)uart_is_readable(UART_ID)) ;
+        PT_YIELD_UNTIL(pt, (int)uart_is_readable(LIB_UART_ID)) ;
         //get the character and echo it back to terminal
         // NOTE this assumes a human is typing!!
-        ch = uart_getc(UART_ID);
-        PT_YIELD_UNTIL(pt, (int)uart_is_writable(UART_ID)) ;
-        uart_putc(UART_ID, ch);
+        ch = uart_getc(LIB_UART_ID);
+        PT_YIELD_UNTIL(pt, (int)uart_is_writable(LIB_UART_ID)) ;
+        uart_putc(LIB_UART_ID, ch);
         // check for <enter> or <backspace>
         if (ch == '\r' ){
           // <enter>> character terminates string,
           // advances the cursor to the next line, then exits
           pt_serial_in_buffer[pt_current_char_count] = 0 ;
-          PT_YIELD_UNTIL(pt, (int)uart_is_writable(UART_ID)) ;
-          uart_putc(UART_ID, '\n') ;
+          PT_YIELD_UNTIL(pt, (int)uart_is_writable(LIB_UART_ID)) ;
+          uart_putc(LIB_UART_ID, '\n') ;
           break ; 
         }
         // check fo ,backspace>
         else if (ch == pt_backspace){
-          PT_YIELD_UNTIL(pt, (int)uart_is_writable(UART_ID)) ;
-          uart_putc(UART_ID, ' ') ;
-          PT_YIELD_UNTIL(pt, (int)uart_is_writable(UART_ID)) ;
-          uart_putc(UART_ID, pt_backspace) ;
-          //uart_putc(UART_ID, ' ') ;
+          PT_YIELD_UNTIL(pt, (int)uart_is_writable(LIB_UART_ID)) ;
+          uart_putc(LIB_UART_ID, ' ') ;
+          PT_YIELD_UNTIL(pt, (int)uart_is_writable(LIB_UART_ID)) ;
+          uart_putc(LIB_UART_ID, pt_backspace) ;
+          //uart_putc(LIB_UART_ID, ' ') ;
           // wipe a character from the output
           pt_current_char_count-- ;
           if (pt_current_char_count<0) {pt_current_char_count = 0 ;}
@@ -1002,8 +1002,8 @@ int pt_serialout_polled(struct pt *pt)
     PT_BEGIN(pt);
     num_send_chars = 0;
     while (pt_serial_out_buffer[num_send_chars] != 0){
-        PT_YIELD_UNTIL(pt, (int)uart_is_writable(UART_ID)) ;
-        uart_putc(UART_ID, pt_serial_out_buffer[num_send_chars]) ;
+        PT_YIELD_UNTIL(pt, (int)uart_is_writable(LIB_UART_ID)) ;
+        uart_putc(LIB_UART_ID, pt_serial_out_buffer[num_send_chars]) ;
         num_send_chars++;
     }
     // kill this output thread, to allow spawning thread to execute
