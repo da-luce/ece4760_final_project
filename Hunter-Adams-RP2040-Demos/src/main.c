@@ -169,6 +169,7 @@ void state_button_on_press(void) {
             // This shouldn't happen
             break;
         case WAITING2:
+            clear_screen = true;
             prog_state = LIDAR;
             // Start motor ahgain
             pio1_interrupt_handler();
@@ -191,6 +192,7 @@ void state_button_on_release(void) {
             current_angle = 0.0;
             current_direction = COUNTERCLOCKWISE;
             SET_DIRECTION_MOTOR_2(current_direction);
+            clear_screen = true;
             prog_state = WAITING2;
             break;
         case WAITING2:
@@ -244,6 +246,37 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         {
             fillRect(0, 0, SCREEN_X, SCREEN_Y, BLACK);
             clear_screen = false;
+        }
+
+        // FIXME: this should only show up on boot
+        // Also, we only want to draw text once for each state, add a flag to do this
+        if (prog_state == WAITING1)
+        {
+            setTextSize(3);
+
+            setTextColor2(BLUE, BLACK);
+            sprintf(screentext, "Welcome to the PicoScope!");
+            setCursor(CENTER_X - 300 - 4, CENTER_Y - 4);
+            writeString(screentext);
+
+            setTextColor2(WHITE, BLACK);
+            sprintf(screentext, "Welcome to the PicoScope!");
+            setCursor(CENTER_X - 300, CENTER_Y);
+            writeString(screentext);
+
+            setTextColor2(WHITE, BLACK);
+            sprintf(screentext, "Hold button to zero...");
+            setCursor(CENTER_X - 300, CENTER_Y + 50);
+            writeString(screentext);
+        }
+
+        if (prog_state == WAITING2)
+        {
+            setTextColor2(WHITE, BLACK);
+            setTextSize(3);
+            sprintf(screentext, "Press again to begin!");
+            setCursor(CENTER_X - 300, CENTER_Y);
+            writeString(screentext);
         }
 
         // If we are not in LiDAR mode, don't draw any points
