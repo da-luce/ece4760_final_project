@@ -89,16 +89,12 @@ typedef enum {
   WAITING2, // Upon button release, wait to start collecting data
   LIDAR     // Upon button press, start collecting data, next button press goes back to WAITING1
 } ProgramState;
-ProgramState prog_state = ZEROING;
+ProgramState prog_state = WAITING1;
 
 // NOTE: This is called every time the motor finishes executing a command.
 // Thus, we call our measurement stuff here...
 void pio1_interrupt_handler() {
     pio_interrupt_clear(pio_1, 0);
-
-    // 1. Signal VGA to draw
-    // IMPORTANT: we must keep calling this thread as it also checks button presses
-    PT_SEM_SIGNAL(pt, &vga_semaphore);
 
     if (prog_state == ZEROING)
     {
@@ -113,7 +109,7 @@ void pio1_interrupt_handler() {
         return;
     }
 
-    // 2. Increment angle representation (switch direction if required)
+    // Increment angle representation (switch direction if required)
     if (current_direction == CLOCKWISE)
     {
         current_angle -= RAD_PER_STEP;
@@ -142,7 +138,7 @@ void pio1_interrupt_handler() {
         current_distance = 0;
     }
 
-    // 3. Signal motor to move one step again
+    // Signal motor to move one step again as we are in LiDAR mode
     MOVE_STEPS_MOTOR_2(1);
 }
 
@@ -154,7 +150,7 @@ void clear_button_on_press(void) {
 Button clear_button = {
     .gpio = 28,
     .state = NOT_PRESSED,
-    .on_press = NULL,
+    .on_press = clear_button_on_press,
     .on_release = NULL,
 };
 
@@ -162,6 +158,9 @@ Button clear_button = {
 void state_button_on_press(void) {
     switch (prog_state) {
         case WAITING1:
+            // We want to always zero in the counterclockwise direction
+            current_direction = COUNTERCLOCKWISE;
+            SET_DIRECTION_MOTOR_2(current_direction);
             prog_state = ZEROING;
             // Start motor
             pio1_interrupt_handler();
@@ -188,6 +187,10 @@ void state_button_on_release(void) {
             // This shouldn't happen
             break;
         case ZEROING:
+            // IMPORTANT: set the angle to zero!
+            current_angle = 0.0;
+            current_direction = COUNTERCLOCKWISE;
+            SET_DIRECTION_MOTOR_2(current_direction);
             prog_state = WAITING2;
             break;
         case WAITING2:
@@ -204,8 +207,8 @@ void state_button_on_release(void) {
 Button state_button = {
     .gpio = 26,
     .state = NOT_PRESSED,
-    .on_press = NULL,
-    .on_release = NULL,
+    .on_press = state_button_on_press,
+    .on_release = state_button_on_release,
 };
 
 // character array
@@ -220,10 +223,6 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         // Wait on semaphore
         PT_SEM_WAIT(pt, &vga_semaphore);
-
-        // Check buttons for press
-        check_button(&clear_button);
-        check_button(&state_button);
 
         if (DEBUG)
         {
@@ -279,11 +278,28 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     PT_END(pt);
 }
 
+// Check button presses here... separate from VGA
+// FIXME: this threading structure doesn't make that much sense?
+static PT_THREAD (protothread_button(struct pt *pt))
+{
+    PT_BEGIN(pt) ;
+    while(1) {
+        PT_SEM_SIGNAL(pt, &vga_semaphore);
+        check_button(&clear_button);
+        check_button(&state_button);
+        PT_YIELD_usec(3000); // FIXME: do we really need a yeild here
+    }
+    PT_END(pt) ;
+}
+
 uint8_t rx_buf[2];
 int received = 0;
 #define TERMINATING_CHAR '\n' // This is what sendInt16() in the Arduino program uses
 /* This is called every time we recieve a byte over the UART channel. Here, we are
  * only recieving two bytes that form a int16_t (current distance reading in mm).
+ *
+ * NOTE: important with printing here. Prinnting before reading the char will mess things
+ * up for sure
  */
 void on_uart_rx() {
     while (uart_is_readable(UART_ID)) {
@@ -328,8 +344,8 @@ int main() {
     uart_set_hw_flow(UART_ID, false, false);
     // Set our data format
     uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
-    // FIXME: do we want this or not?
-    // Turn off FIFO's - we want to do this character by character
+    // Turn off FIFO's (tried to use FIFO and take 2 bytes at a time via DMA but
+    // RP2040 isn't set up to do this very well--see link in progress report 2)
     uart_set_fifo_enabled(UART_ID, false);
     // Set up a RX interrupt
     // We need to set up the handler first
@@ -356,6 +372,7 @@ int main() {
     ///////////////////////////// ROCK AND ROLL ////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
+    pt_add_thread(protothread_button) ;
     pt_add_thread(protothread_vga) ;
     pt_schedule_start ;
 
