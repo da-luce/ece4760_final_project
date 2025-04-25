@@ -47,6 +47,8 @@
 //  Defines
 ////////////////////////////////////////////////////////////////////////////////
 
+#define DEBUG true  // Enable/disable debug info
+
 // UART Setup
 #define UART_ID uart1     // Need to use uart1 since debugger probe is uart0
 #define BAUD_RATE 115200  // IMPORTANT: make sure this matches the Arduino baud rate
@@ -87,7 +89,7 @@ typedef enum {
   WAITING2, // Upon button release, wait to start collecting data
   LIDAR     // Upon button press, start collecting data, next button press goes back to WAITING1
 } ProgramState;
-ProgramState prog_state = WAITING1;
+ProgramState prog_state = ZEROING;
 
 // NOTE: This is called every time the motor finishes executing a command.
 // Thus, we call our measurement stuff here...
@@ -152,7 +154,7 @@ void clear_button_on_press(void) {
 Button clear_button = {
     .gpio = 28,
     .state = NOT_PRESSED,
-    .on_press = clear_button_on_press,
+    .on_press = NULL,
     .on_release = NULL,
 };
 
@@ -200,10 +202,10 @@ void state_button_on_release(void) {
     }
 }
 Button state_button = {
-    .gpio = 29,
+    .gpio = 26,
     .state = NOT_PRESSED,
-    .on_press = state_button_on_press,
-    .on_release = state_button_on_release,
+    .on_press = NULL,
+    .on_release = NULL,
 };
 
 // character array
@@ -222,6 +224,22 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         // Check buttons for press
         check_button(&clear_button);
         check_button(&state_button);
+
+        if (DEBUG)
+        {
+            // Display textual info
+            setTextColor2(WHITE, BLACK);
+            setTextSize(1);
+            sprintf(screentext, "Program State: %d ", prog_state);
+            setCursor(SCREEN_X - 100, 10) ;
+            writeString(screentext);
+            sprintf(screentext, "Clear Button: %d ", clear_button.state);
+            setCursor(SCREEN_X - 100, 20) ;
+            writeString(screentext);
+            sprintf(screentext, "State Button: %d ", state_button.state);
+            setCursor(SCREEN_X - 100, 30) ;
+            writeString(screentext);
+        }
 
         if (clear_screen)
         {
@@ -270,11 +288,11 @@ int received = 0;
 void on_uart_rx() {
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
-        if (ch == '\n') {
-            if (received == TERMINATING_CHAR) {
+        if (ch == TERMINATING_CHAR) {
+            if (received == 2) {
                 int16_t dist = (rx_buf[0]) | (rx_buf[1] << 8);
                 current_distance = dist;
-                printf("Received int: %d\n", dist);
+                // printf("Received int: %d\n", dist);
             }
             received = 0;
         } else if (received < 2) {
@@ -332,11 +350,12 @@ int main() {
     gpio_set_dir(state_button.gpio, GPIO_IN);
     gpio_pull_up(state_button.gpio);
 
+    pio1_interrupt_handler();
+
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////////// ROCK AND ROLL ////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
-    // pt_add_thread(protothread_serial) ;
     pt_add_thread(protothread_vga) ;
     pt_schedule_start ;
 

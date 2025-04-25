@@ -31,7 +31,7 @@ bool check_button(Button *button)
 {
     bool button_reading = gpio_get(button->gpio);
 
-    switch (button_state) {
+    switch (button->state) {
         case NOT_PRESSED:
             if (button_reading == 0) {
                 button->state = MAYBE_PRESSED;
@@ -43,7 +43,9 @@ bool check_button(Button *button)
                 button->state = PRESSED;
 
                 // Press function
-                button->on_press();
+                if (button->on_press) {
+                    button->on_press();
+                }
 
             } else {
                 button->state = NOT_PRESSED;
@@ -63,10 +65,11 @@ bool check_button(Button *button)
                 button->state = NOT_PRESSED;
 
                 // Release function
-                button->on_release();
-
+                if (button->on_release) {
+                    button->on_release();
+                }
             }
-                break;
+            break;
 
         default:
             button->state = NOT_PRESSED;
