@@ -77,6 +77,11 @@
 // VGA semaphore
 static struct pt_sem vga_semaphore;
 
+// VGA Flags
+volatile bool clear_screen  = false;    // Clear the screen
+volatile bool boot_screen   = true;     // Display the welcome screen
+volatile bool draw_text     = true;     // Draw text for the current state (only want to draw once)
+
 volatile int16_t current_distance = 0;                  // Track the current distance measurement
 volatile float current_angle      = 0.0;                // Track the current angle of the motor in radians
 volatile int current_direction    = COUNTERCLOCKWISE;   // Track the current direction of the motor
@@ -143,7 +148,6 @@ void pio1_interrupt_handler() {
 }
 
 // Button to clear screen
-volatile bool clear_screen = false; // Flag read by VGA thread
 void clear_button_on_press(void) {
     clear_screen = true;
 }
@@ -156,6 +160,10 @@ Button clear_button = {
 
 // Button to manage program state
 void state_button_on_press(void) {
+
+    // TODO: check if this works
+    draw_text = true; // Redraw text
+
     switch (prog_state) {
         case WAITING1:
             // We want to always zero in the counterclockwise direction
@@ -182,7 +190,12 @@ void state_button_on_press(void) {
             break;
     }
 }
+
 void state_button_on_release(void) {
+
+    // TODO: check if this works
+    draw_text = true;
+
     switch (prog_state) {
         case WAITING1:
             // This shouldn't happen
@@ -250,7 +263,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         // FIXME: this should only show up on boot
         // Also, we only want to draw text once for each state, add a flag to do this
-        if (prog_state == WAITING1)
+        if (prog_state == WAITING1 && boot_screen && draw_text)
         {
             setTextSize(3);
 
@@ -268,9 +281,12 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             sprintf(screentext, "Hold button to zero...");
             setCursor(CENTER_X - 300, CENTER_Y + 50);
             writeString(screentext);
+
+            draw_text = false;
+            boot_screen = false;
         }
 
-        if (prog_state == WAITING2)
+        if (prog_state == WAITING2 && draw_text)
         {
             setTextColor2(WHITE, BLACK);
             setTextSize(3);
