@@ -74,6 +74,8 @@
 #define PX_PER_MM 0.1 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
 
+const int max_mm = MAX(CENTER_X / PX_PER_MM, CENTER_Y / PX_PER_MM); // Furthest measurement that will show up on the screen
+
 // VGA semaphore
 static struct pt_sem vga_semaphore;
 
@@ -157,6 +159,14 @@ Button clear_button = {
     .on_press = clear_button_on_press,
     .on_release = NULL,
 };
+
+/* FIXME: color heatmap
+ */
+char map_to_color_index(int value, int min_val, int max_val) {
+    if (value <= min_val) return 0;
+    if (value >= max_val) return 15;
+    return (char) (((value - min_val) * 15) / (max_val - min_val));
+}
 
 // Button to manage program state
 void state_button_on_press(void) {
@@ -308,7 +318,9 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
 
-        drawPixel(x_pixel, y_pixel, BLUE);
+        // FIXME: is this correct coloring?
+        char color = map_to_color_index(dist, 0, max_mm);
+        drawPixel(x_pixel, y_pixel, color);
 
         float angle_deg = angle * 180.0 / M_PI;
 
