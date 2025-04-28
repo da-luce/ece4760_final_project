@@ -57,6 +57,10 @@
 #define UART_TX_PIN 8
 #define UART_RX_PIN 9
 
+#define STATE_BUT_PIN 26
+#define CLEAR_BUT_PIN 28
+#define ZERO_GATE_PIN 12    // NOTE: we can treat the optical interrupter as a button and reuse the same deboucing code
+
 // GPIO for motor
 // IMPORTANT: Uses this + subsequent 3 pins, so this uses GPIO 2,3,4,5
 #define MOTOR2_IN1 2
@@ -85,6 +89,8 @@ volatile int16_t current_distance = 0;                  // Track the current dis
 volatile float current_angle      = 0.0;                // Track the current angle of the motor in radians
 volatile int current_direction    = COUNTERCLOCKWISE;   // Track the current direction of the motor
 
+volatile bool zeroed = false; // Set to true once we've hit the gate
+
 /* Overall program states
  */
 typedef enum {
@@ -102,8 +108,20 @@ void pio1_interrupt_handler() {
 
     if (prog_state == ZEROING)
     {
-        // If zeroing, just move, nothing else
-        MOVE_STEPS_MOTOR_2(1);
+        if (zeroed)
+        {
+            zeroed = false;
+            // IMPORTANT: set the angle to zero!
+            current_angle = 0.0;
+            current_direction = COUNTERCLOCKWISE;
+            SET_DIRECTION_MOTOR_2(current_direction);
+            clear_screen = true;
+            prog_state = WAITING2;
+        } else
+        {
+            // If not zeroed yet, just keep moving
+            MOVE_STEPS_MOTOR_2(1);
+        }
         return;
     }
 
@@ -151,9 +169,19 @@ void clear_button_on_press(void) {
     clear_screen = true;
 }
 Button clear_button = {
-    .gpio = 28,
+    .gpio = CLEAR_BUT_PIN,
     .state = NOT_PRESSED,
     .on_press = clear_button_on_press,
+    .on_release = NULL,
+};
+
+void zero_gate_on_block(void) {
+    zeroed = true;
+}
+Button zero_gate = {
+    .gpio = ZERO_GATE_PIN,
+    .state = NOT_PRESSED,
+    .on_press = zero_gate_on_block,
     .on_release = NULL,
 };
 
@@ -181,7 +209,7 @@ void state_button_on_press(void) {
             pio1_interrupt_handler();
             break;
         case ZEROING:
-            // This shouldn't happen
+            // Don't do anything
             break;
         case WAITING2:
             clear_screen = true;
@@ -208,12 +236,7 @@ void state_button_on_release(void) {
             // This shouldn't happen
             break;
         case ZEROING:
-            // IMPORTANT: set the angle to zero!
-            current_angle = 0.0;
-            current_direction = COUNTERCLOCKWISE;
-            SET_DIRECTION_MOTOR_2(current_direction);
-            clear_screen = true;
-            prog_state = WAITING2;
+            // Doesn't matter
             break;
         case WAITING2:
             // This shouldn't happen
@@ -227,7 +250,7 @@ void state_button_on_release(void) {
     }
 }
 Button state_button = {
-    .gpio = 26,
+    .gpio = STATE_BUT_PIN,
     .state = NOT_PRESSED,
     .on_press = state_button_on_press,
     .on_release = state_button_on_release,
@@ -345,6 +368,7 @@ static PT_THREAD (protothread_button(struct pt *pt))
         PT_SEM_SIGNAL(pt, &vga_semaphore);
         check_button(&clear_button);
         check_button(&state_button);
+        check_button(&zero_gate);
         PT_YIELD_usec(3000); // FIXME: do we really need a yeild here
     }
     PT_END(pt) ;
@@ -359,7 +383,8 @@ int received = 0;
  * NOTE: important with printing here. Prinnting before reading the char will mess things
  * up for sure
  */
-void on_uart_rx() {
+void on_uart_rx()
+{
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
         if (ch == TERMINATING_CHAR) {
@@ -423,6 +448,10 @@ int main() {
     gpio_init(state_button.gpio);
     gpio_set_dir(state_button.gpio, GPIO_IN);
     gpio_pull_up(state_button.gpio);
+
+    gpio_init(zero_gate.gpio);
+    gpio_set_dir(zero_gate.gpio, GPIO_IN);
+    gpio_pull_up(zero_gate.gpio);
 
     pio1_interrupt_handler();
 
