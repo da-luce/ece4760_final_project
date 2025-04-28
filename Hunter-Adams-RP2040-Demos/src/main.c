@@ -1,9 +1,6 @@
 /**
- * V. Hunter Adams (vha3@cornell.edu)
- * PWM demo code with serial input
- *
- * This demonstration sets a PWM duty cycle to a
- * user-specified value.
+ * Mac M., Arnav M., Dalton L.
+ * PicoScope: LiDAR made with a RasberryPi Pico.
  *
  * HARDWARE CONNECTIONS
  *     MOTOR
