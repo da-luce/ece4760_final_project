@@ -1,4 +1,4 @@
-/**
+/**k
  ******************************************************************************
  * @file    VL53L4CX_Sat_HelloWorld.ino
  * @author  SRA
@@ -90,6 +90,8 @@ void setup()
   sensor_vl53l4cx_sat.begin();
 
   sensor_vl53l4cx_sat.VL53L4CX_SetDistanceMode(VL53L4CX_DISTANCEMODE_SHORT);
+
+  sensor_vl53l4cx_sat.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(8000);
 
   // Switch off VL53L4CX satellite component.
   sensor_vl53l4cx_sat.VL53L4CX_Off();
