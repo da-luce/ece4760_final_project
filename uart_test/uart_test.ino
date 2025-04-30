@@ -97,7 +97,7 @@ void setup()
   //Initialize VL53L4CX satellite component.
   sensor_vl53l4cx_sat.InitSensor(I2C_ADDR);
 
-  sensor_vl53l4cx_sat.VL53L4CX_SetDistanceMode(VL53L4CX_DISTANCEMODE_SHORT);
+  sensor_vl53l4cx_sat.VL53L4CX_SetDistanceMode(VL53L4CX_DISTANCEMODE_LONG);
 
   status = sensor_vl53l4cx_sat.VL53L4CX_PerformRefSpadManagement();
   if(status != VL53L4CX_ERROR_NONE) {
@@ -120,6 +120,13 @@ void setup()
 	}
 
   sensor_vl53l4cx_sat.VL53L4CX_SetCalibrationData(&CalData);
+
+  sensor_vl53l4cx_sat.VL53L4CX_SetDistanceMode(VL53L4CX_DISTANCEMODE_LONG);
+
+  sensor_vl53l4cx_sat.VL53L4CX_SmudgeCorrectionEnable(VL53L4CX_SMUDGE_CORRECTION_CONTINUOUS);
+  if(status != VL53L4CX_ERROR_NONE) {
+		return;
+	}
 
   sensor_vl53l4cx_sat.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(8000);
 
