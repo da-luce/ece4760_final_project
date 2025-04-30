@@ -68,9 +68,14 @@
   #define LED_BUILTIN 13
 #endif
 #define LedPin LED_BUILTIN
+#define CALIB_DIST 100
+#define I2C_ADDR 0x12
 
 // Components.
 VL53L4CX sensor_vl53l4cx_sat(&DEV_I2C, A1);
+
+VL53L4CX_CalibrationData_t CalData;
+VL53L4CX_Error status = VL53L4CX_ERROR_NONE;
 
 /* Setup ---------------------------------------------------------------------*/
 
@@ -89,15 +94,37 @@ void setup()
   // Configure VL53L4CX satellite component.
   sensor_vl53l4cx_sat.begin();
 
+  //Initialize VL53L4CX satellite component.
+  sensor_vl53l4cx_sat.InitSensor(I2C_ADDR);
+
   sensor_vl53l4cx_sat.VL53L4CX_SetDistanceMode(VL53L4CX_DISTANCEMODE_SHORT);
+
+  status = sensor_vl53l4cx_sat.VL53L4CX_PerformRefSpadManagement();
+  if(status != VL53L4CX_ERROR_NONE) {
+		return;
+	}
+
+  status = sensor_vl53l4cx_sat.VL53L4CX_PerformXTalkCalibration();
+	if(status != VL53L4CX_ERROR_NONE) {
+		return;
+	}
+
+  status = sensor_vl53l4cx_sat.VL53L4CX_PerformOffsetPerVcselCalibration(CALIB_DIST);
+  if(status != VL53L4CX_ERROR_NONE) {
+		return;
+	}
+
+  status = sensor_vl53l4cx_sat.VL53L4CX_GetCalibrationData(&CalData);
+  if(status != VL53L4CX_ERROR_NONE) {
+		return;
+	}
+
+  sensor_vl53l4cx_sat.VL53L4CX_SetCalibrationData(&CalData);
 
   sensor_vl53l4cx_sat.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(8000);
 
   // Switch off VL53L4CX satellite component.
-  sensor_vl53l4cx_sat.VL53L4CX_Off();
-
-  //Initialize VL53L4CX satellite component.
-  sensor_vl53l4cx_sat.InitSensor(0x12);
+  // sensor_vl53l4cx_sat.VL53L4CX_Off();
 
   // Start Measurements
   sensor_vl53l4cx_sat.VL53L4CX_StartMeasurement();
