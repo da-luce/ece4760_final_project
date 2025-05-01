@@ -77,6 +77,11 @@
 
 const int max_mm = MAX(CENTER_X / PX_PER_MM, CENTER_Y / PX_PER_MM); // Furthest measurement that will show up on the screen
 
+const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW, 
+  GREEN, MED_GREEN, DARK_GREEN, 
+  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE, 
+  MAGENTA, PINK, LIGHT_PINK} ;
+
 // VGA semaphore
 static struct pt_sem vga_semaphore;
 
@@ -189,8 +194,10 @@ Button zero_gate = {
  */
 char map_to_color_index(int value, int min_val, int max_val) {
     if (value <= min_val) return 0;
-    if (value >= max_val) return 15;
-    return (char) (((value - min_val) * 15) / (max_val - min_val));
+    if (value >= max_val) return 13;
+
+    return rainbow_colors[(value - min_val) / (max_val - min_val) * 13];
+    // return (char) (((value - min_val) * 13) / (max_val - min_val));
 }
 
 // Button to manage program state
