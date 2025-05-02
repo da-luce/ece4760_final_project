@@ -185,7 +185,12 @@ Button zero_gate = {
     .on_release = NULL,
 };
 
-/* FIXME: color heatmap
+/* FIXME: color heatmap - may draw close points black (or a very dark color) - reverse color scheme?
+ * char map_to_color_index(int value, int min_val, int max_val) {
+    if (value <= min_val) return 15;
+    if (value >= max_val) return 0;
+    return (char) 15-(((value - min_val) * 15) / (max_val - min_val));
+}
  */
 char map_to_color_index(int value, int min_val, int max_val) {
     if (value <= min_val) return 0;
