@@ -190,14 +190,13 @@ Button zero_gate = {
     .on_release = NULL,
 };
 
-/* FIXME: color heatmap
+/* Map a distance to a color index
  */
 char map_to_color_index(int value, int min_val, int max_val) {
     if (value <= min_val) return 0;
     if (value >= max_val) return 13;
 
     return rainbow_colors[(value - min_val) * 13 / (max_val - min_val)];
-    // return (char) (((value - min_val) * 13) / (max_val - min_val));
 }
 
 // Button to manage program state
@@ -221,7 +220,7 @@ void state_button_on_press(void) {
         case WAITING2:
             clear_screen = true;
             prog_state = LIDAR;
-            // Start motor ahgain
+            // Start motor again
             pio1_interrupt_handler();
             break;
         case LIDAR:
@@ -348,7 +347,6 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
 
-        // FIXME: is this correct coloring?
         char color = map_to_color_index(dist, 0, max_mm);
         drawPixel(x_pixel, y_pixel, color);
 
@@ -379,7 +377,7 @@ static PT_THREAD (protothread_button(struct pt *pt))
         check_button(&clear_button);
         check_button(&state_button);
         check_button(&zero_gate);
-        PT_YIELD_usec(3000); // FIXME: do we really need a yeild here
+        PT_YIELD_usec(3000); // FIXME: do we really need a yield here
     }
     PT_END(pt) ;
 }
@@ -390,7 +388,7 @@ int received = 0;
 /* This is called every time we recieve a byte over the UART channel. Here, we are
  * only recieving two bytes that form a int16_t (current distance reading in mm).
  *
- * NOTE: important with printing here. Prinnting before reading the char will mess things
+ * NOTE: important with printing here. Printing before reading the char will mess things
  * up for sure
  */
 void on_uart_rx()
