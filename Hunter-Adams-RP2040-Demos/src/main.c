@@ -199,6 +199,27 @@ Button zero_gate = {
 
 void stop_button_on_press(void) {
     stopped = !stopped;
+
+    // If restarting, start motor again if necessary
+    if (!stopped)
+    {
+        switch (prog_state) {
+            case WAITING1:
+                break;
+            case ZEROING:
+                // Start motor
+                pio1_interrupt_handler();
+                break;
+            case WAITING2:
+                break;
+            case LIDAR:
+                // Start motor
+                pio1_interrupt_handler();
+                break;
+            default:
+                break;
+        }
+    }
 }
 Button stop_button = {
     .gpio = STOP_BUT_PIN,
