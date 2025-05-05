@@ -57,7 +57,7 @@
 #define UART_TX_PIN 8
 #define UART_RX_PIN 9
 
-#define STATE_BUT_PIN 26
+#define STATE_BUT_PIN 22
 #define CLEAR_BUT_PIN 28
 #define ZERO_GATE_PIN 12    // NOTE: we can treat the optical interrupter as a button and reuse the same deboucing code
 
@@ -75,7 +75,12 @@
 #define PX_PER_MM 0.1 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
 
-const int max_mm = MAX(CENTER_X / PX_PER_MM, CENTER_Y / PX_PER_MM); // Furthest measurement that will show up on the screen
+const int max_mm = 1500; // Furthest measurement that will show up on the screen
+
+const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW, 
+  GREEN, MED_GREEN, DARK_GREEN, 
+  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE, 
+  MAGENTA, PINK, LIGHT_PINK} ;
 
 // VGA semaphore
 static struct pt_sem vga_semaphore;
@@ -194,8 +199,10 @@ Button zero_gate = {
  */
 char map_to_color_index(int value, int min_val, int max_val) {
     if (value <= min_val) return 0;
-    if (value >= max_val) return 15;
-    return (char) (((value - min_val) * 15) / (max_val - min_val));
+    if (value >= max_val) return 13;
+
+    return rainbow_colors[(value - min_val) * 13 / (max_val - min_val)];
+    // return (char) (((value - min_val) * 13) / (max_val - min_val));
 }
 
 // Button to manage program state
@@ -280,13 +287,16 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             setTextColor2(WHITE, BLACK);
             setTextSize(1);
             sprintf(screentext, "Program State: %d ", prog_state);
-            setCursor(SCREEN_X - 100, 10) ;
+            setCursor(SCREEN_X - 200, 10) ;
             writeString(screentext);
-            sprintf(screentext, "Clear Button: %d ", clear_button.state);
-            setCursor(SCREEN_X - 100, 20) ;
+            sprintf(screentext, "Clear Button (GPIO %d): %d ", clear_button.gpio, clear_button.state);
+            setCursor(SCREEN_X - 200, 20) ;
             writeString(screentext);
-            sprintf(screentext, "State Button: %d ", state_button.state);
-            setCursor(SCREEN_X - 100, 30) ;
+            sprintf(screentext, "State Button (GPIO %d): %d ", state_button.gpio, state_button.state);
+            setCursor(SCREEN_X - 200, 30) ;
+            writeString(screentext);
+            sprintf(screentext, "Zero Button (GPIO %d): %d ", zero_gate.gpio, zero_gate.state);
+            setCursor(SCREEN_X - 200, 40) ;
             writeString(screentext);
         }
 
