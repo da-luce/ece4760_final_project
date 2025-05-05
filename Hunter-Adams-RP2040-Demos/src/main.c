@@ -412,6 +412,11 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         sprintf(screentext, "Angle (deg):   %f      ", angle_deg) ;
         setCursor(10, 20);
         writeString(screentext);
+
+        for (int i = 0; i < 5; i++) {
+            drawCircle(CENTER_X, CENTER_Y, (short) (max_mm * PX_PER_MM * i/4), WHITE);
+        }
+
     }
 
     // Indicate end of thread
