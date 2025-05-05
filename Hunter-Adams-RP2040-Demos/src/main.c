@@ -60,6 +60,7 @@
 #define STATE_BUT_PIN 22
 #define CLEAR_BUT_PIN 28
 #define ZERO_GATE_PIN 12    // NOTE: we can treat the optical interrupter as a button and reuse the same deboucing code
+#define STOP_BUT_PIN 15
 
 // GPIO for motor
 // IMPORTANT: Uses this + subsequent 3 pins, so this uses GPIO 2,3,4,5
@@ -94,7 +95,8 @@ volatile int16_t current_distance = 0;                  // Track the current dis
 volatile float current_angle      = 0.0;                // Track the current angle of the motor in radians
 volatile int current_direction    = COUNTERCLOCKWISE;   // Track the current direction of the motor
 
-volatile bool zeroed = false; // Set to true once we've hit the gate
+volatile bool zeroed = false;   // Set to true once we've hit the gate
+volatile bool stopped = false;  // Emergency stop
 
 /* Overall program states
  */
@@ -110,6 +112,11 @@ ProgramState prog_state = WAITING1;
 // Thus, we call our measurement stuff here...
 void pio1_interrupt_handler() {
     pio_interrupt_clear(pio_1, 0);
+
+    if (stopped)
+    {
+        return;
+    }
 
     if (prog_state == ZEROING)
     {
@@ -187,6 +194,16 @@ Button zero_gate = {
     .gpio = ZERO_GATE_PIN,
     .state = NOT_PRESSED,
     .on_press = zero_gate_on_block,
+    .on_release = NULL,
+};
+
+void stop_button_on_press(void) {
+    stopped = !stopped;
+}
+Button stop_button = {
+    .gpio = STOP_BUT_PIN,
+    .state = NOT_PRESSED,
+    .on_press = stop_button_on_press,
     .on_release = NULL,
 };
 
@@ -298,6 +315,12 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             sprintf(screentext, "Zero Button (GPIO %d): %d ", zero_gate.gpio, zero_gate.state);
             setCursor(SCREEN_X - 200, 40) ;
             writeString(screentext);
+            sprintf(screentext, "Stop Button (GPIO %d): %d ", stop_button.gpio, stop_button.state);
+            setCursor(SCREEN_X - 200, 50) ;
+            writeString(screentext);
+            sprintf(screentext, "Stopped: %d ", stopped);
+            setCursor(SCREEN_X - 200, 60) ;
+            writeString(screentext);
         }
 
         if (clear_screen)
@@ -384,6 +407,7 @@ static PT_THREAD (protothread_button(struct pt *pt))
         check_button(&clear_button);
         check_button(&state_button);
         check_button(&zero_gate);
+        check_button(&stop_button);
         PT_YIELD_usec(3000); // FIXME: do we really need a yeild here
     }
     PT_END(pt) ;
@@ -467,6 +491,10 @@ int main() {
     gpio_init(zero_gate.gpio);
     gpio_set_dir(zero_gate.gpio, GPIO_IN);
     gpio_pull_up(zero_gate.gpio);
+
+    gpio_init(stop_button.gpio);
+    gpio_set_dir(stop_button.gpio, GPIO_IN);
+    gpio_pull_up(stop_button.gpio);
 
     pio1_interrupt_handler();
 
