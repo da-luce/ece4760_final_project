@@ -75,7 +75,7 @@
 #define PX_PER_MM 0.1 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
 
-const int max_mm = 100; // Furthest measurement that will show up on the screen
+const int max_mm = 1500; // Furthest measurement that will show up on the screen
 
 const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW, 
   GREEN, MED_GREEN, DARK_GREEN, 
@@ -196,7 +196,7 @@ char map_to_color_index(int value, int min_val, int max_val) {
     if (value <= min_val) return 0;
     if (value >= max_val) return 13;
 
-    return rainbow_colors[(value - min_val) / (max_val - min_val) * 13];
+    return rainbow_colors[(value - min_val) * 13 / (max_val - min_val)];
     // return (char) (((value - min_val) * 13) / (max_val - min_val));
 }
 
