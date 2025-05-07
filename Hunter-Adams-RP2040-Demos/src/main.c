@@ -413,9 +413,39 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         setCursor(10, 20);
         writeString(screentext);
 
-        for (int i = 0; i < 5; i++) {
-            drawCircle(CENTER_X, CENTER_Y, (short) (max_mm * PX_PER_MM * i/4), WHITE);
+        for (int i = 1; i < 5; i++) {
+          int radius = (max_mm * PX_PER_MM * i) / 4;
+          drawCircle(CENTER_X, CENTER_Y, (short) radius, WHITE);
+      
+          // Label distance at right side of the circle
+          char label[8];
+          int mm = (max_mm * i) / 4;
+          sprintf(label, "%dmm", mm);
+  
+          int x = CENTER_X + radius + 4; // small offset outside the circle
+          int y = CENTER_Y - 4;          // small offset
+  
+          setCursor(x, y);
+          writeString(label);
         }
+
+        int label_radius = max_mm * PX_PER_MM + 8; // slightly outside the circle
+        int text_offset = 8; // adjust based on font size
+
+        for (int angle_label = 0; angle_label < 360; angle_label += 30) {
+          float angle_label_rad = (angle_label) * 3.14159265 / 180.0;
+      
+          int x = CENTER_X + (int)(label_radius * cos(angle_label_rad));
+          int y = CENTER_Y - (int)(label_radius * sin(angle_label_rad));
+      
+          int dx = (int)(text_offset * cos(angle_label_rad));
+          int dy = (int)(text_offset * sin(angle_label_rad));
+      
+          char label[4];
+          sprintf(label, "%d°", angle_label);
+          setCursor(x - dx, y - dy);
+          writeString(label);
+      }
 
     }
 
