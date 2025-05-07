@@ -413,13 +413,13 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         setCursor(10, 20);
         writeString(screentext);
 
-        for (int i = 1; i < 5; i++) {
-          int radius = (max_mm * PX_PER_MM * i) / 4;
+        for (int i = 1; i < 4; i++) {
+          int radius = (max_mm * PX_PER_MM * i) / 3;
           drawCircle(CENTER_X, CENTER_Y, (short) radius, WHITE);
       
           // Label distance at right side of the circle
           char label[8];
-          int mm = (max_mm * i) / 4;
+          int mm = (max_mm * i) / 3;
           sprintf(label, "%dmm", mm);
   
           int x = CENTER_X + radius + 4; // small offset outside the circle
@@ -438,14 +438,42 @@ static PT_THREAD (protothread_vga(struct pt *pt))
           int x = CENTER_X + (int)(label_radius * cos(angle_label_rad));
           int y = CENTER_Y - (int)(label_radius * sin(angle_label_rad));
       
-          int dx = (int)(text_offset * cos(angle_label_rad));
-          int dy = (int)(text_offset * sin(angle_label_rad));
+          int cursor_x = x;
+          int cursor_y = y;
       
-          char label[4];
+          // Horizontal alignment
+          if (angle_label == 0 || angle_label == 360) {
+              cursor_x -= 0; // right
+          } else if (angle_label == 180) {
+              cursor_x -= label_width; // left
+          } else if (angle_label > 0 && angle_label < 180) {
+              cursor_x -= label_width / 2; // top half, center horizontally
+          } else {
+              cursor_x -= label_width / 2; // bottom half, center horizontally
+          }
+      
+          // Vertical alignment
+          if (angle_label == 90) {
+              cursor_y -= label_height; // above
+          } else if (angle_label == 270) {
+              cursor_y += 0; // below
+          } else if (angle_label > 90 && angle_label < 270) {
+              cursor_y -= label_height / 2; // left side, center vertically
+          } else {
+              cursor_y -= label_height / 2; // right side, center vertically
+          }
+      
+          char label[5];
           sprintf(label, "%d°", angle_label);
-          setCursor(x - dx, y - dy);
+          setCursor(cursor_x, cursor_y);
           writeString(label);
-      }
+        }
+        int scan_length = max_mm * PX_PER_MM;
+
+        int x_end = CENTER_X + (int)(scan_length * cos(angle));
+        int y_end = CENTER_Y - (int)(scan_length * sin(angle));
+
+        drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
 
     }
 
