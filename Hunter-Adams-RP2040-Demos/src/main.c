@@ -390,6 +390,13 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             continue;
         }
 
+        int scan_length = max_mm * PX_PER_MM;
+
+        int x_end = CENTER_X + (int)(scan_length * cos(angle));
+        int y_end = CENTER_Y - (int)(scan_length * sin(angle));
+
+        drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
+        
         // Draw active point
         int dist = current_distance;
         float angle = current_angle;
@@ -399,6 +406,8 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         // FIXME: is this correct coloring?
         char color = map_to_color_index(dist, 0, max_mm);
+
+        drawLine(CENTER_X, CENTER_Y, x_end, y_end, BLACK);
         drawPixel(x_pixel, y_pixel, color);
 
         float angle_deg = angle * 180.0 / M_PI;
@@ -445,22 +454,22 @@ static PT_THREAD (protothread_vga(struct pt *pt))
           if (angle_label == 0 || angle_label == 360) {
               cursor_x -= 0; // right
           } else if (angle_label == 180) {
-              cursor_x -= label_width; // left
+              cursor_x -= label_radius; // left
           } else if (angle_label > 0 && angle_label < 180) {
-              cursor_x -= label_width / 2; // top half, center horizontally
+              cursor_x -= label_radius / 2; // top half, center horizontally
           } else {
-              cursor_x -= label_width / 2; // bottom half, center horizontally
+              cursor_x -= label_radius / 2; // bottom half, center horizontally
           }
       
           // Vertical alignment
           if (angle_label == 90) {
-              cursor_y -= label_height; // above
+              cursor_y -= label_radius; // above
           } else if (angle_label == 270) {
               cursor_y += 0; // below
           } else if (angle_label > 90 && angle_label < 270) {
-              cursor_y -= label_height / 2; // left side, center vertically
+              cursor_y -= label_radius / 2; // left side, center vertically
           } else {
-              cursor_y -= label_height / 2; // right side, center vertically
+              cursor_y -= label_radius / 2; // right side, center vertically
           }
       
           char label[5];
@@ -468,13 +477,6 @@ static PT_THREAD (protothread_vga(struct pt *pt))
           setCursor(cursor_x, cursor_y);
           writeString(label);
         }
-        int scan_length = max_mm * PX_PER_MM;
-
-        int x_end = CENTER_X + (int)(scan_length * cos(angle));
-        int y_end = CENTER_Y - (int)(scan_length * sin(angle));
-
-        drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
-
     }
 
     // Indicate end of thread
