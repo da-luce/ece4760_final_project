@@ -392,8 +392,8 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         int scan_length = max_mm * PX_PER_MM;
 
-        int x_end = CENTER_X + (int)(scan_length * cos(angle));
-        int y_end = CENTER_Y - (int)(scan_length * sin(angle));
+        int x_end = CENTER_X + (int)(scan_length * cos(current_angle));
+        int y_end = CENTER_Y - (int)(scan_length * sin(current_angle));
 
         drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
         
@@ -407,6 +407,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         // FIXME: is this correct coloring?
         char color = map_to_color_index(dist, 0, max_mm);
 
+        sleep_ms(10);
         drawLine(CENTER_X, CENTER_Y, x_end, y_end, BLACK);
         drawPixel(x_pixel, y_pixel, color);
 
@@ -439,7 +440,8 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         }
 
         int label_radius = max_mm * PX_PER_MM + 8; // slightly outside the circle
-        int text_offset = 8; // adjust based on font size
+        int label_width = 12;
+        int label_height = 8;
 
         for (int angle_label = 0; angle_label < 360; angle_label += 30) {
           float angle_label_rad = (angle_label) * 3.14159265 / 180.0;
@@ -454,26 +456,26 @@ static PT_THREAD (protothread_vga(struct pt *pt))
           if (angle_label == 0 || angle_label == 360) {
               cursor_x -= 0; // right
           } else if (angle_label == 180) {
-              cursor_x -= label_radius; // left
+              cursor_x -= label_width; // left
           } else if (angle_label > 0 && angle_label < 180) {
-              cursor_x -= label_radius / 2; // top half, center horizontally
+              cursor_x -= label_width / 2; // top half, center horizontally
           } else {
-              cursor_x -= label_radius / 2; // bottom half, center horizontally
+              cursor_x -= label_width / 2; // bottom half, center horizontally
           }
       
           // Vertical alignment
           if (angle_label == 90) {
-              cursor_y -= label_radius; // above
+              cursor_y -= label_height; // above
           } else if (angle_label == 270) {
               cursor_y += 0; // below
           } else if (angle_label > 90 && angle_label < 270) {
-              cursor_y -= label_radius / 2; // left side, center vertically
+              cursor_y -= label_height / 2; // left side, center vertically
           } else {
-              cursor_y -= label_radius / 2; // right side, center vertically
+              cursor_y -= label_height / 2; // right side, center vertically
           }
       
-          char label[5];
-          sprintf(label, "%d°", angle_label);
+          char label[4];
+          sprintf(label, "%d", angle_label);
           setCursor(cursor_x, cursor_y);
           writeString(label);
         }
