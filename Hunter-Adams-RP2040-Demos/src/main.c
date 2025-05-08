@@ -73,7 +73,7 @@
 #define CENTER_Y 240
 
 // Constants
-#define PX_PER_MM 0.1 // How many pixels make up a millimeters
+#define PX_PER_MM 0.125 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
 
 const int max_mm = 1500; // Furthest measurement that will show up on the screen
@@ -167,9 +167,13 @@ void pio1_interrupt_handler() {
     // Normalize distance.
     // TODO: what does a negative distance mean? It appears the sensor may output
     // such a number
-    if (current_distance < 0)
+    if (current_distance < 0 )
     {
         current_distance = 0;
+    }
+    else if (current_distance > max_mm)
+    {
+        current_distance = max_mm;
     }
 
     // Signal motor to move one step again as we are in LiDAR mode
@@ -306,6 +310,53 @@ Button state_button = {
     .on_release = state_button_on_release,
 };
 
+#define SCALE 1024 
+int sin_table[360];
+int cos_table[360];
+
+void init_trig_tables() {
+    for (int deg = 0; deg < 360; deg++) {
+        float rad = deg * M_PI / 180.0;
+        sin_table[deg] = (int)(sin(rad) * SCALE);
+        cos_table[deg] = (int)(cos(rad) * SCALE);
+    }
+}
+
+void drawTrianglePointerOutline(int angle_deg, int radius_px, char color) {
+  int label_margin = 50;       // space for angle text
+  int triangle_offset = 4;     // buffer past labels
+  int r_base = radius_px + label_margin + triangle_offset;
+
+  int arrow_length = 10;       // from base to tip
+  int half_width = 5;
+
+  int cos_a = cos_table[angle_deg % 360];
+  int sin_a = sin_table[angle_deg % 360];
+  int perp_cos = cos_table[(angle_deg + 90) % 360];
+  int perp_sin = sin_table[(angle_deg + 90) % 360];
+
+  // Base center
+  int base_cx = CENTER_X + (r_base * cos_a) / SCALE;
+  int base_cy = CENTER_Y - (r_base * sin_a) / SCALE;
+
+  // Tip pointing inward
+  int tip_x = base_cx - (arrow_length * cos_a) / SCALE;
+  int tip_y = base_cy + (arrow_length * sin_a) / SCALE;
+
+  // Base corners (perpendicular to angle)
+  int base1_x = base_cx + (half_width * perp_cos) / SCALE;
+  int base1_y = base_cy - (half_width * perp_sin) / SCALE;
+
+  int base2_x = base_cx - (half_width * perp_cos) / SCALE;
+  int base2_y = base_cy + (half_width * perp_sin) / SCALE;
+
+  // Draw triangle outline
+  drawLine(tip_x, tip_y, base1_x, base1_y, color);
+  drawLine(tip_x, tip_y, base2_x, base2_y, color);
+  drawLine(base1_x, base1_y, base2_x, base2_y, color);
+}
+
+
 // character array
 char screentext[200];
 // Thread that draws to VGA display
@@ -390,12 +441,14 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             continue;
         }
 
-        int scan_length = max_mm * PX_PER_MM;
+        // int scan_length = max_mm * PX_PER_MM;
 
-        int x_end = CENTER_X + (int)(scan_length * cos(current_angle));
-        int y_end = CENTER_Y - (int)(scan_length * sin(current_angle));
+        // int x_end = CENTER_X + (int)(scan_length * cos(current_angle));
+        // int y_end = CENTER_Y - (int)(scan_length * sin(current_angle));
 
-        drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
+        // drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
+
+        drawTrianglePointerOutline((int) (current_angle* 180.0 / M_PI), max_mm * PX_PER_MM, WHITE);
         
         // Draw active point
         int dist = current_distance;
@@ -408,8 +461,10 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         char color = map_to_color_index(dist, 0, max_mm);
 
         sleep_ms(10);
-        drawLine(CENTER_X, CENTER_Y, x_end, y_end, BLACK);
-        drawPixel(x_pixel, y_pixel, color);
+        // drawLine(CENTER_X, CENTER_Y, x_end, y_end, BLACK);
+        // drawPixel(x_pixel, y_pixel, color);
+
+        drawTrianglePointerOutline((int) (angle* 180.0 / M_PI), max_mm * PX_PER_MM, BLACK);
 
         float angle_deg = angle * 180.0 / M_PI;
 
@@ -440,11 +495,11 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         }
 
         int label_radius = max_mm * PX_PER_MM + 8; // slightly outside the circle
-        int label_width = 12;
-        int label_height = 8;
+        int label_width = 16;
+        int label_height = 16;
 
-        for (int angle_label = 0; angle_label < 360; angle_label += 30) {
-          float angle_label_rad = (angle_label) * 3.14159265 / 180.0;
+        for (int angle_label = 45; angle_label < 360; angle_label += 45) {
+          float angle_label_rad = (angle_label) * M_PI / 180.0;
       
           int x = CENTER_X + (int)(label_radius * cos(angle_label_rad));
           int y = CENTER_Y - (int)(label_radius * sin(angle_label_rad));
@@ -585,6 +640,8 @@ int main() {
     gpio_pull_up(stop_button.gpio);
 
     pio1_interrupt_handler();
+
+    init_trig_tables();
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////////// ROCK AND ROLL ////////////////////////////
