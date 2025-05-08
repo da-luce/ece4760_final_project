@@ -128,7 +128,7 @@ void setup()
 		return;
 	}
 
-  sensor_vl53l4cx_sat.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(8000);
+  sensor_vl53l4cx_sat.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(32000);
 
   // Switch off VL53L4CX satellite component.
   // sensor_vl53l4cx_sat.VL53L4CX_Off();
