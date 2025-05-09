@@ -63,6 +63,9 @@
 #define CLEAR_BUT_PIN 28
 #define ZERO_GATE_PIN 12    // NOTE: we can treat the optical interrupter as a button and reuse the same deboucing code
 #define STOP_BUT_PIN 15
+#define SIGNAL_BUF_SIZE 5
+
+volatile float signals[SIGNAL_BUF_SIZE] = {0};  
 
 // GPIO for motor
 // IMPORTANT: Uses this + subsequent 3 pins, so this uses GPIO 2,3,4,5
@@ -81,7 +84,7 @@
 #define SIGNAL_BAR_HEIGHT 8
 #define SIGNAL_BAR_X 10
 #define SIGNAL_BAR_Y 40
-#define SIGNAL_MAX_MMCPS 75000
+#define SIGNAL_MAX_MMCPS 15000
 const int max_mm = 3000; // Furthest measurement that will show up on the screen
 // it's actually 2500...
 
@@ -101,7 +104,7 @@ volatile bool boot_screen   = true;     // Display the welcome screen
 volatile bool draw_text     = true;     // Draw text for the current state (only want to draw once)
 
 volatile int16_t current_distance   = 0;                // Track the current distance measurement
-volatile float current_signal  = 0;                // Track current signal lighting  
+volatile int32_t current_signal  = 0;                // Track current signal lighting  
 volatile float current_angle        = 0.0;              // Track the current angle of the motor in radians
 volatile int current_direction      = COUNTERCLOCKWISE; // Track the current direction of the motor
 
@@ -235,6 +238,35 @@ void stop_button_on_press(void) {
         }
     }
 }
+
+
+// void add_signal(int32_t new_signal) {
+//     static int update_counter = 0;
+
+//     update_counter++;
+
+//     if (update_counter >= 25) {
+
+//         current_signal = new_signal;
+//         update_counter = 0;
+//     }
+// }
+
+
+void add_signal(int32_t new_signal) {
+    static int count = 0;
+    static float sum = 0.0f;
+
+    sum += new_signal;
+    count++;
+
+    if (count >= 25) {
+        current_signal = (int32_t)(sum / 25.0f);  
+        count = 0;
+        sum = 0.0f;
+    }
+}
+
 Button stop_button = {
     .gpio = STOP_BUT_PIN,
     .state = NOT_PRESSED,
@@ -486,7 +518,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         sprintf(screentext, "Angle (deg):   %f      ", angle_deg) ;
         setCursor(10, 20);
         writeString(screentext);
-        sprintf(screentext, "Signal (mMCPS): %f     ", current_signal);
+        sprintf(screentext, "Signal (mMCPS): %d     ", current_signal);
         setCursor(10, 30);
         writeString(screentext);
 
@@ -588,9 +620,10 @@ void on_uart_rx() {
             if (received == 6) {
                 int16_t dist = (rx_buf[0]) | (rx_buf[1] << 8);
                 ///int16_t signal = (rx_buf[2]) | (rx_buf[3] << 8);
+
                 float signal = (rx_buf[2]) | (rx_buf[3] << 8)|(rx_buf[4])<<16 |(rx_buf[5] << 24);
                 current_distance = dist;
-                current_signal = signal;
+                add_signal(signal);
                 // printf("Distance: %d\n", current_distance);
                 // printf("Ambience: %d\n", current_signal);
 
