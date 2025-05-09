@@ -31,6 +31,8 @@
 #include "hardware/pio.h"
 #include "hardware/i2c.h"
 #include "hardware/uart.h"
+#include "hardware/clocks.h"
+#include "hardware/pll.h"
 
 // Class libraries
 #include "vga16_graphics.h"
@@ -75,14 +77,15 @@
 // Constants
 #define PX_PER_MM 0.0625 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
-volatile int16_t current_ambient = 0;
-#define AMBIENT_BAR_WIDTH 150
-#define AMBIENT_BAR_HEIGHT 8
-#define AMBIENT_BAR_X 10
-#define AMBIENT_BAR_Y 40
-#define AMBIENT_MAX_MMCPS 1000
+#define SIGNAL_BAR_WIDTH 150
+#define SIGNAL_BAR_HEIGHT 8
+#define SIGNAL_BAR_X 10
+#define SIGNAL_BAR_Y 40
+#define SIGNAL_MAX_MMCPS 75000
 const int max_mm = 3000; // Furthest measurement that will show up on the screen
 // it's actually 2500...
+
+#define RAD2DEG(x) ((x) * 180.0 / M_PI) // Convert radians to degrees
 
 const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW, 
   GREEN, MED_GREEN, DARK_GREEN, 
@@ -97,9 +100,10 @@ volatile bool clear_screen  = false;    // Clear the screen
 volatile bool boot_screen   = true;     // Display the welcome screen
 volatile bool draw_text     = true;     // Draw text for the current state (only want to draw once)
 
-volatile int16_t current_distance = 0;                  // Track the current distance measurement
-volatile float current_angle      = 0.0;                // Track the current angle of the motor in radians
-volatile int current_direction    = COUNTERCLOCKWISE;   // Track the current direction of the motor
+volatile int16_t current_distance   = 0;                // Track the current distance measurement
+volatile float current_signal  = 0;                // Track current signal lighting  
+volatile float current_angle        = 0.0;              // Track the current angle of the motor in radians
+volatile int current_direction      = COUNTERCLOCKWISE; // Track the current direction of the motor
 
 volatile bool zeroed = false;   // Set to true once we've hit the gate
 volatile bool stopped = false;  // Emergency stop
@@ -329,12 +333,12 @@ void init_trig_tables() {
 }
 
 void drawTrianglePointerOutline(int angle_deg, int radius_px, char color) {
-  int label_margin = 50;       // space for angle text
+  int label_margin = 40;       // space for angle text
   int triangle_offset = 4;     // buffer past labels
   int r_base = radius_px + label_margin + triangle_offset;
 
-  int arrow_length = 10;       // from base to tip
-  int half_width = 5;
+  int arrow_length = 14;       // from base to tip
+  int half_width = 7;
 
   int cos_a = cos_table[angle_deg % 360];
   int sin_a = sin_table[angle_deg % 360];
@@ -424,7 +428,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             writeString(screentext);
 
             setTextColor2(WHITE, BLACK);
-            sprintf(screentext, "Hold button to zero...");
+            sprintf(screentext, "Press button to zero...");
             setCursor(CENTER_X - 300, CENTER_Y + 50);
             writeString(screentext);
 
@@ -454,7 +458,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         // drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
 
-        drawTrianglePointerOutline((int) (current_angle* 180.0 / M_PI), max_mm * PX_PER_MM, WHITE);
+        drawTrianglePointerOutline((int) (RAD2DEG(current_angle)), max_mm * PX_PER_MM, WHITE);
         
         // Draw active point
         int dist = current_distance;
@@ -463,16 +467,15 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
 
-        // FIXME: is this correct coloring?
         char color = map_to_color_index(dist, 0, max_mm);
 
         sleep_ms(10);
+        
         // drawLine(CENTER_X, CENTER_Y, x_end, y_end, BLACK);
         drawPixel(x_pixel, y_pixel, color);
 
-        drawTrianglePointerOutline((int) (angle* 180.0 / M_PI), max_mm * PX_PER_MM, BLACK);
-
-        float angle_deg = angle * 180.0 / M_PI;
+        float angle_deg = RAD2DEG(angle);
+        drawTrianglePointerOutline((int) (angle_deg), max_mm * PX_PER_MM, BLACK);
 
         // Display textual info
         setTextColor2(WHITE, BLACK);
@@ -483,24 +486,23 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         sprintf(screentext, "Angle (deg):   %f      ", angle_deg) ;
         setCursor(10, 20);
         writeString(screentext);
-        
-        sprintf(screentext, "Ambient (mMcps): %d     ", current_ambient);
+        sprintf(screentext, "Signal (mMCPS): %f     ", current_signal);
         setCursor(10, 30);
         writeString(screentext);
 
-        // Draw ambient light bar
-        // Calculate filled bar length based on ambient light
-        int ambient_bar_length = (current_ambient * AMBIENT_BAR_WIDTH) / AMBIENT_MAX_MMCPS;
-        if (ambient_bar_length > AMBIENT_BAR_WIDTH) ambient_bar_length = AMBIENT_BAR_WIDTH;
+        // Draw signal light bar
+        // Calculate filled bar length based on signal light
+        float signal_bar_length = (current_signal * SIGNAL_BAR_WIDTH) / SIGNAL_MAX_MMCPS;
+        if (signal_bar_length > SIGNAL_BAR_WIDTH) signal_bar_length = SIGNAL_BAR_WIDTH;
 
         // Draw background (empty bar)
-        fillRect(AMBIENT_BAR_X, AMBIENT_BAR_Y, AMBIENT_BAR_WIDTH, AMBIENT_BAR_HEIGHT, BLACK);
+        fillRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, SIGNAL_BAR_WIDTH, SIGNAL_BAR_HEIGHT, BLACK);
 
         // Draw filled bar
-        fillRect(AMBIENT_BAR_X, AMBIENT_BAR_Y, ambient_bar_length, AMBIENT_BAR_HEIGHT, CYAN);
-        drawRect(AMBIENT_BAR_X, AMBIENT_BAR_Y, AMBIENT_BAR_WIDTH, AMBIENT_BAR_HEIGHT, WHITE);
+        fillRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, signal_bar_length, SIGNAL_BAR_HEIGHT, CYAN);
+        drawRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, SIGNAL_BAR_WIDTH, SIGNAL_BAR_HEIGHT, WHITE);
         setTextColor2(WHITE, BLACK);
-        setCursor(AMBIENT_BAR_X, AMBIENT_BAR_Y + AMBIENT_BAR_HEIGHT + 2);
+        setCursor(SIGNAL_BAR_X, SIGNAL_BAR_Y + SIGNAL_BAR_HEIGHT + 2);
 
         
         for (int i = 1; i < 7; i++) {
@@ -568,7 +570,7 @@ static PT_THREAD (protothread_button(struct pt *pt))
     PT_END(pt) ;
 }
 
-uint8_t rx_buf[4];
+uint8_t rx_buf[6];
 int received = 0;
 #define TERMINATING_CHAR '\n' // This is what sendInt16() in the Arduino program uses
 /* This is called every time we recieve a byte over the UART channel. Here, we are
@@ -583,19 +585,21 @@ void on_uart_rx() {
         uint8_t ch = uart_getc(UART_ID);
 
         if (ch == TERMINATING_CHAR) {
-            if (received == 4) {
+            if (received == 6) {
                 int16_t dist = (rx_buf[0]) | (rx_buf[1] << 8);
-                int16_t ambient = (rx_buf[2]) | (rx_buf[3] << 8);
-                // int32_t ambient = (rx_buf[2]) | (rx_buf[3] << 8)|(rx_buf[4])<<16 |(rx_buf[5] << 24);
+                ///int16_t signal = (rx_buf[2]) | (rx_buf[3] << 8);
+                float signal = (rx_buf[2]) | (rx_buf[3] << 8)|(rx_buf[4])<<16 |(rx_buf[5] << 24);
                 current_distance = dist;
-                current_ambient = ambient;
-        
+                current_signal = signal;
+                // printf("Distance: %d\n", current_distance);
+                // printf("Ambience: %d\n", current_signal);
+
                 received = 0;  // Reset for next packet
             }
-        } else if (received < 4) {
+        } else if (received < 6) {
             rx_buf[received++] = ch;
         } else {
-            printf("Error: more than 4 bytes received before newline.\n");
+            printf("Error: more than 6 bytes received before newline.\n");
             received = 0;
         }
     }
@@ -623,7 +627,7 @@ void on_uart_rx() {
 // }
 
 int main() {
-
+    // set_sys_clock_khz(250000, true);
     // Initialize stdio
     stdio_init_all();
 
