@@ -31,8 +31,6 @@
 #include "hardware/pio.h"
 #include "hardware/i2c.h"
 #include "hardware/uart.h"
-#include "hardware/clocks.h"
-#include "hardware/pll.h"
 
 // Class libraries
 #include "vga16_graphics.h"
@@ -41,6 +39,8 @@
 
 // Local libraries
 #include "button.h"
+#include "vga_plus.h"
+#include "image.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Defines
@@ -65,7 +65,7 @@
 #define STOP_BUT_PIN 15
 #define SIGNAL_BUF_SIZE 5
 
-volatile float signals[SIGNAL_BUF_SIZE] = {0};  
+volatile float signals[SIGNAL_BUF_SIZE] = {0};
 
 // GPIO for motor
 // IMPORTANT: Uses this + subsequent 3 pins, so this uses GPIO 2,3,4,5
@@ -90,9 +90,9 @@ const int max_mm = 3000; // Furthest measurement that will show up on the screen
 
 #define RAD2DEG(x) ((x) * 180.0 / M_PI) // Convert radians to degrees
 
-const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW, 
-  GREEN, MED_GREEN, DARK_GREEN, 
-  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE, 
+const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW,
+  GREEN, MED_GREEN, DARK_GREEN,
+  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE,
   MAGENTA, PINK, LIGHT_PINK} ;
 
 // VGA semaphore
@@ -104,7 +104,7 @@ volatile bool boot_screen   = true;     // Display the welcome screen
 volatile bool draw_text     = true;     // Draw text for the current state (only want to draw once)
 
 volatile int16_t current_distance   = 0;                // Track the current distance measurement
-volatile int32_t current_signal     = 0;                // Track current signal strength  
+volatile int32_t current_signal     = 0;                // Track current signal strength
 volatile float current_angle        = 0.0;              // Track the current angle of the motor in radians
 volatile float current_triangle_ang = 0.0;              // Angle at which we drew the triangle
 volatile int current_direction      = COUNTERCLOCKWISE; // Track the current direction of the motor
@@ -262,7 +262,7 @@ void add_signal(int32_t new_signal) {
     count++;
 
     if (count >= 25) {
-        current_signal = (int32_t)(sum / 25.0f);  
+        current_signal = (int32_t)(sum / 25.0f);
         count = 0;
         sum = 0.0f;
     }
@@ -357,7 +357,7 @@ Button state_button = {
     .on_release = state_button_on_release,
 };
 
-#define SCALE 1024 
+#define SCALE 1024
 int sin_table[360];
 int cos_table[360];
 
@@ -370,37 +370,37 @@ void init_trig_tables() {
 }
 
 void drawTrianglePointerOutline(int angle_deg, int radius_px, char color) {
-  int label_margin = 40;       // space for angle text
-  int triangle_offset = 4;     // buffer past labels
-  int r_base = radius_px + label_margin + triangle_offset;
+    int label_margin = 40;       // space for angle text
+    int triangle_offset = 4;     // buffer past labels
+    int r_base = radius_px + label_margin + triangle_offset;
 
-  int arrow_length = 14;       // from base to tip
-  int half_width = 7;
+    int arrow_length = 14;       // from base to tip
+    int half_width = 7;
 
-  int cos_a = cos_table[angle_deg % 360];
-  int sin_a = sin_table[angle_deg % 360];
-  int perp_cos = cos_table[(angle_deg + 90) % 360];
-  int perp_sin = sin_table[(angle_deg + 90) % 360];
+    int cos_a = cos_table[angle_deg % 360];
+    int sin_a = sin_table[angle_deg % 360];
+    int perp_cos = cos_table[(angle_deg + 90) % 360];
+    int perp_sin = sin_table[(angle_deg + 90) % 360];
 
-  // Base center
-  int base_cx = CENTER_X + (r_base * cos_a) / SCALE;
-  int base_cy = CENTER_Y - (r_base * sin_a) / SCALE;
+    // Base center
+    int base_cx = CENTER_X + (r_base * cos_a) / SCALE;
+    int base_cy = CENTER_Y - (r_base * sin_a) / SCALE;
 
-  // Tip pointing inward
-  int tip_x = base_cx - (arrow_length * cos_a) / SCALE;
-  int tip_y = base_cy + (arrow_length * sin_a) / SCALE;
+    // Tip pointing inward
+    int tip_x = base_cx - (arrow_length * cos_a) / SCALE;
+    int tip_y = base_cy + (arrow_length * sin_a) / SCALE;
 
-  // Base corners (perpendicular to angle)
-  int base1_x = base_cx + (half_width * perp_cos) / SCALE;
-  int base1_y = base_cy - (half_width * perp_sin) / SCALE;
+    // Base corners (perpendicular to angle)
+    int base1_x = base_cx + (half_width * perp_cos) / SCALE;
+    int base1_y = base_cy - (half_width * perp_sin) / SCALE;
 
-  int base2_x = base_cx - (half_width * perp_cos) / SCALE;
-  int base2_y = base_cy + (half_width * perp_sin) / SCALE;
+    int base2_x = base_cx - (half_width * perp_cos) / SCALE;
+    int base2_y = base_cy + (half_width * perp_sin) / SCALE;
 
-  // Draw triangle outline
-  drawLine(tip_x, tip_y, base1_x, base1_y, color);
-  drawLine(tip_x, tip_y, base2_x, base2_y, color);
-  drawLine(base1_x, base1_y, base2_x, base2_y, color);
+    // Draw triangle outline
+    drawLine(tip_x, tip_y, base1_x, base1_y, color);
+    drawLine(tip_x, tip_y, base2_x, base2_y, color);
+    drawLine(base1_x, base1_y, base2_x, base2_y, color);
 }
 
 
@@ -450,7 +450,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
                     writeString(screentext);
                     break;
                 }
-            
+
             sprintf(screentext, "Clear Button (GPIO %d): %d ", clear_button.gpio, clear_button.state);
             setCursor(SCREEN_X - 200, 20) ;
             writeString(screentext);
@@ -485,14 +485,27 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             setCursor(CENTER_X - 300 - 4, CENTER_Y - 4);
             writeString(screentext);
 
+            drawImage(0, 0, SCREEN_X, SCREEN_Y, image_data);
+
             setTextColor2(WHITE, BLACK);
             sprintf(screentext, "Welcome to the PicoScope!");
             setCursor(CENTER_X - 300, CENTER_Y);
             writeString(screentext);
 
+            setTextSize(1);
             setTextColor2(WHITE, BLACK);
-            sprintf(screentext, "Press button to zero...");
+            sprintf(screentext, "Press green button to zero...");
             setCursor(CENTER_X - 300, CENTER_Y + 50);
+            writeString(screentext);
+
+            setTextColor2(WHITE, BLACK);
+            sprintf(screentext, "Press blue button to clear...");
+            setCursor(CENTER_X - 300, CENTER_Y + 100);
+            writeString(screentext);
+
+            setTextColor2(WHITE, BLACK);
+            sprintf(screentext, "Press gray button to stop the motor...");
+            setCursor(CENTER_X - 300, CENTER_Y + 150);
             writeString(screentext);
 
             draw_text = false;
@@ -514,30 +527,25 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             continue;
         }
 
-        // int scan_length = max_mm * PX_PER_MM;
-
-        // int x_end = CENTER_X + (int)(scan_length * cos(current_angle));
-        // int y_end = CENTER_Y - (int)(scan_length * sin(current_angle));
-
-        // drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
-
-        drawTrianglePointerOutline((int)(RAD2DEG(current_triangle_ang))-1, max_mm * PX_PER_MM, BLACK);
+        // Erase the old triangle
         drawTrianglePointerOutline((int) (RAD2DEG(current_triangle_ang)), max_mm * PX_PER_MM, BLACK);
-        drawTrianglePointerOutline((int)(RAD2DEG(current_triangle_ang))+1, max_mm * PX_PER_MM, BLACK);
-        drawTrianglePointerOutline((int) (RAD2DEG(current_angle)), max_mm * PX_PER_MM, WHITE);
-        current_triangle_ang = current_angle;
+
+        // Store the current angle as a local variable
+        // NOTE: if you do not do this, current_angle may update between and
+        // cause strange visual glitches
+        float current_temp = current_angle;
+        drawTrianglePointerOutline((int)(RAD2DEG(current_temp)), max_mm * PX_PER_MM, WHITE);
+        current_triangle_ang = current_temp;
 
         // Draw active point
         int dist = current_distance;
         float angle = current_angle;
         float angle_deg = RAD2DEG(angle);
+
         // FIXME: is this correct. WTH is going on here.
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
-
         char color = map_to_color_index(dist, 0, max_mm);
-
-        // drawLine(CENTER_X, CENTER_Y, x_end, y_end, BLACK);
         drawPixel(x_pixel, y_pixel, color);
 
         // Display textual info
@@ -567,20 +575,21 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         setTextColor2(WHITE, BLACK);
         setCursor(SIGNAL_BAR_X, SIGNAL_BAR_Y + SIGNAL_BAR_HEIGHT + 2);
 
+        // Draw distance rings
         for (int i = 1; i < 7; i++) {
-          int radius = (max_mm * PX_PER_MM * i) / 6;
-          drawCircle(CENTER_X, CENTER_Y, (short) radius, WHITE);
+            int radius = (max_mm * PX_PER_MM * i) / 6;
+            drawCircle(CENTER_X, CENTER_Y, (short) radius, WHITE);
 
-          // Label distance at right side of the circle
-          char label[8];
-          float m = (max_mm * (float)i) / 6.0f / 1000.0f;
-          sprintf(label, "%.1fm", m);
-  
-          int x = CENTER_X + radius + 4; // small offset outside the circle
-          int y = CENTER_Y - 4;          // small offset
-  
-          setCursor(x, y);
-          writeString(label);
+            // Label distance at right side of the circle
+            char label[8];
+            float m = (max_mm * (float)i) / 6.0f / 1000.0f;
+            sprintf(label, "%.1fm", m);
+
+            int x = CENTER_X + radius + 4; // small offset outside the circle
+            int y = CENTER_Y - 4;          // small offset
+
+            setCursor(x, y);
+            writeString(label);
         }
 
         int label_radius = max_mm * PX_PER_MM + 8; // slightly outside the circle
@@ -589,24 +598,24 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         for (int angle_label = 45; angle_label < 360; angle_label += 45) {
             float angle_label_rad = angle_label * M_PI / 180.0;
-        
+
             // Offset radius to push label slightly away from circle
             float padding = 6.0f; // pixels — adjust if needed
             float label_x = CENTER_X + (label_radius + padding) * cos(angle_label_rad);
             float label_y = CENTER_Y - (label_radius + padding) * sin(angle_label_rad);
-        
+
             // Generate label string
             char label[4];
             sprintf(label, "%d", angle_label);
-        
+
             int label_len = strlen(label);
             int label_width = label_len * 4;  // 4 px per character
             int label_height = 4;
-        
+
             // Center horizontally and vertically
             int cursor_x = (int)(label_x - label_width / 2);
             int cursor_y = (int)(label_y - label_height / 2);
-        
+
             setCursor(cursor_x, cursor_y);
             writeString(label);
         }
@@ -638,7 +647,7 @@ int received = 0;
 /* This is called every time we recieve a byte over the UART channel. Here, we are
  * only recieving two bytes that form a int16_t (current distance reading in mm).
  *
- * NOTE: important with printing here. Prinnting before reading the char will mess things
+ * NOTE: important with printing here. Printing before reading the char will mess things
  * up for sure
  */
 
@@ -668,26 +677,6 @@ void on_uart_rx() {
     }
 
 }
-// void on_uart_rx()
-// {
-//     while (uart_is_readable(UART_ID)) {
-//         uint8_t ch = uart_getc(UART_ID);
-//         if (ch == TERMINATING_CHAR) {
-//             if (received == 2) {
-//                 int16_t dist = (rx_buf[0]) | (rx_buf[1] << 8);
-//                 current_distance = dist;
-//                 // printf("Received int: %d\n", dist);
-//             }
-//             received = 0;
-//         } else if (received < 2) {
-//             rx_buf[received] = ch;
-//             received += 1;
-//         } else {
-//             printf("Error, more than 2 bytes recieved before newline.");
-//             received = 0;
-//         }
-//     }
-// }
 
 int main() {
     // set_sys_clock_khz(250000, true);
