@@ -41,6 +41,7 @@
 #include "button.h"
 #include "vga_plus.h"
 #include "image.h"
+#include "image_2.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Defines
@@ -486,6 +487,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             writeString(screentext);
 
             drawImage(0, 0, SCREEN_X, SCREEN_Y, image_data);
+            drawImage(SCREEN_X, SCREEN_Y, IMAGE_WIDTH_2, IMAGE_HEIGHT_2, image_data_2);
 
             setTextColor2(WHITE, BLACK);
             sprintf(screentext, "Welcome to the PicoScope!");
@@ -504,7 +506,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             writeString(screentext);
 
             setTextColor2(WHITE, BLACK);
-            sprintf(screentext, "Press gray button to stop the motor...");
+            sprintf(screentext, "Press gray button to stop...");
             setCursor(CENTER_X - 300, CENTER_Y + 150);
             writeString(screentext);
 
