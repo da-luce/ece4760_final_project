@@ -73,10 +73,16 @@
 #define CENTER_Y 240
 
 // Constants
-#define PX_PER_MM 0.125 // How many pixels make up a millimeters
+#define PX_PER_MM 0.0625 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
-
-const int max_mm = 1500; // Furthest measurement that will show up on the screen
+volatile int16_t current_ambient = 0;
+#define AMBIENT_BAR_WIDTH 150
+#define AMBIENT_BAR_HEIGHT 8
+#define AMBIENT_BAR_X 10
+#define AMBIENT_BAR_Y 40
+#define AMBIENT_MAX_MMCPS 1000
+const int max_mm = 3000; // Furthest measurement that will show up on the screen
+// it's actually 2500...
 
 const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW, 
   GREEN, MED_GREEN, DARK_GREEN, 
@@ -462,7 +468,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         sleep_ms(10);
         // drawLine(CENTER_X, CENTER_Y, x_end, y_end, BLACK);
-        // drawPixel(x_pixel, y_pixel, color);
+        drawPixel(x_pixel, y_pixel, color);
 
         drawTrianglePointerOutline((int) (angle* 180.0 / M_PI), max_mm * PX_PER_MM, BLACK);
 
@@ -477,21 +483,40 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         sprintf(screentext, "Angle (deg):   %f      ", angle_deg) ;
         setCursor(10, 20);
         writeString(screentext);
+        
+        sprintf(screentext, "Ambient (mMcps): %d     ", current_ambient);
+        setCursor(10, 30);
+        writeString(screentext);
 
-        for (int i = 1; i < 4; i++) {
-          int radius = (max_mm * PX_PER_MM * i) / 3;
+        // Draw ambient light bar
+        // Calculate filled bar length based on ambient light
+        int ambient_bar_length = (current_ambient * AMBIENT_BAR_WIDTH) / AMBIENT_MAX_MMCPS;
+        if (ambient_bar_length > AMBIENT_BAR_WIDTH) ambient_bar_length = AMBIENT_BAR_WIDTH;
+
+        // Draw background (empty bar)
+        fillRect(AMBIENT_BAR_X, AMBIENT_BAR_Y, AMBIENT_BAR_WIDTH, AMBIENT_BAR_HEIGHT, BLACK);
+
+        // Draw filled bar
+        fillRect(AMBIENT_BAR_X, AMBIENT_BAR_Y, ambient_bar_length, AMBIENT_BAR_HEIGHT, CYAN);
+        drawRect(AMBIENT_BAR_X, AMBIENT_BAR_Y, AMBIENT_BAR_WIDTH, AMBIENT_BAR_HEIGHT, WHITE);
+        setTextColor2(WHITE, BLACK);
+        setCursor(AMBIENT_BAR_X, AMBIENT_BAR_Y + AMBIENT_BAR_HEIGHT + 2);
+
+        
+        for (int i = 1; i < 7; i++) {
+          int radius = (max_mm * PX_PER_MM * i) / 6;
           drawCircle(CENTER_X, CENTER_Y, (short) radius, WHITE);
-      
+
           // Label distance at right side of the circle
           char label[8];
-          int mm = (max_mm * i) / 3;
-          sprintf(label, "%dmm", mm);
+          float m = (max_mm * (float)i) / 6.0f / 1000.0f;
+          sprintf(label, "%.1fm", m);
   
           int x = CENTER_X + radius + 4; // small offset outside the circle
           int y = CENTER_Y - 4;          // small offset
   
           setCursor(x, y);
-          writeString(label);
+          writeString(label);            
         }
 
         int label_radius = max_mm * PX_PER_MM + 8; // slightly outside the circle
@@ -499,40 +524,27 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         int label_height = 16;
 
         for (int angle_label = 45; angle_label < 360; angle_label += 45) {
-          float angle_label_rad = (angle_label) * M_PI / 180.0;
-      
-          int x = CENTER_X + (int)(label_radius * cos(angle_label_rad));
-          int y = CENTER_Y - (int)(label_radius * sin(angle_label_rad));
-      
-          int cursor_x = x;
-          int cursor_y = y;
-      
-          // Horizontal alignment
-          if (angle_label == 0 || angle_label == 360) {
-              cursor_x -= 0; // right
-          } else if (angle_label == 180) {
-              cursor_x -= label_width; // left
-          } else if (angle_label > 0 && angle_label < 180) {
-              cursor_x -= label_width / 2; // top half, center horizontally
-          } else {
-              cursor_x -= label_width / 2; // bottom half, center horizontally
-          }
-      
-          // Vertical alignment
-          if (angle_label == 90) {
-              cursor_y -= label_height; // above
-          } else if (angle_label == 270) {
-              cursor_y += 0; // below
-          } else if (angle_label > 90 && angle_label < 270) {
-              cursor_y -= label_height / 2; // left side, center vertically
-          } else {
-              cursor_y -= label_height / 2; // right side, center vertically
-          }
-      
-          char label[4];
-          sprintf(label, "%d", angle_label);
-          setCursor(cursor_x, cursor_y);
-          writeString(label);
+            float angle_label_rad = angle_label * M_PI / 180.0;
+        
+            // Offset radius to push label slightly away from circle
+            float padding = 6.0f; // pixels — adjust if needed
+            float label_x = CENTER_X + (label_radius + padding) * cos(angle_label_rad);
+            float label_y = CENTER_Y - (label_radius + padding) * sin(angle_label_rad);
+        
+            // Generate label string
+            char label[4];
+            sprintf(label, "%d", angle_label);
+        
+            int label_len = strlen(label);
+            int label_width = label_len * 4;  // 4 px per character
+            int label_height = 4;
+        
+            // Center horizontally and vertically
+            int cursor_x = (int)(label_x - label_width / 2);
+            int cursor_y = (int)(label_y - label_height / 2);
+        
+            setCursor(cursor_x, cursor_y);
+            writeString(label);
         }
     }
 
@@ -556,7 +568,7 @@ static PT_THREAD (protothread_button(struct pt *pt))
     PT_END(pt) ;
 }
 
-uint8_t rx_buf[2];
+uint8_t rx_buf[4];
 int received = 0;
 #define TERMINATING_CHAR '\n' // This is what sendInt16() in the Arduino program uses
 /* This is called every time we recieve a byte over the UART channel. Here, we are
@@ -565,26 +577,50 @@ int received = 0;
  * NOTE: important with printing here. Prinnting before reading the char will mess things
  * up for sure
  */
-void on_uart_rx()
-{
+
+void on_uart_rx() {
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
+
         if (ch == TERMINATING_CHAR) {
-            if (received == 2) {
+            if (received == 4) {
                 int16_t dist = (rx_buf[0]) | (rx_buf[1] << 8);
+                int16_t ambient = (rx_buf[2]) | (rx_buf[3] << 8);
+                // int32_t ambient = (rx_buf[2]) | (rx_buf[3] << 8)|(rx_buf[4])<<16 |(rx_buf[5] << 24);
                 current_distance = dist;
-                // printf("Received int: %d\n", dist);
+                current_ambient = ambient;
+        
+                received = 0;  // Reset for next packet
             }
-            received = 0;
-        } else if (received < 2) {
-            rx_buf[received] = ch;
-            received += 1;
+        } else if (received < 4) {
+            rx_buf[received++] = ch;
         } else {
-            printf("Error, more than 2 bytes recieved before newline.");
+            printf("Error: more than 4 bytes received before newline.\n");
             received = 0;
         }
     }
+
 }
+// void on_uart_rx()
+// {
+//     while (uart_is_readable(UART_ID)) {
+//         uint8_t ch = uart_getc(UART_ID);
+//         if (ch == TERMINATING_CHAR) {
+//             if (received == 2) {
+//                 int16_t dist = (rx_buf[0]) | (rx_buf[1] << 8);
+//                 current_distance = dist;
+//                 // printf("Received int: %d\n", dist);
+//             }
+//             received = 0;
+//         } else if (received < 2) {
+//             rx_buf[received] = ch;
+//             received += 1;
+//         } else {
+//             printf("Error, more than 2 bytes recieved before newline.");
+//             received = 0;
+//         }
+//     }
+// }
 
 int main() {
 
