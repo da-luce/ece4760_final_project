@@ -104,8 +104,9 @@ volatile bool boot_screen   = true;     // Display the welcome screen
 volatile bool draw_text     = true;     // Draw text for the current state (only want to draw once)
 
 volatile int16_t current_distance   = 0;                // Track the current distance measurement
-volatile int32_t current_signal  = 0;                // Track current signal lighting  
+volatile int32_t current_signal     = 0;                // Track current signal strength  
 volatile float current_angle        = 0.0;              // Track the current angle of the motor in radians
+volatile float current_triangle_ang = 0.0;              // Angle at which we drew the triangle
 volatile int current_direction      = COUNTERCLOCKWISE; // Track the current direction of the motor
 
 volatile bool zeroed = false;   // Set to true once we've hit the gate
@@ -301,20 +302,24 @@ void state_button_on_press(void) {
             current_direction = COUNTERCLOCKWISE;
             SET_DIRECTION_MOTOR_2(current_direction);
             prog_state = ZEROING;
+
             // Start motor
             pio1_interrupt_handler();
             break;
         case ZEROING:
             // Don't do anything
+
             break;
         case WAITING2:
             clear_screen = true;
             prog_state = LIDAR;
+
             // Start motor ahgain
             pio1_interrupt_handler();
             break;
         case LIDAR:
             prog_state = WAITING1;
+
             break;
         default:
             printf("An error has occured.");
@@ -412,14 +417,40 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         // Wait on semaphore
         PT_SEM_WAIT(pt, &vga_semaphore);
 
+
         if (DEBUG)
         {
             // Display textual info
             setTextColor2(WHITE, BLACK);
             setTextSize(1);
-            sprintf(screentext, "Program State: %d ", prog_state);
-            setCursor(SCREEN_X - 200, 10) ;
-            writeString(screentext);
+            switch (prog_state) {
+                case WAITING1:
+                    sprintf(screentext, "Program State: Pending...");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                case ZEROING:
+                    sprintf(screentext, "Program State: Zeroing");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                case WAITING2:
+                    sprintf(screentext, "Program State: Pending...");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                case LIDAR:
+                    sprintf(screentext, "Program State: LIDAR");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                default:
+                    sprintf(screentext, "Program State: Pending...");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                }
+            
             sprintf(screentext, "Clear Button (GPIO %d): %d ", clear_button.gpio, clear_button.state);
             setCursor(SCREEN_X - 200, 20) ;
             writeString(screentext);
@@ -472,7 +503,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         {
             setTextColor2(WHITE, BLACK);
             setTextSize(3);
-            sprintf(screentext, "Press again to begin!");
+            sprintf(screentext, "Press again to begin scanning!");
             setCursor(CENTER_X - 300, CENTER_Y);
             writeString(screentext);
         }
@@ -490,24 +521,24 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
         // drawLine(CENTER_X, CENTER_Y, x_end, y_end, WHITE);
 
+        drawTrianglePointerOutline((int)(RAD2DEG(current_triangle_ang))-1, max_mm * PX_PER_MM, BLACK);
+        drawTrianglePointerOutline((int) (RAD2DEG(current_triangle_ang)), max_mm * PX_PER_MM, BLACK);
+        drawTrianglePointerOutline((int)(RAD2DEG(current_triangle_ang))+1, max_mm * PX_PER_MM, BLACK);
         drawTrianglePointerOutline((int) (RAD2DEG(current_angle)), max_mm * PX_PER_MM, WHITE);
-        
+        current_triangle_ang = current_angle;
+
         // Draw active point
         int dist = current_distance;
         float angle = current_angle;
+        float angle_deg = RAD2DEG(angle);
         // FIXME: is this correct. WTH is going on here.
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
 
         char color = map_to_color_index(dist, 0, max_mm);
 
-        sleep_ms(10);
-        
         // drawLine(CENTER_X, CENTER_Y, x_end, y_end, BLACK);
         drawPixel(x_pixel, y_pixel, color);
-
-        float angle_deg = RAD2DEG(angle);
-        drawTrianglePointerOutline((int) (angle_deg), max_mm * PX_PER_MM, BLACK);
 
         // Display textual info
         setTextColor2(WHITE, BLACK);
@@ -536,7 +567,6 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         setTextColor2(WHITE, BLACK);
         setCursor(SIGNAL_BAR_X, SIGNAL_BAR_Y + SIGNAL_BAR_HEIGHT + 2);
 
-        
         for (int i = 1; i < 7; i++) {
           int radius = (max_mm * PX_PER_MM * i) / 6;
           drawCircle(CENTER_X, CENTER_Y, (short) radius, WHITE);
@@ -550,7 +580,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
           int y = CENTER_Y - 4;          // small offset
   
           setCursor(x, y);
-          writeString(label);            
+          writeString(label);
         }
 
         int label_radius = max_mm * PX_PER_MM + 8; // slightly outside the circle
