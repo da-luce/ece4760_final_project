@@ -21,7 +21,23 @@ Provide a detailed summary of what you did and why.
 
 ## High-Level Design
 
-Rationale, math, logical structure, etc.
+The purpose of this project was to construct a 2-Dimensional LiDAR capable of scanning distances up to approximately 3 meters in distance. The high-level design of the project consisted of a few key components: the mechanical structure upon which the Time-of-Flight sensor was mounted, the software logic for interfacing with a stepper motor for rotating the Time-of-Flight Sensor, Arduino code and UART communication for extracting readings from the sensor, and graphics for visualizing measurements. Additionally, various mechanisms were implemented to allow for sensor calibration, including an optical-interrupter used to provide a reference point for the angle of the stepper motor. 
+
+Background on Time-of-Flight Sensor:
+
+Generally, Time-of-Flight sensors can measure surrounding terrain by emitting photons and sensing the duration of time before photons return back to the sensor. Note that from this point forward Time-of-Flight will be abbreviated with the acronym ToF. 
+The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating the use of infrared radiation. Infrared radiation is often used for such applications as it is “invisible” and can reduce interference from external light sources. In fact, infrared light is less susceptible to Rayleigh scattering, a well-known phenomenon where small atmospheric particles cause light to scatter. The intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4:
+
+Intensity of Scattered Light ~ 1/(4)
+
+Thus, infrared light, specifically at a wavelength of 940nm, is a good choice for a ToF sensor. One can roughly estimate the distance of an object by employing a simplified formula based on the speed of light:
+
+ Distance (t*c/2), 
+
+where the variable t corresponds to the duration of time for a photon to return back to the sensor (time-of-flight). 
+
+Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference.
+
 
 ---
 
