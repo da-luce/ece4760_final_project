@@ -1,17 +1,15 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
     background-color: #f4f4f4;
 }
 
-.content-container {
+body {
     max-width: 800px; /* Set the max width */
     margin: 0 auto; /* Center the content horizontally */
     padding: 20px; /* Add padding inside */
 }
 
-.content-container img {
+body img {
     width: 100%; /* Makes the image scale to the width of the container */
     height: auto; /* Maintains the aspect ratio */
 }
