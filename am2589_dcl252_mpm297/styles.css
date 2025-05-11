@@ -16,12 +16,31 @@ body {
     height: auto; /* Maintains the aspect ratio */
 }
 
-header, section {
-    margin-bottom: 20px;
+a, a:visited {
+    color: #946666;
 }
 
-h1, h2 {
+header, section {
+    margin-bottom: 4em;
+    border-bottom: 2px solid rgb(218, 213, 213);
+}
+
+h1, h2, h3, p {
     color: #333;
+}
+
+pre {
+    background-color: #f0f0f0;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow-x: auto;
+    line-height: 1.4;
+}
+
+/* TODO: smaller code font size? */
+code {
+    font-family: Consolas, Monaco, 'Courier New', monospace;
 }
 
 footer {

@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PicoScope</title>
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Code highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+
 </head>
 <body>
     <div class="content-container">
@@ -32,6 +38,23 @@
         <section id="hardware-software">
             <h2>Program/Hardware Design</h2>
             <p>Discuss tricky parts, hardware, and software choices.</p>
+            <h3>Graphics</h3>
+            <p>Arnav, you probably know this the best</p>
+            <p> One of the challenges we encountered while rendering the data was dealing with volatile variables. A particularly tricky issue arose in the code snippet below:</p>
+            <pre><code class="language-c">
+drawTrianglePointerOutline((int) RAD2DEG(current_angle), max_mm * PX_PER_MM, BLACK);
+drawTrianglePointerOutline((int) RAD2DEG(current_angle), max_mm * PX_PER_MM, WHITE);
+            </code></pre>
+            <p>These lines are responsible for drawing the triangle which indicates the current LiDAR angle. At first glance, this code appears fine. However, we observed frequent flickering—sometimes the triangle wasn't fully erased, leading to inconsistent visual behavior. The randomness of this issue suggested that interrupts were affecting the value of <code>current_angle</code> between the two drawing calls.</p>
+            <p> The root cause was that <code>current_angle</code> is a volatile variable that may be modified by an interrupt at any time. As a result, the value could change between the two calls to <code>drawTrianglePointerOutline()</code>, causing the triangle to be drawn and erased at different angles. To solve this, we cached the computed value before using it, ensuring consistency: </p>
+            <pre><code class="language-c">
+float angle_deg = RAD2DEG(current_angle);
+drawTrianglePointerOutline((int) angle_deg, max_mm * PX_PER_MM, BLACK);
+drawTrianglePointerOutline((int) angle_deg, max_mm * PX_PER_MM, WHITE);
+            </code></pre>
+            <p>By storing the result of <code>current_angle</code> in a temporary variable, we guaranteed that both calls used the exact same angle, eliminating flicker and improving rendering stability. </p>
+            <h3>Hardware Schematic</h3>
+            <p>Add schematic here!</p>
         </section>
 
         <section id="results">
@@ -42,6 +65,12 @@
         <section id="conclusion">
             <h2>Conclusions</h2>
             <p>Analyze your results and discuss improvements.</p>
+        </section>
+
+        <section id="appendix-a">
+            <h2>Appendix A</h2>
+            <p>The group does not approve this report for inclusion on the course website.</p>
+            <p>The group does not approve the video for inclusion on the course youtube channel.</p>
         </section>
 
         <footer>
