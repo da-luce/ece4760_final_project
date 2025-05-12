@@ -7,9 +7,9 @@ subtitle: "Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am25
 
 The project involves building a 2D lidar system using a
 [Raspberry Pi Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf),
-[Adafruit VL53L4CX ToF sensor](https://www.adafruit.com/product/5425), and
-[28BYJ-48 stepper motor](https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf) with a
-[ULN2003 Driver](https://www.hadex.cz/spec/m513.pdf)
+[Adafruit VL53L4CX ToF sensor][tof], and
+[28BYJ-48 stepper motor][motor] with a
+[ULN2003 Driver][driver]
 to capture and process distance measurements for mapping and navigation applications.
 
 ---
