@@ -83,7 +83,13 @@ Discuss tricky parts, hardware, and software choices.
 
 TODO: could someone help check this wiring
 
-![A [Fritzing](https://fritzing.org/) schematic of our breadboard](schematic.png)
+![A [Fritzing](https://fritzing.org/) schematic of our breadboard](hard_schematic.png)
+
+### Software Schematic
+
+TODO: the threading structure doesn't make that much sense. I forget why I put the button checks in their own thread...
+
+![Software Schematic](soft_schematic.png)
 
 ### Graphics
 
@@ -290,6 +296,8 @@ Data, results, scope traces, etc.
 Analyze your results and discuss improvements.
 
 TODO: add more than just on mechanics!
+- Note that DMA and FIFO for uart was broke :/
+- Note that GPIO 15 would trigger 22 :/
 
 Our 2D LiDAR system achieved its primary goal of capturing rotational distance measurements using a Raspberry Pi Pico, a ToF sensor, and a stepper motor. The implementation was successful in demonstrating the core functionality of a low-cost scanning system capable of mapping its surroundings in real-time.
 
