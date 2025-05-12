@@ -76,7 +76,7 @@ Discuss tricky parts, hardware, and software choices.
 
 ### Hardware Schematic
 
-![Schematic](schematic.png)
+![A [Fritzing](https://fritzing.org/) schematic of our breadboard](schematic.png)
 
 ### Graphics
 
@@ -233,7 +233,42 @@ To display an boot screen, we added a boolean flag, which when true, will displa
 
 ### Images
 
-![Man image](man.png)
+![A happy man displayed as a test homescreen](man.png)
+
+To display custom images on the VGA output, we created a Python toolchain to convert regular images into a C array that matches the 16-color VGA palette. This approach allowed us to prepare image assets offline and store them in a format that could be directly used with our graphics rendering code.
+Image Conversion Workflow
+
+We used Python with the Pillow and numpy libraries to process the image:
+
+1. Resize the image to the VGA resolution of 160×120.
+2. Quantize the image colors to the 16-color VGA palette.
+3. Convert the pixel data into a flat C array for use in our embedded code.
+
+This script outputs a .c file with the image data, which we can include in our project. For example
+
+```c
+#define IMAGE_WIDTH 160
+#define IMAGE_HEIGHT 120
+const unsigned char image_data[IMAGE_WIDTH * IMAGE_HEIGHT] = {
+    // image pixel indices here...
+};
+```
+
+To draw this array onto the screen, we used a simple helper function:
+
+```c
+// #include "vga16_graphics.h"
+
+void drawImage(short x0, short y0, short width, short height, const unsigned char *image)
+{
+    for (short y = 0; y < height; y++) {
+        for (short x = 0; x < width; x++) {
+            char color = image[y * width + x];
+            drawPixel(x0 + x, y0 + y, color);
+        }
+    }
+}
+```
 
 ---
 
