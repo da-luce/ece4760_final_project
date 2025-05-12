@@ -28,13 +28,17 @@ Background on Time-of-Flight Sensor:
 Generally, Time-of-Flight sensors can measure surrounding terrain by emitting photons and sensing the duration of time before photons return back to the sensor. Note that from this point forward Time-of-Flight will be abbreviated with the acronym ToF. 
 The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating the use of infrared radiation. Infrared radiation is often used for such applications as it is “invisible” and can reduce interference from external light sources. In fact, infrared light is less susceptible to Rayleigh scattering, a well-known phenomenon where small atmospheric particles cause light to scatter. The intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4:
 
-Intensity of Scattered Light ~ 1/(4)
+$$
+\text{Intensity of Scattered Light} \propto \frac{1}{\lambda^4}
+$$
 
-Thus, infrared light, specifically at a wavelength of 940nm, is a good choice for a ToF sensor. One can roughly estimate the distance of an object by employing a simplified formula based on the speed of light:
+Thus, infrared light—specifically at a wavelength of 940 nm—is a suitable choice for a ToF sensor. One can estimate the distance to an object using a simplified formula based on the speed of light:
 
- Distance (t*c/2), 
+$$
+\text{Distance} \approx \frac{t \cdot c}{2}
+$$
 
-where the variable t corresponds to the duration of time for a photon to return back to the sensor (time-of-flight). 
+where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light.
 
 Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference.
 
