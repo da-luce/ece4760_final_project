@@ -79,7 +79,9 @@ Interestingly, the properties of the objects which reflect the emitted IR radiat
 
 Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light. This type of photodiode is exceedingly useful for detecting photons. When a photon enters the depletion region of the diode, an electron-hole pair is created. And the strong electric field caused by the reverse-biased diode ensures that the creation of an electron-hole pair leads to an avalanche of additional electron-hole pairs, allowing for amplification of the signal caused by the reflected photon. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche":
 
-<img width="366" alt="Screenshot 2025-05-12 at 3 18 29 AM" src="https://github.com/user-attachments/assets/ee27d291-4079-407c-9ad9-ff404a9737d1" />
+<div align="center">
+  <img width="366" alt="Screenshot 2025-05-12 at 3 18 29 AM" src="https://github.com/user-attachments/assets/ee27d291-4079-407c-9ad9-ff404a9737d1" />
+</div>
 
 Thus, a multitude of physical factors highlights the suitability of a ToF sensor structure for scanning terrain in scientific applications, providing inspiration and a rationale for the PicoScope Project.
 
