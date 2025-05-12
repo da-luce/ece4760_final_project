@@ -10,6 +10,26 @@ body {
     counter-reset: figure;
 }
 
+@keyframes flash {
+    0%, 100% {
+        background-color: yellow;
+        color: black;
+    }
+    50% {
+        background-color: red;
+        color: white;
+    }
+}
+
+.todo {
+    background-color: yellow;
+    color: black;
+    font-weight: bold;
+    animation: flash 1s infinite;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
 body img {
     width: 100%; /* Makes the image scale to the width of the container */
     height: auto; /* Maintains the aspect ratio */
@@ -46,21 +66,22 @@ h1, h2, h3, p {
     color: #333;
 }
 
-pre {
-    background-color: #f0f0f0;
-    padding: 12px;
-    border: 1px solid #ccc;
+.sourceCode {
     border-radius: 6px;
+}
+
+pre {
+    padding: 12px;
+    /* border: 1px solid #ccc;
+    border-radius: 6px; */
     overflow-x: auto;
     line-height: 1.4;
 }
 
 /* TODO: smaller code font size? */
 code {
-    /* font-family: Consolas, Monaco, 'Courier New', monospace; */
     border-radius: 3px;
     padding: 3px;
-    background-color: #f0f0f0;
 }
 
 footer {

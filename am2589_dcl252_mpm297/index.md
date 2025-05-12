@@ -1,7 +1,10 @@
 ---
-title: "PicoScope Project"
+title: "[ECE 4760](https://ece4760.github.io/) SP25 Final Project: [PicoScope](index.html)"
 subtitle: "Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589)"
+toc-title: "Table of Contents"
 ---
+
+## Project Introduction
 
 ![Test Image](test.png)
 
@@ -11,12 +14,6 @@ The project involves building a 2D lidar system using a
 [28BYJ-48 stepper motor][motor] with a
 [ULN2003 Driver][driver]
 to capture and process distance measurements for mapping and navigation applications.
-
----
-
-## Project Introduction
-
-Provide a detailed summary of what you did and why.
 
 ### Materials
 
@@ -88,8 +85,6 @@ Initially software logic for interfacing with the stepper motor via PIO state ma
 Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting open-source Arduino libraries for the sensor. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040 – ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. Upon further investigation, it was determined that the call stack of the relevant functions for our ToF sensor project was far too complex, and a more sensible solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
 
 These two software components were essential for operating the ToF sensor and stepper motor, forming the backbone of the project's physical component control.
-
-
 
 ---
 
