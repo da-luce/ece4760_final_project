@@ -39,6 +39,9 @@
 
 // Local libraries
 #include "button.h"
+#include "vga_plus.h"
+#include "image.h"
+#include "image_2.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Defines
@@ -61,6 +64,9 @@
 #define CLEAR_BUT_PIN 28
 #define ZERO_GATE_PIN 12    // NOTE: we can treat the optical interrupter as a button and reuse the same deboucing code
 #define STOP_BUT_PIN 15
+#define SIGNAL_BUF_SIZE 5
+
+volatile float signals[SIGNAL_BUF_SIZE] = {0};
 
 // GPIO for motor
 // IMPORTANT: Uses this + subsequent 3 pins, so this uses GPIO 2,3,4,5
@@ -73,14 +79,21 @@
 #define CENTER_Y 240
 
 // Constants
-#define PX_PER_MM 0.1 // How many pixels make up a millimeters
+#define PX_PER_MM 0.0625 // How many pixels make up a millimeters
 #define RAD_PER_STEP 0.0015339807878818 * 2 // AKA Stride Angle for 28BYJ-48
+#define SIGNAL_BAR_WIDTH 150
+#define SIGNAL_BAR_HEIGHT 8
+#define SIGNAL_BAR_X 10
+#define SIGNAL_BAR_Y 40
+#define SIGNAL_MAX_MMCPS 15000
+const int max_mm = 3000; // Furthest measurement that will show up on the screen
+// it's actually 2500...
 
-const int max_mm = 1500; // Furthest measurement that will show up on the screen
+#define RAD2DEG(x) ((x) * 180.0 / M_PI) // Convert radians to degrees
 
-const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW, 
-  GREEN, MED_GREEN, DARK_GREEN, 
-  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE, 
+const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW,
+  GREEN, MED_GREEN, DARK_GREEN,
+  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE,
   MAGENTA, PINK, LIGHT_PINK} ;
 
 // VGA semaphore
@@ -91,9 +104,11 @@ volatile bool clear_screen  = false;    // Clear the screen
 volatile bool boot_screen   = true;     // Display the welcome screen
 volatile bool draw_text     = true;     // Draw text for the current state (only want to draw once)
 
-volatile int16_t current_distance = 0;                  // Track the current distance measurement
-volatile float current_angle      = 0.0;                // Track the current angle of the motor in radians
-volatile int current_direction    = COUNTERCLOCKWISE;   // Track the current direction of the motor
+volatile int16_t current_distance   = 0;                // Track the current distance measurement
+volatile int32_t current_signal     = 0;                // Track current signal strength
+volatile float current_angle        = 0.0;              // Track the current angle of the motor in radians
+volatile float current_triangle_ang = 0.0;              // Angle at which we drew the triangle
+volatile int current_direction      = COUNTERCLOCKWISE; // Track the current direction of the motor
 
 volatile bool zeroed = false;   // Set to true once we've hit the gate
 volatile bool stopped = false;  // Emergency stop
@@ -167,9 +182,13 @@ void pio1_interrupt_handler() {
     // Normalize distance.
     // TODO: what does a negative distance mean? It appears the sensor may output
     // such a number
-    if (current_distance < 0)
+    if (current_distance < 0 )
     {
         current_distance = 0;
+    }
+    else if (current_distance > max_mm)
+    {
+        current_distance = max_mm;
     }
 
     // Signal motor to move one step again as we are in LiDAR mode
@@ -221,6 +240,35 @@ void stop_button_on_press(void) {
         }
     }
 }
+
+
+// void add_signal(int32_t new_signal) {
+//     static int update_counter = 0;
+
+//     update_counter++;
+
+//     if (update_counter >= 25) {
+
+//         current_signal = new_signal;
+//         update_counter = 0;
+//     }
+// }
+
+
+void add_signal(int32_t new_signal) {
+    static int count = 0;
+    static float sum = 0.0f;
+
+    sum += new_signal;
+    count++;
+
+    if (count >= 25) {
+        current_signal = (int32_t)(sum / 25.0f);
+        count = 0;
+        sum = 0.0f;
+    }
+}
+
 Button stop_button = {
     .gpio = STOP_BUT_PIN,
     .state = NOT_PRESSED,
@@ -255,20 +303,24 @@ void state_button_on_press(void) {
             current_direction = COUNTERCLOCKWISE;
             SET_DIRECTION_MOTOR_2(current_direction);
             prog_state = ZEROING;
+
             // Start motor
             pio1_interrupt_handler();
             break;
         case ZEROING:
             // Don't do anything
+
             break;
         case WAITING2:
             clear_screen = true;
             prog_state = LIDAR;
+
             // Start motor ahgain
             pio1_interrupt_handler();
             break;
         case LIDAR:
             prog_state = WAITING1;
+
             break;
         default:
             printf("An error has occured.");
@@ -306,6 +358,53 @@ Button state_button = {
     .on_release = state_button_on_release,
 };
 
+#define SCALE 1024
+int sin_table[360];
+int cos_table[360];
+
+void init_trig_tables() {
+    for (int deg = 0; deg < 360; deg++) {
+        float rad = deg * M_PI / 180.0;
+        sin_table[deg] = (int)(sin(rad) * SCALE);
+        cos_table[deg] = (int)(cos(rad) * SCALE);
+    }
+}
+
+void drawTrianglePointerOutline(int angle_deg, int radius_px, char color) {
+    int label_margin = 40;       // space for angle text
+    int triangle_offset = 4;     // buffer past labels
+    int r_base = radius_px + label_margin + triangle_offset;
+
+    int arrow_length = 14;       // from base to tip
+    int half_width = 7;
+
+    int cos_a = cos_table[angle_deg % 360];
+    int sin_a = sin_table[angle_deg % 360];
+    int perp_cos = cos_table[(angle_deg + 90) % 360];
+    int perp_sin = sin_table[(angle_deg + 90) % 360];
+
+    // Base center
+    int base_cx = CENTER_X + (r_base * cos_a) / SCALE;
+    int base_cy = CENTER_Y - (r_base * sin_a) / SCALE;
+
+    // Tip pointing inward
+    int tip_x = base_cx - (arrow_length * cos_a) / SCALE;
+    int tip_y = base_cy + (arrow_length * sin_a) / SCALE;
+
+    // Base corners (perpendicular to angle)
+    int base1_x = base_cx + (half_width * perp_cos) / SCALE;
+    int base1_y = base_cy - (half_width * perp_sin) / SCALE;
+
+    int base2_x = base_cx - (half_width * perp_cos) / SCALE;
+    int base2_y = base_cy + (half_width * perp_sin) / SCALE;
+
+    // Draw triangle outline
+    drawLine(tip_x, tip_y, base1_x, base1_y, color);
+    drawLine(tip_x, tip_y, base2_x, base2_y, color);
+    drawLine(base1_x, base1_y, base2_x, base2_y, color);
+}
+
+
 // character array
 char screentext[200];
 // Thread that draws to VGA display
@@ -319,14 +418,40 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         // Wait on semaphore
         PT_SEM_WAIT(pt, &vga_semaphore);
 
+
         if (DEBUG)
         {
             // Display textual info
             setTextColor2(WHITE, BLACK);
             setTextSize(1);
-            sprintf(screentext, "Program State: %d ", prog_state);
-            setCursor(SCREEN_X - 200, 10) ;
-            writeString(screentext);
+            switch (prog_state) {
+                case WAITING1:
+                    sprintf(screentext, "Program State: Pending...");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                case ZEROING:
+                    sprintf(screentext, "Program State: Zeroing");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                case WAITING2:
+                    sprintf(screentext, "Program State: Pending...");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                case LIDAR:
+                    sprintf(screentext, "Program State: LIDAR");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                default:
+                    sprintf(screentext, "Program State: Pending...");
+                    setCursor(SCREEN_X - 200, 10) ;
+                    writeString(screentext);
+                    break;
+                }
+
             sprintf(screentext, "Clear Button (GPIO %d): %d ", clear_button.gpio, clear_button.state);
             setCursor(SCREEN_X - 200, 20) ;
             writeString(screentext);
@@ -361,14 +486,28 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             setCursor(CENTER_X - 300 - 4, CENTER_Y - 4);
             writeString(screentext);
 
+            drawImage(0, 0, SCREEN_X, SCREEN_Y, image_data);
+            drawImage(SCREEN_X, SCREEN_Y, IMAGE_WIDTH_2, IMAGE_HEIGHT_2, image_data_2);
+
             setTextColor2(WHITE, BLACK);
             sprintf(screentext, "Welcome to the PicoScope!");
             setCursor(CENTER_X - 300, CENTER_Y);
             writeString(screentext);
 
+            setTextSize(1);
             setTextColor2(WHITE, BLACK);
-            sprintf(screentext, "Hold button to zero...");
+            sprintf(screentext, "Press green button to zero...");
             setCursor(CENTER_X - 300, CENTER_Y + 50);
+            writeString(screentext);
+
+            setTextColor2(WHITE, BLACK);
+            sprintf(screentext, "Press blue button to clear...");
+            setCursor(CENTER_X - 300, CENTER_Y + 100);
+            writeString(screentext);
+
+            setTextColor2(WHITE, BLACK);
+            sprintf(screentext, "Press gray button to stop...");
+            setCursor(CENTER_X - 300, CENTER_Y + 150);
             writeString(screentext);
 
             draw_text = false;
@@ -379,7 +518,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         {
             setTextColor2(WHITE, BLACK);
             setTextSize(3);
-            sprintf(screentext, "Press again to begin!");
+            sprintf(screentext, "Press again to begin scanning!");
             setCursor(CENTER_X - 300, CENTER_Y);
             writeString(screentext);
         }
@@ -390,18 +529,26 @@ static PT_THREAD (protothread_vga(struct pt *pt))
             continue;
         }
 
+        // Erase the old triangle
+        drawTrianglePointerOutline((int) (RAD2DEG(current_triangle_ang)), max_mm * PX_PER_MM, BLACK);
+
+        // Store the current angle as a local variable
+        // NOTE: if you do not do this, current_angle may update between and
+        // cause strange visual glitches
+        float current_temp = current_angle;
+        drawTrianglePointerOutline((int)(RAD2DEG(current_temp)), max_mm * PX_PER_MM, WHITE);
+        current_triangle_ang = current_temp;
+
         // Draw active point
         int dist = current_distance;
         float angle = current_angle;
+        float angle_deg = RAD2DEG(angle);
+
         // FIXME: is this correct. WTH is going on here.
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
-
-        // FIXME: is this correct coloring?
         char color = map_to_color_index(dist, 0, max_mm);
         drawPixel(x_pixel, y_pixel, color);
-
-        float angle_deg = angle * 180.0 / M_PI;
 
         // Display textual info
         setTextColor2(WHITE, BLACK);
@@ -412,6 +559,68 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         sprintf(screentext, "Angle (deg):   %f      ", angle_deg) ;
         setCursor(10, 20);
         writeString(screentext);
+        sprintf(screentext, "Signal (mMCPS): %d     ", current_signal);
+        setCursor(10, 30);
+        writeString(screentext);
+
+        // Draw signal light bar
+        // Calculate filled bar length based on signal light
+        float signal_bar_length = (current_signal * SIGNAL_BAR_WIDTH) / SIGNAL_MAX_MMCPS;
+        if (signal_bar_length > SIGNAL_BAR_WIDTH) signal_bar_length = SIGNAL_BAR_WIDTH;
+
+        // Draw background (empty bar)
+        fillRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, SIGNAL_BAR_WIDTH, SIGNAL_BAR_HEIGHT, BLACK);
+
+        // Draw filled bar
+        fillRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, signal_bar_length, SIGNAL_BAR_HEIGHT, CYAN);
+        drawRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, SIGNAL_BAR_WIDTH, SIGNAL_BAR_HEIGHT, WHITE);
+        setTextColor2(WHITE, BLACK);
+        setCursor(SIGNAL_BAR_X, SIGNAL_BAR_Y + SIGNAL_BAR_HEIGHT + 2);
+
+        // Draw distance rings
+        for (int i = 1; i < 7; i++) {
+            int radius = (max_mm * PX_PER_MM * i) / 6;
+            drawCircle(CENTER_X, CENTER_Y, (short) radius, WHITE);
+
+            // Label distance at right side of the circle
+            char label[8];
+            float m = (max_mm * (float)i) / 6.0f / 1000.0f;
+            sprintf(label, "%.1fm", m);
+
+            int x = CENTER_X + radius + 4; // small offset outside the circle
+            int y = CENTER_Y - 4;          // small offset
+
+            setCursor(x, y);
+            writeString(label);
+        }
+
+        int label_radius = max_mm * PX_PER_MM + 8; // slightly outside the circle
+        int label_width = 16;
+        int label_height = 16;
+
+        for (int angle_label = 45; angle_label < 360; angle_label += 45) {
+            float angle_label_rad = angle_label * M_PI / 180.0;
+
+            // Offset radius to push label slightly away from circle
+            float padding = 6.0f; // pixels — adjust if needed
+            float label_x = CENTER_X + (label_radius + padding) * cos(angle_label_rad);
+            float label_y = CENTER_Y - (label_radius + padding) * sin(angle_label_rad);
+
+            // Generate label string
+            char label[4];
+            sprintf(label, "%d", angle_label);
+
+            int label_len = strlen(label);
+            int label_width = label_len * 4;  // 4 px per character
+            int label_height = 4;
+
+            // Center horizontally and vertically
+            int cursor_x = (int)(label_x - label_width / 2);
+            int cursor_y = (int)(label_y - label_height / 2);
+
+            setCursor(cursor_x, cursor_y);
+            writeString(label);
+        }
     }
 
     // Indicate end of thread
@@ -434,38 +643,45 @@ static PT_THREAD (protothread_button(struct pt *pt))
     PT_END(pt) ;
 }
 
-uint8_t rx_buf[2];
+uint8_t rx_buf[6];
 int received = 0;
 #define TERMINATING_CHAR '\n' // This is what sendInt16() in the Arduino program uses
 /* This is called every time we recieve a byte over the UART channel. Here, we are
  * only recieving two bytes that form a int16_t (current distance reading in mm).
  *
- * NOTE: important with printing here. Prinnting before reading the char will mess things
+ * NOTE: important with printing here. Printing before reading the char will mess things
  * up for sure
  */
-void on_uart_rx()
-{
+
+void on_uart_rx() {
     while (uart_is_readable(UART_ID)) {
         uint8_t ch = uart_getc(UART_ID);
+
         if (ch == TERMINATING_CHAR) {
-            if (received == 2) {
+            if (received == 6) {
                 int16_t dist = (rx_buf[0]) | (rx_buf[1] << 8);
+                ///int16_t signal = (rx_buf[2]) | (rx_buf[3] << 8);
+
+                float signal = (rx_buf[2]) | (rx_buf[3] << 8)|(rx_buf[4])<<16 |(rx_buf[5] << 24);
                 current_distance = dist;
-                // printf("Received int: %d\n", dist);
+                add_signal(signal);
+                // printf("Distance: %d\n", current_distance);
+                // printf("Ambience: %d\n", current_signal);
+
+                received = 0;  // Reset for next packet
             }
-            received = 0;
-        } else if (received < 2) {
-            rx_buf[received] = ch;
-            received += 1;
+        } else if (received < 6) {
+            rx_buf[received++] = ch;
         } else {
-            printf("Error, more than 2 bytes recieved before newline.");
+            printf("Error: more than 6 bytes received before newline.\n");
             received = 0;
         }
     }
+
 }
 
 int main() {
-
+    // set_sys_clock_khz(250000, true);
     // Initialize stdio
     stdio_init_all();
 
@@ -518,6 +734,8 @@ int main() {
     gpio_pull_up(stop_button.gpio);
 
     pio1_interrupt_handler();
+
+    init_trig_tables();
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////////// ROCK AND ROLL ////////////////////////////

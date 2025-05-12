@@ -138,11 +138,16 @@ void setup()
 }
 
 /* Send a new line terminated int16_t */
-void sendInt16(int16_t value) {
+void sendInt16(int16_t value, int32_t value2) {
   // Send each byte, LSB first (little-endian)
   Serial.write((uint8_t)value & 0xFF);
   Serial.write((uint8_t)((value >> 8) & 0xFF));
-  Serial.write((uint8_t)'\n');
+  Serial.write((uint8_t)(value2 & 0xFF));          
+  Serial.write((uint8_t)((value2 >> 8) & 0xFF));   
+  Serial.write((uint8_t)(value2>>16 & 0xFF));          
+  Serial.write((uint8_t)((value2 >> 24) & 0xFF)); 
+  Serial.write((uint8_t)'\n'); 
+
 }
 
 void loop()
@@ -166,9 +171,16 @@ void loop()
     no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
     snprintf(report, sizeof(report), "VL53L4CX Satellite: Count=%d, #Objs=%1d ", pMultiRangingData->StreamCount, no_of_object_found);
     // SerialPort.print(report);
+    // for (j = 0; j < no_of_object_found; j++) {
+    //   int16_t range_val = pMultiRangingData->RangeData[j].RangeMilliMeter;
+    //   sendInt16(range_val);
+    // }
+    // If we want to include ambient light measurement
     for (j = 0; j < no_of_object_found; j++) {
       int16_t range_val = pMultiRangingData->RangeData[j].RangeMilliMeter;
-      sendInt16(range_val);
+      int32_t ambient_mcps = (int32_t)(pMultiRangingData->RangeData[j].SignalRateRtnMegaCps/65536.0f* (1000));
+      // float ambient_mcps = pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0f;
+      sendInt16(range_val, ambient_mcps);
     }
     // SerialPort.println("");
     if (status == 0) {
