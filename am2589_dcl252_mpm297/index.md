@@ -73,20 +73,27 @@ $$
 
 where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light.
 
-Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference.
-
-Interestingly, the properties of the objects which reflect the emitted IR radiation can also have a significant impact on the qualtiy of ToF measurements. Shiny surfaces, including metals and glass, are often great reflectors of IR radiation. These objects may be easier to detect utilizng the ToF sensor compared to objects that absorb IR radition, such as objects with dark surfaces. 
+Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference. Interestingly, the properties of the objects which reflect the emitted IR radiation can also have a significant impact on the qualtiy of ToF measurements. Shiny surfaces, including metals and glass, are often great reflectors of IR radiation. These objects may be easier to detect utilizng the ToF sensor compared to objects that absorb IR radition, such as objects with dark surfaces. 
 
 Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light. This type of photodiode is exceedingly useful for detecting photons. When a photon enters the depletion region of the diode, an electron-hole pair is created. And the strong electric field caused by the reverse-biased diode ensures that the creation of an electron-hole pair leads to an avalanche of additional electron-hole pairs, allowing for amplification of the signal caused by the reflected photon. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche":
+
 
 <div align="center">
   <img width="366" alt="Screenshot 2025-05-12 at 3 18 29 AM" src="https://github.com/user-attachments/assets/ee27d291-4079-407c-9ad9-ff404a9737d1" />
 </div>
 
-Thus, a multitude of physical factors highlights the suitability of a ToF sensor structure for scanning terrain in scientific applications, providing inspiration and a rationale for the PicoScope Project.
+<div align="center">
+  <a href="https://www.sto.nato.int/publications/STO%20Meeting%20Proceedings/STO-MP-IST-SET-198/MP-IST-SET-198-C1-03.pdf">
+    Figure 1, Diagram of SPAD
+  </a>
+</div>
+  
+  
+Thus, despite some challenges, a multitude of physical factors highlights the suitability of a ToF sensor structure for scanning terrain in scientific applications, providing inspiration and a rationale for the PicoScope Project.
 
 ### Logical Structure
 
+The logical structure of this project consisted of the development of a few key componenets, namely the mechanical assembly of the ToF structure, software and hardware logic for interfacing with the sensor and stepper motor, development of the user experience, and graphics for visualizing sensor data/measurements. 
 
 ---
 
