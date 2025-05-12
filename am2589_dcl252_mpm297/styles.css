@@ -4,9 +4,10 @@ body {
 }
 
 body {
-    max-width: 800px; /* Set the max width */
+    max-width: 700px; /* Set the max width */
     margin: 0 auto; /* Center the content horizontally */
     padding: 20px; /* Add padding inside */
+    color: #333;
 }
 
 body img {

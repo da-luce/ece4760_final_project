@@ -1,5 +1,6 @@
 ---
 title: "PicoScope Project"
+subtitle: "Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589)"
 ---
 
 ![Test Image](test.png)
@@ -240,9 +241,9 @@ Image Conversion Workflow
 
 We used Python with the Pillow and numpy libraries to process the image:
 
-1. Resize the image to the VGA resolution of 160×120.
-2. Quantize the image colors to the 16-color VGA palette.
-3. Convert the pixel data into a flat C array for use in our embedded code.
+1. Resize the image to the VGA resolution of `160 x 120`
+2. Quantize the image colors to the 16-color VGA palette
+3. Convert the pixel data into a flat C array for use in our embedded code
 
 This script outputs a .c file with the image data, which we can include in our project. For example
 
@@ -302,4 +303,4 @@ The group does not approve this report for inclusion on the course website.
 
 The group does not approve the video for inclusion on the course YouTube channel.
 
-© 2025 Mac Marsh (mpm297) | Dalton Luce (dcl252) | Arnav Muthiayen (am2589) — Cornell University
+© 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
