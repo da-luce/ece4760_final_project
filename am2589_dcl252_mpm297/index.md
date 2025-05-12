@@ -81,6 +81,8 @@ Discuss tricky parts, hardware, and software choices.
 
 ### Hardware Schematic
 
+TODO: could someone help check this wiring
+
 ![A [Fritzing](https://fritzing.org/) schematic of our breadboard](schematic.png)
 
 ### Graphics
