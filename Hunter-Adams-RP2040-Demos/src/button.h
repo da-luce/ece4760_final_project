@@ -27,7 +27,7 @@ typedef struct
 
 /* Debounce button press
  */
-bool check_button(Button *button)
+void check_button(Button *button)
 {
     bool button_reading = gpio_get(button->gpio);
 
