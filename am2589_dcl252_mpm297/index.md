@@ -17,6 +17,32 @@ to capture and process distance measurements for mapping and navigation applicat
 
 Provide a detailed summary of what you did and why.
 
+### Materials
+
+TODO: check these costs
+
+| Material                           | Purpose                                              | Cost    |
+| ---------------------------------- | ---------------------------------------------------- | ------- |
+| [Raspberry Pi Pico][pico]          | Microcontroller used to control the LiDAR system     | $4      |
+| [Adafruit VL53L4CX][tof]           | Time-of-Flight sensor for distance measurements      | $16     |
+| [28BYJ-48 Stepper Motor][motor]    | Provides rotational motion for LiDAR scanning        | $3      |
+| [ULN2003 Driver][driver]           | Driver board for controlling the stepper motor       | $2      |
+| [Optical Interrupter][interrupter] | Used for zeroing the stepper motor position          | $0.80   |
+| Coupler                            | Connects the stepper motor shaft to the 8mm shaft    | $2      |
+| 8mm Shaft                          | Acts as the rotating structure for the ToF sensor    | $3      |
+| Linear Rail Shaft Guide            | Acts as mounting point for ToF sensor onto the shaft | $1.90   |
+| LEGOs                              | Base structure for prototyping the LiDAR system      | Free\/$5 |
+| **Total**                          |                                                      | ~$40    |
+
+[pico]: https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf
+[tof]: https://www.adafruit.com/product/5425
+[motor]: https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf
+[driver]: https://www.hadex.cz/spec/m513.pdf
+[interrupter]: https://www.amazon.com/dp/B08977QFK5
+
+TODO: add link for coupler and shaft
+
+
 ---
 
 ## High-Level Design
@@ -104,7 +130,7 @@ typedef struct
 } Button;
 ```
 
-We then updated the debouncing function to take one of these structures;
+We then updated the debouncing function to take one of these structures:
 
 ```c
 /* Debounce button press
@@ -218,6 +244,20 @@ Data, results, scope traces, etc.
 ## Conclusions
 
 Analyze your results and discuss improvements.
+
+TODO: add more than just on mechanics!
+
+Our 2D LiDAR system achieved its primary goal of capturing rotational distance measurements using a Raspberry Pi Pico, a ToF sensor, and a stepper motor. The implementation was successful in demonstrating the core functionality of a low-cost scanning system capable of mapping its surroundings in real-time.
+
+One of the most significant engineering challenges we faced was the mechanical assembly, particularly the issue of wire entanglement during rotation. By designing the system to sweep back and forth over 360°, we avoided the need for an expensive slip ring while still maintaining full angular coverage. However, this introduced complexity in cable management and occasional interference, even when using a flexible ribbon cable. A future improvement would be to mount the entire sensor on a rotating platform, isolating electronic components from moving parts and allowing a slip ring to only carry power and ground.
+
+The use of LEGOs as the structural framework provided a convenient and adaptable platform, but a custom 3D-printed or machined chassis would offer greater precision, durability, and compactness. Additionally, our zeroing mechanism using an optical interrupter worked well after incorporating debouncing, though it required careful alignment and tuning. Integrating a mechanical end-stop or magnetic encoder could provide a more robust and repeatable zeroing process.
+
+We also observed that the VL53L4CX sensor appears to be optimized more for high-accuracy measurements rather than performance in dynamic or high-speed environments like LiDAR scanning. While it delivers precise distance readings under static or slow-moving conditions, its update rate and timing constraints limited how fast we could reliably rotate the sensor and still obtain accurate readings. A sensor designed specifically for fast time-of-flight sampling in motion could significantly improve the responsiveness and resolution of our system.
+
+Similarly, the small 28BYJ-48 stepper motor, while cost-effective and easy to control, imposed limitations on scan speed and torque. Its relatively low speed made high-resolution scans time-consuming, and its low torque occasionally caused missed steps or jitter. Replacing it with a larger stepper motor or even a continuous-rotation servo could drastically improve angular velocity and positional stability, enabling smoother and faster scans. A motor with built-in position feedback (like a servo or closed-loop stepper) would further enhance precision and eliminate the need for separate zeroing hardware.
+
+Overall, our project demonstrated a functional and extensible LiDAR system that could serve as the foundation for further development, including real-time mapping, obstacle detection, or autonomous navigation. With minor refinements in mechanical design and electrical isolation, the system’s performance, accuracy, and reliability could be significantly improved.
 
 ## Appendix A
 
