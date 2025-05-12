@@ -38,7 +38,10 @@ pre {
 
 /* TODO: smaller code font size? */
 code {
-    font-family: Consolas, Monaco, 'Courier New', monospace;
+    /* font-family: Consolas, Monaco, 'Courier New', monospace; */
+    border-radius: 3px;
+    padding: 3px;
+    background-color: #f0f0f0;
 }
 
 footer {
