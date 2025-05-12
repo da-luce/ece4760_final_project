@@ -81,9 +81,15 @@ Thus, despite some challenges, a multitude of physical factors highlights the su
 
 ### Logical Structure
 
-The logical structure of this project consisted of the development of a few key componenets, namely the mechanical assembly of the ToF structure, software and hardware logic for interfacing with the sensor and stepper motor, development of the user experience, and graphics for visualizing sensor data/measurements. 
+The logical structure of this project consisted of the development of a few key components, namely the mechanical assembly of the ToF structure, software and hardware logic for interfacing with the sensor and stepper motor, development of the user experience, and graphics for visualizing sensor data/measurements. 
 
-Software logic was for interfacing with the stepper motor via 
+Initially software logic for interfacing with the stepper motor via PIO state machines and with the ToF sensor were developed. Using the list of MACROs and functions provided in ECE4760's motor_library.h file, the direction and pace of the motor was continuously updated via an interrupt service routine. Because the interrupt handler was called after the stepper motor executed a command, it was also a suitable function for processing the distance measurements produced by the ToF sensor. 
+
+Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting open-source Arduino libraries for the sensor. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040 – ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. Upon further investigation, it was determined that the call stack of the relevant functions for our ToF sensor project was far too complex, and a more sensible solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
+
+These two software components were essential for operating the ToF sensor and stepper motor, forming the backbone of the project's physical component control.
+
+
 
 ---
 
