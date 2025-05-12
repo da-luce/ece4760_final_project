@@ -76,6 +76,8 @@ Discuss tricky parts, hardware, and software choices.
 
 ### Hardware Schematic
 
+![Schematic](schematic.png)
+
 ### Graphics
 
 Arnav, you probably know this the best.
