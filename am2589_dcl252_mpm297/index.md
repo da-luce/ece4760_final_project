@@ -33,6 +33,7 @@ TODO: check these costs
 | [8mm Shaft][shaft]                 | Acts as the rotating structure for the ToF sensor    | $3    |
 | [Linear Rail Shaft Guide][mount]   | Acts as mounting point for ToF sensor onto the shaft | $1.90 |
 | [LEGOs][lego]                      | Base structure for prototyping the LiDAR system      | $5    |
+| [Coupler][coupler]                 | Coupler for mechanical connection with stepper motor | $4.95    |
 | **Total**                          |                                                      | ~$50  |
 
 [pico]: https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf
@@ -44,6 +45,7 @@ TODO: check these costs
 [shaft]: https://www.mcmaster.com/products/shafts/diameter~8-mm/shafts-3~/
 [mount]: https://www.amazon.com/Aluminum-Linear-Support-Motion-Diameter/dp/B08JTPG54L?crid=VE5NLH316WIC&dib=eyJ2IjoiMSJ9.8u7yLVsXJBCCXM-_QTPta-R2lmSJKFH-DtzfCBahL9cnmPkF2szSko9g0C1rEBCG6bWblfNmAMwnvw4zKdipPjAAkPqK9mF_uiAwiPyp-3CHeSUozXEmkEz0_U7f2gGTDtdbu5OqW56t3uetVcu8oFVF8yaxu7_8Y5Cf46Fdh_mlrRXYPnfe326K4AS7tn2qRFR2RoI1jNnCYq0fCcVEPHziCsNV_U2Tc7l1DSdM3b0.j-Z2p5phNmA9W1UhB2zbppoalZmnu23CJ87fPc1kSMs&dib_tag=se&keywords=8mm+linear+mount&qid=1747017395&sprefix=8mm+linear+moun%2Caps%2C85&sr=8-3
 [lego]: https://www.lego.com/en-us/product/millennium-falcon-75192
+[coupler]: https://www.digikey.com/en/products/detail/adafruit-industries-llc/1176/5356856?_gl=1*1fj4v1t*_up*MQ..*_gs*MQ..&gclid=Cj0KCQjwlYHBBhD9ARIsALRu09pQkFZ69vrKAREuje5s0DU45L-u0MY9VR9d4HslId9s2JQaq0RHWlgaAo-VEALw_wcB&gclsrc=aw.ds&gbraid=0AAAAADrbLli0Lcyq9VNl9vfY3Nuxm_SOE
 
 TODO: add link for coupler and shaft
 
@@ -54,7 +56,7 @@ TODO: add link for coupler and shaft
 
 The purpose of this project was to construct a 2-Dimensional LiDAR capable of scanning distances up to approximately 3 meters in distance. The high-level design of the project consisted of a few key components: the mechanical structure upon which the Time-of-Flight sensor was mounted, the software logic for interfacing with a stepper motor for rotating the Time-of-Flight Sensor, Arduino code and UART communication for extracting readings from the sensor, and graphics for visualizing measurements. Additionally, various mechanisms were implemented to allow for sensor calibration, including an optical-interrupter used to provide a reference point for the angle of the stepper motor.
 
-### Time-of-Flight Sensors
+### Time-of-Flight Sensors: Rationale, Background Math, and Project Inspiration
 
 Generally, Time-of-Flight sensors can measure surrounding terrain by emitting photons and sensing the duration of time before photons return back to the sensor. Note that from this point forward Time-of-Flight will be abbreviated with the acronym ToF. 
 The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating the use of infrared radiation. Infrared radiation is often used for such applications as it is “invisible” and can reduce interference from external light sources. In fact, infrared light is less susceptible to Rayleigh scattering, a well-known phenomenon where small atmospheric particles cause light to scatter. The intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4:
@@ -72,6 +74,17 @@ $$
 where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light.
 
 Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference.
+
+Interestingly, the properties of the objects which reflect the emitted IR radiation can also have a significant impact on the qualtiy of ToF measurements. Shiny surfaces, including metals and glass, are often great reflectors of IR radiation. These objects may be easier to detect utilizng the ToF sensor compared to objects that absorb IR radition, such as objects with dark surfaces. 
+
+Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light. This type of photodiode is exceedingly useful for detecting photons. When a photon enters the depletion region of the diode, an electron-hole pair is created. And the strong electric field caused by the reverse-biased diode ensures that the creation of an electron-hole pair leads to an avalanche of additional electron-hole pairs, allowing for amplification of the signal caused by the reflected photon. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche":
+
+<img width="366" alt="Screenshot 2025-05-12 at 3 18 29 AM" src="https://github.com/user-attachments/assets/ee27d291-4079-407c-9ad9-ff404a9737d1" />
+
+Thus, a multitude of physical factors highlights the suitability of a ToF sensor structure for scanning terrain in scientific applications, providing inspiration and a rationale for the PicoScope Project.
+
+### Logical Structure
+
 
 ---
 
