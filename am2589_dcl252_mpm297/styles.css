@@ -30,6 +30,36 @@ body {
     padding: 2px 4px;
 }
 
+.picoscope-highlight {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(90deg, 
+                #333 48%, 
+                rgba(255, 255, 255, 0.0) 50%, 
+                #333 52%);
+    background-size: 200% 100%; /* Set the gradient's size */
+    animation: gradientShift 5s ease-in-out infinite; /* Animate the gradient position */
+    color: transparent; /* Make the text transparent */
+    -webkit-background-clip: text; /* Use background as text fill */
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: -10% 0%;
+    }
+    50% {
+        background-position: 110% 0%;
+    }
+    100% {
+        background-position: -10% 0%;
+    }
+}
+
+
+
+
+  
+  
 body img {
     width: 100%; /* Makes the image scale to the width of the container */
     height: auto; /* Maintains the aspect ratio */
