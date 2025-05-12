@@ -5,6 +5,9 @@ body {
     color: #333;
     background-color: #f4f4f4;
     font-family: Arial, sans-serif;
+
+    /* Support automatic figure numbers */
+    counter-reset: figure;
 }
 
 body img {
@@ -14,6 +17,24 @@ body img {
 
 a, a:visited {
     color: #946666;
+}
+
+
+figure {
+    margin-top: 2em;
+    counter-increment: figure;
+}
+
+figcaption {
+    text-align: center;
+    font-style: italic;
+    margin-bottom: 2em;
+}
+
+figcaption::before {
+    content: "Figure " counter(figure) ": ";
+    font-weight: bold;
+    font-style: normal;
 }
 
 header, section {
