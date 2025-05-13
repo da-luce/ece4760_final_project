@@ -84,7 +84,17 @@ Initially software logic for interfacing with the stepper motor via PIO state ma
 
 Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting open-source Arduino libraries for the sensor. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040 – ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. Upon further investigation, it was determined that the call stack of the relevant functions for our ToF sensor project was far too complex, and a more sensible solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
 
-These two software components were essential for operating the ToF sensor and stepper motor, forming the backbone of the project's physical component control.
+These two software components were essential for operating the ToF sensor and stepper motor, forming the backbone of the project's physical component control. The pin out diagram of the sensor below illustrates the hardware interface that allows for the I2C communication with the Arduino DUE. Most notably,  SDA and SCL pins allow for the I2C communication
+
+<br>
+<div align="center">
+  <img width="470" alt="Screenshot 2025-05-12 at 11 52 25 PM" src="https://github.com/user-attachments/assets/1cc7b271-681a-40c8-bc2c-7c75d6377849" />
+</div>
+<br>
+
+Additionally, the mechanical strcuture of the PicoScope was carefully crafted to esnure accuracy, stability, and precision. The stepper motor was connected to a coupler and 8mm shaft - this made up the rotating structure of the ToF sensor allowing for complete 2-D scans. Connected to the shaft was a mount for the ToF sensor, and a lego structure encased the system to provide extra stabilitgy and robustness. Moroever, an optical interruptor was incorporated into the assembly to provide a reference point for the sensor angle. Before scanning, the sensor was "zeroed" at the optical interrupter, providing an accurate reference for ToF distance and signal rate measurements. Below is an image of the mechanical assembly:
+
+
 
 ---
 
