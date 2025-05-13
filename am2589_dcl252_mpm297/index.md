@@ -307,7 +307,18 @@ void drawImage(short x0, short y0, short width, short height, const unsigned cha
 
 Data, results, scope traces, etc.
 
-- Without wire getting caught, the stepper was not overtorqued and would consistently return to 0. 
+- Without wire getting caught, the stepper was not overtorqued and would consistently return to 0 (show video)
+
+TODO: fill in data:
+TODO: importance of smudge correction
+
+| Actual Object Distance (mm) | Reported Distance with No Calibration | Reported Distance with Calibration |
+| --------------------------- | ------------------------------------- | ---------------------------------- |
+| 0                           |                                       |                                    |
+| 50                          |                                       |                                    |
+| 100                         |                                       |                                    |
+| 1000                        |                                       |                                    |
+
 
 ## Conclusions
 
