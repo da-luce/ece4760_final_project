@@ -117,9 +117,13 @@ Arnav, you probably know this the best.
 
 Dalton
 
+### Signal Bar
+
+Mac
+
 #### Polar Grid
 
-Arnav
+To improve spatial orientation and help users interpret both distance from the ToF sensor and direction relative to the zero gate, we overlaid a polar grid on the display. The grid includes concentric rings that represent increasing radial distances from the ToF sensor (center of the plot), and angle labels placed every 45° around the outermost ring to indicate direction. Because the zero gate defines the 0° direction, all angle measurements are shown relative to that baseline, making it easier to understand the spatial position of each point in the scene.
 
 #### Angle Arrow
 
