@@ -111,13 +111,23 @@ TODO: the threading structure doesn't make that much sense. I forget why I put t
 
 ### Graphics
 
-Arnav, you probably know this the best.
+TODO: intro should probably include
+
+- FSM / some description of different screens and modes
+- drawing points in polar form, a clear representation for angle and distance
+
+```c
+int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
+int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
+char color = map_to_color(dist, 0, max_mm);
+drawPixel(x_pixel, y_pixel, color);
+```
 
 #### Image Drawing
 
 Dalton
 
-### Signal Bar
+#### Signal Bar
 
 Mac
 
@@ -127,9 +137,9 @@ To improve spatial orientation and help users interpret both distance from the T
 
 #### Angle Arrow
 
-Arnav
+To indicate the current orientation of the ToF sensor relative to the zero gate, we added a triangular arrow that orbits just beyond the outermost distance ring of the polar grid, pointing toward the center. As the ToF sensor rotates through angles, the arrow moves smoothly around the circle, providing a clear and continuous indication of the sensor's current direction. Initially, we computed the arrow's position using radian-based (floating-point) `sin()` and `cos()` calls each frame, but this introduced noticeable lag, occasionally causing the pointer to skip nearly 20° between updates. To resolve this, we precomputed sine and cosine values for all 360 degrees and scaled each value by a constant factor (SCALE = 1024) so the values can be stored as `int`s in lookup tables. Using these, we constructed the triangle with basic vector geometry: its tip points along the current angle, and its base is centered perpendicular to that direction. The coordinates of the triangle's vertices are calculated from the scaled trig values and rendered using three lines, resulting in a lightweight visual marker of the real-time sweep of the sensor.
 
-#### Volatile Variables
+##### Volatile Variables
 
 One of the challenges we encountered while rendering the data was dealing with volatile variables. A particularly tricky issue arose in the code snippet below:
 
