@@ -111,7 +111,17 @@ TODO: the threading structure doesn't make that much sense. I forget why I put t
 
 ### Graphics
 
-Arnav, you probably know this the best.
+TODO: intro should probably include
+
+- FSM / some description of different screens and modes
+- drawing points in polar form, a clear representation for angle and distance
+
+```c
+int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
+int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
+char color = map_to_color(dist, 0, max_mm);
+drawPixel(x_pixel, y_pixel, color);
+```
 
 #### Image Drawing
 
