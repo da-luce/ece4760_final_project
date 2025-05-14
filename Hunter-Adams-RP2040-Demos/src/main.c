@@ -241,20 +241,6 @@ void stop_button_on_press(void) {
     }
 }
 
-
-// void add_signal(int32_t new_signal) {
-//     static int update_counter = 0;
-
-//     update_counter++;
-
-//     if (update_counter >= 25) {
-
-//         current_signal = new_signal;
-//         update_counter = 0;
-//     }
-// }
-
-
 void add_signal(int32_t new_signal) {
     static int count = 0;
     static float sum = 0.0f;
@@ -645,8 +631,6 @@ void on_uart_rx() {
                 float signal = (rx_buf[2]) | (rx_buf[3] << 8)|(rx_buf[4])<<16 |(rx_buf[5] << 24);
                 current_distance = dist;
                 add_signal(signal);
-                // printf("Distance: %d\n", current_distance);
-                // printf("Ambience: %d\n", current_signal);
 
                 received = 0;  // Reset for next packet
             }
