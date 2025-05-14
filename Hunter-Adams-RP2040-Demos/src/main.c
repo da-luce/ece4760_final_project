@@ -276,19 +276,11 @@ Button stop_button = {
     .on_release = NULL,
 };
 
-/* FIXME: color heatmap - may draw close points black (or a very dark color) - reverse color scheme?
- * char map_to_color_index(int value, int min_val, int max_val) {
-    if (value <= min_val) return 15;
-    if (value >= max_val) return 0;
-    return (char) 15-(((value - min_val) * 15) / (max_val - min_val));
-}
- */
-char map_to_color_index(int value, int min_val, int max_val) {
+char map_to_color(int value, int min_val, int max_val) {
     if (value <= min_val) return 0;
     if (value >= max_val) return 13;
 
     return rainbow_colors[(value - min_val) * 13 / (max_val - min_val)];
-    // return (char) (((value - min_val) * 13) / (max_val - min_val));
 }
 
 // Button to manage program state
@@ -547,7 +539,7 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         // FIXME: is this correct. WTH is going on here.
         int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
         int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
-        char color = map_to_color_index(dist, 0, max_mm);
+        char color = map_to_color(dist, 0, max_mm);
         drawPixel(x_pixel, y_pixel, color);
 
         // Display textual info

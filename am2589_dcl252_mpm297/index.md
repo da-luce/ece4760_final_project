@@ -148,7 +148,21 @@ By storing the result of `current_angle` in a temporary variable, we guaranteed 
 
 #### Color Map
 
-Arnav, you also know this better
+To make the polar grid visually convey distance more intuitively, we designed it so that points are colored along a rainbow gradient, starting from red at the closest distances and transitioning through shades of orange, yellow, green, blue, and finally pink at the farthest distances. This color progression allows viewers to quickly interpret relative distance based on color alone. Although `vga16_graphics.h` provides a predefined enum `colors`, its ordering is not aligned with a rainbow ordering, placing greens and blues before reds and yellows. Consequently, if we simply looped through the enum values in order, the resulting colors would jump around; this motivated the creation of `rainbow_colors`, a custom array of 14 colors (excluding `WHITE` and `BLACK` from the 16 VGA colors) arranged to represent a rainbow gradient. The function `map_to_color` then maps a value (distance) to the appropriate color. It linearly scales the input value between a min_val and max_val (in our case, `0` and `max_mm=3000`) to an index from 0 to 13, which selects the corresponding color from the array. This approach ensures smooth color transitions across the grid and makes it easy to map different data ranges by adjusting `min_val` and `max_val` without modifying `rainbow_colors`.
+
+```c
+const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW,
+  GREEN, MED_GREEN, DARK_GREEN,
+  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE,
+  MAGENTA, PINK, LIGHT_PINK} ;
+
+char map_to_color_index(int value, int min_val, int max_val) { 
+    if (value <= min_val) return 0;
+    if (value >= max_val) return 13;
+
+    return rainbow_colors[(value - min_val) * 13 / (max_val - min_val)];
+}
+```
 
 ### Mechanical Assembly
 
