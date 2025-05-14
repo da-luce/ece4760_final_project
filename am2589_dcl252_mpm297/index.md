@@ -113,6 +113,18 @@ TODO: the threading structure doesn't make that much sense. I forget why I put t
 
 Arnav, you probably know this the best.
 
+#### Image Drawing
+
+Dalton
+
+#### Polar Grid
+
+Arnav
+
+#### Angle Arrow
+
+Arnav
+
 #### Volatile Variables
 
 One of the challenges we encountered while rendering the data was dealing with volatile variables. A particularly tricky issue arose in the code snippet below:
