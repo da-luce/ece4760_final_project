@@ -123,10 +123,10 @@ void setup()
 
   sensor_vl53l4cx_sat.VL53L4CX_SetDistanceMode(VL53L4CX_DISTANCEMODE_LONG);
 
-  sensor_vl53l4cx_sat.VL53L4CX_SmudgeCorrectionEnable(VL53L4CX_SMUDGE_CORRECTION_CONTINUOUS);
-  if(status != VL53L4CX_ERROR_NONE) {
-		return;
-	}
+  // sensor_vl53l4cx_sat.VL53L4CX_SmudgeCorrectionEnable(VL53L4CX_SMUDGE_CORRECTION_CONTINUOUS);
+  // if(status != VL53L4CX_ERROR_NONE) {
+	// 	return;
+	// }
 
   sensor_vl53l4cx_sat.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(32000);
 

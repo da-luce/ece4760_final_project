@@ -69,7 +69,7 @@ $$
 
 where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light.
 
-Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference. Interestingly, the properties of the objects which reflect the emitted IR radiation can also have a significant impact on the quality of ToF measurements. Shiny surfaces, including metals and glass, are often great reflectors of IR radiation. These objects may be easier to detect utilizing the ToF sensor compared to objects that absorb IR radiation, such as objects with dark surfaces. 
+Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference. Interestingly, the properties of the objects which reflect the emitted IR radiation can also have a significant impact on the quality of ToF measurements. Shiny surfaces, including metals and glass, are often great reflectors of IR radiation. These objects may be easier to detect utilizing the ToF sensor compared to objects that absorb IR radiation, such as objects with dark surfaces.
 
 Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light. This type of photodiode is exceedingly useful for detecting photons. When a photon enters the depletion region of the diode, an electron-hole pair is created. And the strong electric field caused by the reverse-biased diode ensures that the creation of an electron-hole pair leads to an avalanche of additional electron-hole pairs, allowing for amplification of the signal caused by the reflected photon. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche":
 
@@ -79,7 +79,7 @@ Thus, despite some challenges, a multitude of physical factors highlights the su
 
 ### Logical Structure
 
-The logical structure of this project consisted of the development of a few key components, namely the mechanical assembly of the ToF structure, software and hardware logic for interfacing with the sensor and stepper motor, development of the user experience, and graphics for visualizing sensor data/measurements. 
+The logical structure of this project consisted of the development of a few key components, namely the mechanical assembly of the ToF structure, software and hardware logic for interfacing with the sensor and stepper motor, development of the user experience, and graphics for visualizing sensor data/measurements.
 
 Initially software logic for interfacing with the stepper motor via PIO state machines and with the ToF sensor were developed. Using the list of MACROs and functions provided in ECE4760's motor_library.h file, the direction and pace of the motor was continuously updated via an interrupt service routine. Because the interrupt handler was called after the stepper motor executed a command, it was also a suitable function for processing the distance measurements produced by the ToF sensor.
 
@@ -160,7 +160,7 @@ const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW,
   CYAN, LIGHT_BLUE, BLUE, DARK_BLUE,
   MAGENTA, PINK, LIGHT_PINK} ;
 
-char map_to_color_index(int value, int min_val, int max_val) { 
+char map_to_color_index(int value, int min_val, int max_val) {
     if (value <= min_val) return 0;
     if (value >= max_val) return 13;
 
@@ -184,7 +184,7 @@ To zero the motor (to define a set zero angle), we mounted an optical interrupte
 Since we required multiple buttons for a design, we refactored the debouncing code of prior labs to make the code easier to reuse. We define a `Button` struct to hold all data pertinent to debouncing and firing a specific button.
 
 ```c
-typedef struct 
+typedef struct
 {
     uint gpio;
     ButtonState state;
@@ -342,12 +342,12 @@ Data, results, scope traces, etc.
 TODO: fill in data:
 TODO: importance of smudge correction
 
-| Actual Object Distance (mm) | Reported Distance with No Calibration | Reported Distance with Calibration |
-| --------------------------- | ------------------------------------- | ---------------------------------- |
-| 0                           |                                       |                                    |
-| 50                          |                                       |                                    |
-| 100                         |                                       |                                    |
-| 1000                        |                                       |                                    |
+| Actual Object Distance (mm) | Reported Distance with No Calibration |
+| --------------------------- | ------------------------------------- |
+| 0                           | ~0                                    |
+| 50                          | 49                                    |
+| 500                         | 502                                   |
+| 1000                        | 1001                                  |
 
 
 ## Conclusions

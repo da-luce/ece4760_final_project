@@ -408,8 +408,12 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     while (true) {
 
         // Wait on semaphore
-        PT_SEM_WAIT(pt, &vga_semaphore);
+        // PT_SEM_WAIT(pt, &vga_semaphore);
 
+        check_button(&clear_button);
+        check_button(&state_button);
+        check_button(&zero_gate);
+        check_button(&stop_button);
 
         if (DEBUG)
         {
@@ -619,22 +623,6 @@ static PT_THREAD (protothread_vga(struct pt *pt))
     PT_END(pt);
 }
 
-// Check button presses here... separate from VGA
-// FIXME: this threading structure doesn't make that much sense?
-static PT_THREAD (protothread_button(struct pt *pt))
-{
-    PT_BEGIN(pt) ;
-    while(1) {
-        PT_SEM_SIGNAL(pt, &vga_semaphore);
-        check_button(&clear_button);
-        check_button(&state_button);
-        check_button(&zero_gate);
-        check_button(&stop_button);
-        PT_YIELD_usec(3000); // FIXME: do we really need a yeild here
-    }
-    PT_END(pt) ;
-}
-
 uint8_t rx_buf[6];
 int received = 0;
 #define TERMINATING_CHAR '\n' // This is what sendInt16() in the Arduino program uses
@@ -733,7 +721,6 @@ int main() {
     ///////////////////////////// ROCK AND ROLL ////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
-    pt_add_thread(protothread_button) ;
     pt_add_thread(protothread_vga) ;
     pt_schedule_start ;
 
