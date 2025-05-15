@@ -123,7 +123,7 @@ Thus, the project comprised several hardware and sfotware components that were l
 
 The project involved several hardware/software tradeoffs. One initial difficulty, as mentioned previously, was ensuring compatibility between the ToF sensor’s software library and the RP2040. Because the sensor’s library was designed for Arduino, its functions were not usable by the Pico.  Initially, it seemed that modifying the basic I2C read and write functions of the sensor would adapt the higher-level functions for RP2040 compatibility. However, further analysis indicated that this process would be too complex. Therefore, instead of attempting to extensively modify the library, an Arduino DUE microcontroller was integrated into the hardware setup to extract measurements from the ToF. This hardware modification helped eliminate the extensive software difficulties presented by the sensor's library, highlighting a major hardware/software tradeoff of the project. Ultimately, the sensor's measurements were communicated to the RP2040 from the Arduino via UART.
 
-Moreover, an additional consideration for the project was implementing more user-control. 
+Moreover, button debouncing comprised an additional HW/SW tradeoff for the project. Button debouncing was implemented via software - a state machine for checking button presses was coded in C. However, it is possible to implement the same functionality using hardware components. 
 
 ---
 
