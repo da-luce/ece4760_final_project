@@ -242,12 +242,13 @@ void stop_button_on_press(void) {
 }
 
 void add_signal(int32_t new_signal) {
+
     static int count = 0;
     static float sum = 0.0f;
-
+  
     sum += new_signal;
     count++;
-
+  
     if (count >= 25) {
         current_signal = (int32_t)(sum / 25.0f);
         count = 0;
@@ -545,19 +546,19 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         setCursor(10, 30);
         writeString(screentext);
 
-        // Draw signal light bar
+
         // Calculate filled bar length based on signal light
         float signal_bar_length = (current_signal * SIGNAL_BAR_WIDTH) / SIGNAL_MAX_MMCPS;
+
+        // Clamp the signal_bar_length for graphical display
         if (signal_bar_length > SIGNAL_BAR_WIDTH) signal_bar_length = SIGNAL_BAR_WIDTH;
 
-        // Draw background (empty bar)
+       // Draw filled bar, maintain constant bar size
         fillRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, SIGNAL_BAR_WIDTH, SIGNAL_BAR_HEIGHT, BLACK);
-
-        // Draw filled bar
         fillRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, signal_bar_length, SIGNAL_BAR_HEIGHT, CYAN);
+      
+        // Draw an outline for the bar
         drawRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, SIGNAL_BAR_WIDTH, SIGNAL_BAR_HEIGHT, WHITE);
-        setTextColor2(WHITE, BLACK);
-        setCursor(SIGNAL_BAR_X, SIGNAL_BAR_Y + SIGNAL_BAR_HEIGHT + 2);
 
         // Draw distance rings
         for (int i = 1; i < 7; i++) {
