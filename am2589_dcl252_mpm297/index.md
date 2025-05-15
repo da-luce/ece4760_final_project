@@ -150,6 +150,8 @@ TODO: the threading structure doesn't make that much sense. I forget why I put t
 
 TODO: intro should probably include
 
+Graphics for displaying the state of the ToF sensor were implemented via a VGA. The program consisted of four screen states - one for displaying an introduction to the user, one for prompting the user to calibrate the sensor, one for prompting the user to initiate ToF scanning, and a final screen for displaying the ToF sensor's realtime measurements. In addition to these states, the VGA could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA communicated various measurements extracted from the sensor. The VGA displayed real-time 2-D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and cocentric circles were utilzied to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
+
 - FSM / some description of different screens and modes
 - drawing points in polar form, a clear representation for angle and distance
 
