@@ -56,7 +56,9 @@ The purpose of this project was to construct a 2-Dimensional LiDAR capable of sc
 
 Generally, Time-of-Flight sensors can measure surrounding terrain by emitting photons and sensing the duration of time before photons return back to the sensor. Note that from this point forward Time-of-Flight will be abbreviated with the acronym ToF.
 
-The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating the use of infrared radiation. Infrared radiation is often used for such applications as it is “invisible” and can reduce interference from external light sources. In fact, infrared light is less susceptible to Rayleigh scattering, a well-known phenomenon where small atmospheric particles cause light to scatter. The intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4:
+The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating the use of infrared radiation. Infrared radiation is often used for such applications as it is “invisible” and can reduce interference from external light sources. In fact, infrared light is less susceptible to Rayleigh scattering, a well-known phenomenon where small atmospheric particles cause light to scatter. The intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4
+http://hyperphysics.phy-astr.gsu.edu/hbase/atmos/blusky.html
+:
 
 $$
 \text{Intensity of Scattered Light} \propto \frac{1}{\lambda^4}
@@ -97,17 +99,21 @@ Initially software logic for interfacing with the stepper motor via PIO state ma
 
 Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting open-source Arduino libraries for the sensor. These libraries allowed for distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040 – ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. Upon further investigation, it was determined that the call stack of the relevant functions for our ToF sensor project was far too complex, and a more sensible solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
 
-These two software components were essential for operating the ToF sensor and stepper motor, forming the backbone of the project's physical component control. The pin out diagram of the sensor below illustrates the hardware interface that allows for the I2C communication with the Arduino DUE. Most notably,  SDA and SCL pins allow for the I2C communication
+These two software components were essential for operating the ToF sensor and stepper motor, forming a strong base for our project. The pin-out diagram of the sensor below illustrates the hardware interface that allows for the I2C communication with the Arduino DUE. Most notably, SDA and SCL pins allow for the I2C communication:
 
-![ToF sensor PCM Schematic](tof_sensor.png)
+<p align="center">
+  <a href="https://cdn-learn.adafruit.com/downloads/pdf/adafruit-vl53l4cx-time-of-flight-distance-sensor.pdf">
+    <img src="tof_sensor.png" alt="ToF Sensor" width="400" />
+  </a>
+</p>
 
-Additionally, the mechanical structure of the PicoScope was carefully crafted to ensure accuracy, stability, and precision. The stepper motor was connected to a coupler and 8mm shaft - this made up the rotating structure of the ToF sensor allowing for complete 2-D scans. Connected to the shaft was a mount for the ToF sensor, and a lego structure encased the system to provide extra stability and robustness. Moreover, an optical interrupter was incorporated into the assembly to provide a reference point for the sensor angle. Before scanning, the sensor was "zeroed" at the optical interrupter, providing an accurate reference for ToF distance and signal rate measurements. Below is an image of the mechanical assembly:
+Additionally, the mechanical structure of the PicoScope was constructed to allow for accuracy, stability, and precision. The stepper motor was connected to a coupler and 8mm shaft - this made up the rotating structure of the ToF sensor allowing for complete 2-D scans. Then, a mount for the ToF sensor was connected to the shaft, and a lego structure housed the system providing extra stability and robustness. Moreover, an optical interrupter was integrated into the mechanical assembly to provide a reference point for the sensor's angle. Before scanning, the sensor was "zeroed" at the optical interrupter, providing an accurate angle reference for ToF distance and signal rate measurements. Below is an image of the mechanical assembly:
 
 INSERT IMAGE HERE - Dalton?
 
-In addition to the above software and hardware componenets, user-experience was a major componenent of this project. Three buttons making up a state machine alloweingfor easy control over the ToF sensor. Most notably, a state button was utilized to control calibrate the ToF and intiiate scanning. Moreover, the optical iterrupter functioned as a "button" by triggering when the ToF moved into the correct position. And, a reset/clear screen button was implemented to reset the ToF measurements and an emergency motor stop button was implemented for safety purposes. 
+In addition to the above software and hardware components, user-experience was a major component of this project. Three buttons making up a state machine allowed for easy control over the ToF sensor. Most notably, a state button was utilized to control and calibrate the ToF and intiiate scanning. Moreover, the optical iterrupter functioned as a "button" by being triggered when the ToF moved into the correct position. And, a reset/clear screen button was implemented to reset the ToF measurements and an emergency motor stop button was implemented for safety purposes. 
 
-Lastly, VGA graphics were implemented to disoplay the ToF measurements. Cocentric circles were dfrawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurmeents from the ToF sesnsor were reported in mm while signal rate measurements were report in milli-MegaCounts per Second (measurement of the number of photons returning to the sesnor per second). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
+Lastly, VGA graphics were implemented to display the ToF measurements. Cocentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sesnsor were reported in mm while signal rate measurements were report in milli-MegaCounts per Second (measurement of the number of photons returning to the sesnor per second). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
 
 INSERT IMAGE HERE - Dalton?
 
@@ -115,10 +121,9 @@ Thus, the project comprised several hardware and sfotware components that were l
 
 ### Hardware/Software Tradeoffs
 
-The project involved several hardware/software tradeoffs. One initial difficulty, as mentioned previously, was ensuring compatibility between the ToF sensor’s software library and the RP2040. Because the sensor’s library was designed for Arduino, its functions were not usable by the Pico.  Initially, it seemed that modifying the basic I2C read and write functions of the sensor would adapt the higher-level functions for RP2040 compatibility. However, after analysis of the call stacks within the sensor’s library, it became clear that this approach would be ineffective. Therefore, instead of attempting to extensively modify the library, an Arduino DUE microcontroller was integrated into the hardware setup to extract measurements from the ToF. This hardware modification helped eliminate the extensive software difficulties presented by the sensor's library, highlighting a major hardware/software tradeoff of the project. Ultimately, the sensor's measurements were communicated to the RP2040 from the Arduino via UART.
+The project involved several hardware/software tradeoffs. One initial difficulty, as mentioned previously, was ensuring compatibility between the ToF sensor’s software library and the RP2040. Because the sensor’s library was designed for Arduino, its functions were not usable by the Pico.  Initially, it seemed that modifying the basic I2C read and write functions of the sensor would adapt the higher-level functions for RP2040 compatibility. However, further analysis indicated that this process would be too complex. Therefore, instead of attempting to extensively modify the library, an Arduino DUE microcontroller was integrated into the hardware setup to extract measurements from the ToF. This hardware modification helped eliminate the extensive software difficulties presented by the sensor's library, highlighting a major hardware/software tradeoff of the project. Ultimately, the sensor's measurements were communicated to the RP2040 from the Arduino via UART.
 
-
-
+Moreover, an additional consideration for the project was implementing more user-control. 
 
 ---
 
