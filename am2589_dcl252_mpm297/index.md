@@ -102,6 +102,10 @@ INSERT IMAGE HERE - Dalton?
 
 Thus, the project comprised several hardware and sfotware components that were logically integrated into a highly functional Time-of-Flight sensor.
 
+### Hardware Software Tradeoffs
+
+Talk about Arduino Due, Rewriting I2C maybe some other stuff. 
+
 
 
 ---
