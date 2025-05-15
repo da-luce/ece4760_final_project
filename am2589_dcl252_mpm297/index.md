@@ -29,7 +29,8 @@ TODO: check these costs
 | [8mm Shaft][shaft]                 | Acts as the rotating structure for the ToF sensor    | $3    |
 | [Linear Rail Shaft Guide][mount]   | Acts as mounting point for ToF sensor onto the shaft | $1.90 |
 | [LEGOs][lego]                      | Base structure for prototyping the LiDAR system      | $5    |
-| [Coupler][coupler]                 | Connects the stepper motor shaft to the 8mm shaft    | $4.95    |
+| [Coupler][coupler]                 | Connects the stepper motor shaft to the 8mm shaft    | $6.99
+|
 | **Total**                          |                                                      | ~$50  |
 
 [pico]: https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf
@@ -37,7 +38,7 @@ TODO: check these costs
 [motor]: https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf
 [driver]: https://www.hadex.cz/spec/m513.pdf
 [interrupter]: https://www.amazon.com/dp/B08977QFK5
-[coupler]: https://www.digikey.com/en/products/detail/adafruit-industries-llc/1176/5356856?_gl=1*1fj4v1t*_up*MQ..*_gs*MQ..&gclid=Cj0KCQjwlYHBBhD9ARIsALRu09pQkFZ69vrKAREuje5s0DU45L-u0MY9VR9d4HslId9s2JQaq0RHWlgaAo-VEALw_wcB&gclsrc=aw.ds&gbraid=0AAAAADrbLli0Lcyq9VNl9vfY3Nuxm_SOE
+[coupler]: [https://www.digikey.com/en/products/detail/adafruit-industries-llc/1176/5356856?](https://www.amazon.com/dp/B09954NX1D?ref=ppx_yo2ov_dt_b_fed_asin_title)_gl=1*1fj4v1t*_up*MQ..*_gs*MQ..&gclid=Cj0KCQjwlYHBBhD9ARIsALRu09pQkFZ69vrKAREuje5s0DU45L-u0MY9VR9d4HslId9s2JQaq0RHWlgaAo-VEALw_wcB&gclsrc=aw.ds&gbraid=0AAAAADrbLli0Lcyq9VNl9vfY3Nuxm_SOE
 [shaft]: https://www.mcmaster.com/products/shafts/diameter~8-mm/shafts-3~/
 [mount]: https://www.amazon.com/Aluminum-Linear-Support-Motion-Diameter/dp/B08JTPG54L?crid=VE5NLH316WIC&dib=eyJ2IjoiMSJ9.8u7yLVsXJBCCXM-_QTPta-R2lmSJKFH-DtzfCBahL9cnmPkF2szSko9g0C1rEBCG6bWblfNmAMwnvw4zKdipPjAAkPqK9mF_uiAwiPyp-3CHeSUozXEmkEz0_U7f2gGTDtdbu5OqW56t3uetVcu8oFVF8yaxu7_8Y5Cf46Fdh_mlrRXYPnfe326K4AS7tn2qRFR2RoI1jNnCYq0fCcVEPHziCsNV_U2Tc7l1DSdM3b0.j-Z2p5phNmA9W1UhB2zbppoalZmnu23CJ87fPc1kSMs&dib_tag=se&keywords=8mm+linear+mount&qid=1747017395&sprefix=8mm+linear+moun%2Caps%2C85&sr=8-3
 [lego]: https://www.lego.com/en-us/product/millennium-falcon-75192
@@ -90,6 +91,18 @@ These two software components were essential for operating the ToF sensor and st
 ![ToF sensor PCM Schematic](tof_sensor.png)
 
 Additionally, the mechanical structure of the PicoScope was carefully crafted to ensure accuracy, stability, and precision. The stepper motor was connected to a coupler and 8mm shaft - this made up the rotating structure of the ToF sensor allowing for complete 2-D scans. Connected to the shaft was a mount for the ToF sensor, and a lego structure encased the system to provide extra stability and robustness. Moreover, an optical interrupter was incorporated into the assembly to provide a reference point for the sensor angle. Before scanning, the sensor was "zeroed" at the optical interrupter, providing an accurate reference for ToF distance and signal rate measurements. Below is an image of the mechanical assembly:
+
+INSERT IMAGE HERE - Dalton?
+
+In addition to the above software and hardware componenets, user-experience was a major componenent of this project. Three buttons making up a state machine alloweingfor easy control over the ToF sensor. Most notably, a state button was utilized to control calibrate the ToF and intiiate scanning. Moreover, the optical iterrupter functioned as a "button" by triggering when the ToF moved into the correct position. And, a reset/clear screen button was implemented to reset the ToF measurements and an emergency motor stop button was implemented for safety purposes. 
+
+Lastly, VGA graphics were implemented to disoplay the ToF measurements. Cocentric circles were dfrawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurmeents from the ToF sesnsor were reported in mm while signal rate measurements were report in milli-MegaCounts per Second (measurement of the number of photons returning to the sesnor per second). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
+
+INSERT IMAGE HERE - Dalton?
+
+Thus, the project comprised several hardware and sfotware components that were logically integrated into a highly functional Time-of-Flight sensor.
+
+
 
 ---
 
