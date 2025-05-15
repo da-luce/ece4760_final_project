@@ -68,17 +68,24 @@ $$
 \text{Distance} \approx \frac{t \cdot c}{2}
 $$
 
-where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light.
+where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light. 
 
 Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference. Interestingly, the properties of the objects which reflect the emitted IR radiation can also have a significant impact on the quality of ToF measurements. Shiny surfaces, including metals and glass, are often great reflectors of IR radiation. These objects may be easier to detect utilizing the ToF sensor compared to objects that absorb IR radiation, such as objects with dark surfaces.
 
-Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light. This type of photodiode is exceedingly useful for detecting photons. When a photon enters the depletion region of the diode, an electron-hole pair is created. And the strong electric field caused by the reverse-biased diode ensures that the creation of an electron-hole pair leads to an avalanche of additional electron-hole pairs, allowing for amplification of the signal caused by the reflected photon. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche":
+Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light. This type of photodiode is exceedingly useful for detecting photons. When a photon enters the depletion region of the diode, a photogenerated carrier is created. And the strong electric field caused by the reverse-biased diode ensures that the carrier leads to an avalanche of additional carriers via a process called impact ionization - photogenerated carriers get accelerated by the electric field and collide with other bounded carriers, freeing them and creating an avalanche effect.  This avalanche effect allows for amplification of the signal caused by the reflected photon. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche":
+
+
+https://opg.optica.org/ao/fulltext.cfm?uri=ao-35-12-1956&id=46631
+https://www.sto.nato.int/publications/STO%20Meeting%20Proceedings/STO-MP-IST-SET-198/MP-IST-SET-198-C1-03.pdf
+
 
 <p align="center">
   <a href="https://www.sto.nato.int/publications/STO%20Meeting%20Proceedings/STO-MP-IST-SET-198/MP-IST-SET-198-C1-03.pdf">
-    <img src="SPAD_Diagram.png" alt="Diagram of SPAD" />
+    <img src="SPAD_Diagram.png" alt="Diagram of SPAD" width="400" />
   </a>
 </p>
+
+The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract measurements of surrounding terrain.
 
 Thus, despite some challenges, a multitude of physical factors highlights the suitability of a ToF sensor structure for scanning terrain in scientific applications, providing inspiration and a rationale for the PicoScope Project.
 
@@ -88,7 +95,7 @@ The logical structure of this project consisted of the development of a few key 
 
 Initially software logic for interfacing with the stepper motor via PIO state machines and with the ToF sensor were developed. Using the list of MACROs and functions provided in ECE4760's motor_library.h file, the direction and pace of the motor was continuously updated via an interrupt service routine. Because the interrupt handler was called after the stepper motor executed a command, it was also a suitable function for processing the distance measurements produced by the ToF sensor.
 
-Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting open-source Arduino libraries for the sensor. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040 – ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. Upon further investigation, it was determined that the call stack of the relevant functions for our ToF sensor project was far too complex, and a more sensible solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
+Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting open-source Arduino libraries for the sensor. These libraries allowed for distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040 – ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. Upon further investigation, it was determined that the call stack of the relevant functions for our ToF sensor project was far too complex, and a more sensible solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
 
 These two software components were essential for operating the ToF sensor and stepper motor, forming the backbone of the project's physical component control. The pin out diagram of the sensor below illustrates the hardware interface that allows for the I2C communication with the Arduino DUE. Most notably,  SDA and SCL pins allow for the I2C communication
 
@@ -106,9 +113,10 @@ INSERT IMAGE HERE - Dalton?
 
 Thus, the project comprised several hardware and sfotware components that were logically integrated into a highly functional Time-of-Flight sensor.
 
-### Hardware Software Tradeoffs
+### Hardware/Software Tradeoffs
 
-Talk about Arduino Due, Rewriting I2C maybe some other stuff. 
+The project involved several hardware/software tradeoffs. One initial difficulty, as mentioned previously, was ensuring compatibility between the ToF sensor’s software library and the RP2040. Because the sensor’s library was designed for Arduino, its functions were not usable by the Pico.  Initially, it seemed that modifying the basic I2C read and write functions of the sensor would adapt the higher-level functions for RP2040 compatibility. However, after analysis of the call stacks within the sensor’s library, it became clear that this approach would be ineffective. Therefore, instead of attempting to extensively modify the library, an Arduino DUE microcontroller was integrated into the hardware setup to extract measurements from the ToF. This hardware modification helped eliminate the extensive software difficulties presented by the sensor's library, highlighting a major hardware/software tradeoff of the project. Ultimately, the sensor's measurements were communicated to the RP2040 from the Arduino via UART.
+
 
 
 
