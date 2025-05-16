@@ -372,7 +372,7 @@ A yield of three milliseconds proved sufficient to debounce the mechanical butto
 
 ![State Diagram](state_diagram.drawio.png)
 
-The program operates as a finite state machine to manage the LiDAR system's behavior based on user input. It begins in the `WAITING1` state, during which the system is idle and allows for sensor calibration (TODO: see elsewhere). If the user holds a the green state button, the system transitions to the `ZEROING` state, which is responsible for aligning the stepper motor with the zero position via the optical interrupter.
+The program operates as a finite state machine to manage the LiDAR system's behavior based on user input. It begins in the `WAITING1` state, during which the system is idle and allows for [sensor calibration](#vl53l4cx-accuracy). If the user holds a the green state button, the system transitions to the `ZEROING` state, which is responsible for aligning the stepper motor with the zero position via the optical interrupter.
 
 Once the zero position is reach, the system automatically enters the `WAITING2` state, signaling readiness to begin data collection. When the user presses the button again, the program transitions to the `LIDAR` state, actively rotating the motor and collecting distance data from the ToF sensor. Pressing the button once more returns the system to the initial `WAITING1` state, completing the control loop.
 
@@ -384,6 +384,8 @@ To display an boot screen, we added a boolean flag, which when true, will displa
 
 Data, results, scope traces, etc.
 
+### Zeroing Mechanism
+
 When the wiring was free and unobstructed, the stepper motor avoided over-torquing and consistently returned accurately to the zero position. Zeroing worked reliably throughout testing.
 
 <figure>
@@ -394,6 +396,16 @@ When the wiring was free and unobstructed, the stepper motor avoided over-torqui
       <figcaption>Top-down view of stepper motor zeroing.</figcaption>
 </figure>
 
+<figure>
+    <video width="640" height="480" controls>
+    <source src="zeroing_side.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+      <figcaption>A side view of the of zeroing mechanism.</figcaption>
+</figure>
+
+### VL53L4CX Accuracy
+
 | Actual Object Distance (mm) | Reported Distance  |
 | --------------------------- | ------------------------------------- |
 | 0                           | ~0                                    |
@@ -403,7 +415,25 @@ When the wiring was free and unobstructed, the stepper motor avoided over-torqui
 
 The ToF sensor demonstrated excellent precision and repeatability. The small discrepancies seen in the distance measurements (e.g., 49 mm vs. 50 mm) were primarily due to limitations in our testing setup, not the sensor itself. For reference, we used a meter stick and placed a piece of wood above it to align target distances. This method introduced small alignment and parallax errors, especially at longer distances. Despite this, the reported measurements were remarkably close to the actual values, confirming the sensor's accuracy. With a more controlled calibration environment (e.g., laser-aligned setup or fixed mounts), we would have observed even greater accuracy.
 
-The VL53L4CX also supports advanced features such as smudge correction, signal threshold tuning, and multi-zone detection, which we did not fully utilize in this project (for instance, adding smudge correction did not result in any observable difference in our scans).
+The VL53L4CX also supports advanced features such as smudge correction, signal threshold tuning, and multi-zone detection, which we did not fully utilize in this project (for instance, adding smudge correction did not result in any observable difference in our scans). There was also a setting that permitted the user to calibrate the sensor using a fixed, known distance. This could have been used during the [`WAITING1`](#states) state.
+
+### Scans
+
+While the VL53L4CX sensor is well-suited for measuring slow-moving objects, large sudden jumps in distance can cause inaccurate readings, resulting in poor scan quality. Additionally, the maximum report rate of about 8 ms per measurement is not fast enough for extremely precise scans. Furthermore, movement from the stepper motor and wire tugging introduced additional noise into the measurements, affecting overall scan reliability.
+
+<figure>
+    <video width="640" height="480" controls>
+    <source src="scan.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+      <figcaption>Example of a scan being collected.</figcaption>
+</figure>
+
+We also set up a test environment to demonstrate the scan’s effectiveness. By placing a large piece of wood next to the sensor, we showed that it reliably appears in the scan output (see the following image).
+
+![Test setup with a large wooden object placed near the sensor](wood.jpeg)
+
+![Resulting scan data showing the wooden object clearly detected in the expected location](wood_scan.png)
 
 ## Conclusions
 
