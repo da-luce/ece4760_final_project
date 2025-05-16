@@ -9,7 +9,6 @@ link-citations: true
 ## Project Introduction
 
 We have constructed a Time-of-Flight system, *PicoScope*, capable of scanning and extracting measurements from surrounding terrain in 2 dimensions. A Time-of-Flight sensor was mounted on a mechanical structure that rotated 360 degrees clockwise and counter-clockwise to allow for complete 2-dimensional scans. Various design choices, including the integration of an optical interrupter, were made to enhance the user experience and provide precise measurements. An Arduino DUE extracted distance and signal rate measurements from the sensor and communicated them to the RP2040 via UART. And measurements were shown on a VGA display in real-time to visualize the surrounding terrain scanned by the sensor. Three buttons---a state button, clear/reset button, and motor stop button---were integrated into the design to allow for user control over the scanning process. Testing revealed that the system provided accurate, precise, and stable distance measurements, demonstrating its potential suitability for a wide range of scientific applications.
-We have constructed a Time-of-Flight system, *PicoScope* capable of scanning and extracting measurements from surrounding terrain in 2 dimensions. A Time-of-Flight sensor was mounted on a mechanical structure that rotated 360 degrees clockwise and counter-clockwise to allow for complete 2-dimensional scans. Various design choices, including the integration of an optical interrupter, were made to enhance the user experience and provide precise measurements. An Arduino DUE extracted distance and signal rate measurements from the sensor and communicated them to the RP2040 via UART. And measurmeents were graphically displayed on a VGA in real-time to visualize the surrounding terrain scanned by the sensor. Three buttons - a state button, clear/reset button, and motor stop button - were integrated into the design to allow for user control over the scanning process. Testing revealed that the system provided accurate, precise, and stable distance measurements, demonstrating its potential suitability for a wide range of scientiifc applications.
 
 [Raspberry Pi Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf),
 [Adafruit VL53L4CX ToF sensor](https://www.adafruit.com/product/5425), and
@@ -81,7 +80,7 @@ Finally, the ToF sensor characteristics include physical phenomena crucial for a
 
 ![Diagram of SPAD](SPAD_Diagram.png)
 
-The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract measurements of surrounding terrain.
+The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetector abilities to extract measurements of surrounding terrain.
 
 Thus, despite challenges, a number of relevant physical factors highlight how ToF sensors can effectively scan terrain in scientific applications, providing inspiration and a rationale for the PicoScope Project.
 
