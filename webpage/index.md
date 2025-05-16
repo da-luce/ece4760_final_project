@@ -16,38 +16,6 @@ We have constructed a Time-of-Flight system, *PicoScope*, capable of scanning an
 [ULN2003 Driver](https://www.hadex.cz/spec/m513.pdf)
 to capture and process distance measurements for mapping and navigation applications. The final video demonstration may be found [here](https://www.youtube.com/watch?v=iKAAPpQTxMU).
 
-### Materials
-
-TODO: check these costs
-
-<!--Can't use reference style links because --citeproc breaks them... sad-->
-
-| Material                   | Purpose                                              | Cost  |
-|:-------------------------- |:---------------------------------------------------- | -----:|
-| Raspberry Pi Pico          | Microcontroller used to control the LiDAR system     | $4    |
-| Adafruit VL53L4CX          | Time-of-Flight sensor for distance measurements      | $16   |
-| 28BYJ-48 Stepper Motor     | Provides rotational motion for LiDAR scanning        | $3    |
-| ULN2003 Driver             | Driver board for controlling the stepper motor       | $2    |
-| Optical Interrupter        | Used for zeroing the stepper motor position          | $0.80 |
-| 8mm Shaft                  | Constructed in lab                                   | ~$3   |
-| Linear Rail Shaft Guide    | Acts as mounting point for ToF sensor onto the shaft | $1.90 |
-| LEGOs                      | Base structure for prototyping the LiDAR system      | $5    |
-| Coupler                    | Connects the stepper motor shaft to the 8mm shaft    | $6.99 |
-| **Total**                  |                                                      | ~$45  |
-
-### Links
-
-- [Raspberry Pi Pico Datasheet](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf)  
-- [Adafruit VL53L4CX Product Page](https://www.adafruit.com/product/5425)  
-- [28BYJ-48 Stepper Motor Datasheet](https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf)  
-- [ULN2003 Driver Datasheet](https://www.hadex.cz/spec/m513.pdf)  
-- [Optical Interrupter on Amazon](https://www.amazon.com/dp/B08977QFK5)  
-- [Linear Rail Shaft Guide on Amazon](https://www.amazon.com/Aluminum-Linear-Support-Motion-Diameter/dp/B08JTPG54L?crid=VE5NLH316WIC&dib=eyJ2IjoiMSJ9.8u7yLVsXJBCCXM-_QTPta-R2lmSJKFH-DtzfCBahL9cnmPkF2szSko9g0C1rEBCG6bWblfNmAMwnvw4zKdipPjAAkPqK9mF_uiAwiPyp-3CHeSUozXEmkEz0_U7f2gGTDtdbu5OqW56t3uetVcu8oFVF8yaxu7_8Y5Cf46Fdh_mlrRXYPnfe326K4AS7tn2qRFR2RoI1jNnCYq0fCcVEPHziCsNV_U2Tc7l1DSdM3b0.j-Z2p5phNmA9W1UhB2zbppoalZmnu23CJ87fPc1kSMs&dib_tag=se&keywords=8mm+linear+mount&qid=1747017395&sprefix=8mm+linear+moun%2Caps%2C85&sr=8-3)  
-- [LEGOs Millennium Falcon](https://www.lego.com/en-us/product/millennium-falcon-75192)  
-- [Coupler on Amazon](https://www.amazon.com/dp/B09954NX1D?ref=ppx_yo2ov_dt_b_fed_asin_title)  
-
----
-
 ## High-Level Design
 
 The purpose of this project was to construct a 2-dimensional LiDAR capable of scanning up to approximately 3 meters in distance. The high-level design of the project consisted of a few major components: the mechanical structure for mounting and rotating the Time-of-Flight sensor, the software logic for controlling the stepper motor (which rotated the mechanical structure), Arduino code and UART communication for extracting readings from the sensor, and graphics for visualizing measurements. Additionally, various hardware mechanisms and software processes were implemented to enhance the user's experience. For example, an optical-interrupter was integrated into the hardware design to help calibrate the sensor to ensure precise measurements.
@@ -152,7 +120,7 @@ Graphics for displaying the state of the ToF sensor were implemented via a VGA. 
 |---------------------------------|-------------------------------------|---------------------------------|
 | ![Home Screen](home_screen.png) | ![Prompt Screen](prompt_screen.jpg) | ![Scan Screen](scan_screen.png) |
 
-In addition to these states, the VGA could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA communicated various measurements extracted from the sensor. The VGA display showed real-time 2D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and concentric circles were utilized to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
+In addition to these states, the VGA display could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA display communicated various measurements extracted from the sensor, showing real-time 2D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and concentric circles were utilized to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
 
 #### Converting Polar Measurements to Screen Positions
 
@@ -459,12 +427,57 @@ Similarly, the small 28BYJ-48 stepper motor, while cost-effective and easy to co
 
 Overall, our project demonstrated a functional and extensible LiDAR system that could serve as the foundation for further development, including real-time mapping, obstacle detection, or autonomous navigation. With minor refinements in mechanical design and electrical isolation, the system's performance, accuracy, and reliability could be significantly improved.
 
-## Appendix A
+## Appendix A: Permissions
 
 The group does not approve this report for inclusion on the course website.
 
 The group does not approve the video for inclusion on the course YouTube channel.
 
 © 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
+
+## Appendix B: Code
+
+[GitHub Repository](https://github.com/da-luce/ece4760_final_project)
+
+## Appendix C: Materials
+
+| Material                         | Purpose                                              | Cost             |
+|:--------------------------       |:---------------------------------------------------- |-----------------:|
+| [Raspberry Pi Pico][pico]        | Microcontroller used to control the LiDAR system     | [\$4.00][pico-cost] |
+| [Adafruit VL53L4CX][vl53]        | Time‑of‑Flight sensor for distance measurements      | [\$14.95][vl53-cost]|
+| [28BYJ‑48 Stepper Motor][stepper]| Provides rotational motion for LiDAR scanning        | [\$2.50][stepper-cost] |
+| [ULN2003 Driver][uln2003]        | Driver board for controlling the stepper motor       | [\$1.98][uln2003-cost] |
+| [Optical Interrupter][optint]    | Used for zeroing the stepper motor position          | [\$0.80][optint-cost] |
+| [8 mm Shaft][shaft]              | Constructed in lab                                   | [\$6.99][shaft-cost] |
+| [Linear Rail Shaft Guide][rail]  | Acts as mounting point for ToF sensor onto the shaft | [\$3.95][rail-cost] |
+| [LEGOs][legos]                   | Base structure for prototyping the LiDAR system      | [~\$5][legos-cost] |
+| [Coupler][coupler]               | Connects the stepper motor shaft to the 8 mm shaft   | [\$4.95][coupler-cost] |
+| **Total**                        |                                                      | **~\$45**        |
+[pico]: https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf  
+[pico-cost]: https://www.adafruit.com/product/4864  
+
+[vl53]: https://www.st.com/resource/en/datasheet/vl53l4cx.pdf  
+[vl53-cost]: https://www.adafruit.com/product/5425  
+
+[stepper]: https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf  
+[stepper-cost]: https://www.amazon.com/Stepper-28BYJ-48-ULN2003-Arduino-Electric/dp/B07V5V37WJ
+
+[uln2003]: https://www.hadex.cz/spec/m513.pdf  
+[uln2003-cost]: https://www.amazon.com/Stepper-28BYJ-48-ULN2003-Arduino-Electric/dp/B07V6XZXG2 
+
+[optint]: https://www.amazon.com/dp/B08977QFK5  
+[optint-cost]: https://www.amazon.com/dp/B08977QFK5  
+
+[shaft]: https://www.amazon.com/Linear-Motion-Shaft-Guide-Craft/dp/B0BQBVJ2NL 
+[shaft-cost]: https://www.amazon.com/Linear-Motion-Shaft-Guide-Craft/dp/B0BQBVJ2NL
+
+[rail]: https://www.adafruit.com/product/1182 
+[rail-cost]: https://www.adafruit.com/product/1182
+
+[legos]: https://www.lego.com/en-us/product/millennium-falcon-75192  
+[legos-cost]: https://www.lego.com/en-us/product/millennium-falcon-75192  
+
+[coupler]: https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/1300/1176_Web.pdf  
+[coupler-cost]: https://www.digikey.com/en/products/detail/adafruit-industries-llc/1176/5356856  
 
 ## References
