@@ -21,29 +21,35 @@ to capture and process distance measurements for mapping and navigation applicat
 
 TODO: check these costs
 
-| Material                           | Purpose                                              | Cost  |
-| ---------------------------------- | ---------------------------------------------------- | ----- |
-| [Raspberry Pi Pico][pico]          | Microcontroller used to control the LiDAR system     | $4    |
-| [Adafruit VL53L4CX][tof]           | Time-of-Flight sensor for distance measurements      | $16   |
-| [28BYJ-48 Stepper Motor][motor]    | Provides rotational motion for LiDAR scanning        | $3    |
-| [ULN2003 Driver][driver]           | Driver board for controlling the stepper motor       | $2    |
-| [Optical Interrupter][interrupter] | Used for zeroing the stepper motor position          | $0.80 |
-| [8mm Shaft][shaft]                 | Acts as the rotating structure for the ToF sensor    | $3    |
-| [Linear Rail Shaft Guide][mount]   | Acts as mounting point for ToF sensor onto the shaft | $1.90 |
-| [LEGOs][lego]                      | Base structure for prototyping the LiDAR system      | $5    |
-| [Coupler][coupler]                 | Connects the stepper motor shaft to the 8mm shaft    | $6.99 |
-| Shaft (constructed in lab)         | Pieces together stepper motor, coupler, and mount    | ~$2   |
-| **Total**                          |                                                      | ~$50  |
+<!--Can't use reference style links because --citeproc breaks them... sad-->
 
-[pico]: https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf
-[tof]: https://www.adafruit.com/product/5425
-[motor]: https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf
-[driver]: https://www.hadex.cz/spec/m513.pdf
-[interrupter]: https://www.amazon.com/dp/B08977QFK5
-[coupler]: [https://www.digikey.com/en/products/detail/adafruit-industries-llc/1176/5356856?](https://www.amazon.com/dp/B09954NX1D?ref=ppx_yo2ov_dt_b_fed_asin_title)_gl=1*1fj4v1t*_up*MQ..*_gs*MQ..&gclid=Cj0KCQjwlYHBBhD9ARIsALRu09pQkFZ69vrKAREuje5s0DU45L-u0MY9VR9d4HslId9s2JQaq0RHWlgaAo-VEALw_wcB&gclsrc=aw.ds&gbraid=0AAAAADrbLli0Lcyq9VNl9vfY3Nuxm_SOE
-[shaft]: https://www.mcmaster.com/products/shafts/diameter~8-mm/shafts-3~/
-[mount]: https://www.amazon.com/Aluminum-Linear-Support-Motion-Diameter/dp/B08JTPG54L?crid=VE5NLH316WIC&dib=eyJ2IjoiMSJ9.8u7yLVsXJBCCXM-_QTPta-R2lmSJKFH-DtzfCBahL9cnmPkF2szSko9g0C1rEBCG6bWblfNmAMwnvw4zKdipPjAAkPqK9mF_uiAwiPyp-3CHeSUozXEmkEz0_U7f2gGTDtdbu5OqW56t3uetVcu8oFVF8yaxu7_8Y5Cf46Fdh_mlrRXYPnfe326K4AS7tn2qRFR2RoI1jNnCYq0fCcVEPHziCsNV_U2Tc7l1DSdM3b0.j-Z2p5phNmA9W1UhB2zbppoalZmnu23CJ87fPc1kSMs&dib_tag=se&keywords=8mm+linear+mount&qid=1747017395&sprefix=8mm+linear+moun%2Caps%2C85&sr=8-3
-[lego]: https://www.lego.com/en-us/product/millennium-falcon-75192
+| Material                   | Purpose                                              | Cost  |
+| -------------------------- | ---------------------------------------------------- | ----- |
+| Raspberry Pi Pico          | Microcontroller used to control the LiDAR system     | $4    |
+| Adafruit VL53L4CX          | Time-of-Flight sensor for distance measurements      | $16   |
+| 28BYJ-48 Stepper Motor     | Provides rotational motion for LiDAR scanning        | $3    |
+| ULN2003 Driver             | Driver board for controlling the stepper motor       | $2    |
+| Optical Interrupter        | Used for zeroing the stepper motor position          | $0.80 |
+| 8mm Shaft                  | Acts as the rotating structure for the ToF sensor    | $3    |
+| Linear Rail Shaft Guide    | Acts as mounting point for ToF sensor onto the shaft | $1.90 |
+| LEGOs                      | Base structure for prototyping the LiDAR system      | $5    |
+| Coupler                    | Connects the stepper motor shaft to the 8mm shaft    | $6.99 |
+| Shaft (constructed in lab) | Pieces together stepper motor, coupler, and mount    | ~$2   |
+| **Total**                  |                                                      | ~$50  |
+
+---
+
+### Links
+
+- [Raspberry Pi Pico Datasheet](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf)  
+- [Adafruit VL53L4CX Product Page](https://www.adafruit.com/product/5425)  
+- [28BYJ-48 Stepper Motor Datasheet](https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf)  
+- [ULN2003 Driver Datasheet](https://www.hadex.cz/spec/m513.pdf)  
+- [Optical Interrupter on Amazon](https://www.amazon.com/dp/B08977QFK5)  
+- [8mm Shaft on McMaster-Carr](https://www.mcmaster.com/products/shafts/diameter~8-mm/shafts-3~/)  
+- [Linear Rail Shaft Guide on Amazon](https://www.amazon.com/Aluminum-Linear-Support-Motion-Diameter/dp/B08JTPG54L?crid=VE5NLH316WIC&dib=eyJ2IjoiMSJ9.8u7yLVsXJBCCXM-_QTPta-R2lmSJKFH-DtzfCBahL9cnmPkF2szSko9g0C1rEBCG6bWblfNmAMwnvw4zKdipPjAAkPqK9mF_uiAwiPyp-3CHeSUozXEmkEz0_U7f2gGTDtdbu5OqW56t3uetVcu8oFVF8yaxu7_8Y5Cf46Fdh_mlrRXYPnfe326K4AS7tn2qRFR2RoI1jNnCYq0fCcVEPHziCsNV_U2Tc7l1DSdM3b0.j-Z2p5phNmA9W1UhB2zbppoalZmnu23CJ87fPc1kSMs&dib_tag=se&keywords=8mm+linear+mount&qid=1747017395&sprefix=8mm+linear+moun%2Caps%2C85&sr=8-3)  
+- [LEGOs Millennium Falcon](https://www.lego.com/en-us/product/millennium-falcon-75192)  
+- [Coupler on DigiKey](https://www.digikey.com/en/products/detail/adafruit-industries-llc/1176/5356856?)  
 
 TODO: add link for coupler and shaft
 
