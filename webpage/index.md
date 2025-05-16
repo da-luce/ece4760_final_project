@@ -350,21 +350,18 @@ Button zero_gate = {
 };
 ```
 
-All the buttons are then debounced in their own thread:
+All the buttons are then debounced at the top of the loop in the VGA thread:
 
 ```c
-static PT_THREAD (protothread_button(struct pt *pt))
-{
-    PT_BEGIN(pt) ;
-    while(1) {
-        PT_SEM_SIGNAL(pt, &vga_semaphore);
-        check_button(&clear_button);
-        check_button(&state_button);
-        check_button(&zero_gate);
-        check_button(&stop_button);
-        PT_YIELD_usec(3000);
-    }
-    PT_END(pt) ;
+while (true) {
+
+    check_button(&clear_button);
+    check_button(&state_button);
+    check_button(&zero_gate);
+    check_button(&stop_button);
+
+    // Drawing logic
+    // ...
 }
 ```
 
