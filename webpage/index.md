@@ -155,9 +155,6 @@ Graphics for displaying the state of the ToF sensor were implemented via a VGA. 
 
 In addition to these states, the VGA could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA communicated various measurements extracted from the sensor. The VGA display showed real-time 2D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and concentric circles were utilized to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
 
-- FSM / some description of different screens and modes
-
-
 #### Converting Polar Measurements to Screen Positions
 
 As the stepper motor rotates the ToF sensor, it provides the current angle of the sensor, while the ToF sensor measures the distance to the nearest object in that direction. Together, these form polar coordinates (`dist`, `angle`) that need to be converted into 2D coordinates (`x_pixel`, `y_pixel`) to show on the VGA display. The x position is calculated from the cosine of the angle, and the y from the sine. Because screen coordinates define increasing y as downward, we subtract the vertical offset to preserve the expected spatial orientation. This (x, y) position represents the detected point in space and is drawn to the screen using a color that reflects its distance.
@@ -230,7 +227,7 @@ void drawImage(short x0, short y0, short width, short height, const unsigned cha
 
 #### Signal Bar
 
-To display the current signal rate in mMCPS, a bar was displayed in the upper left corner of the VGA. The mMCPS, as described previously, represents the signal rate, or number of photons hitting the sensor (@clark_vl53l4cx). To draw the bar, the background of the bar was drawn in black so as to ensure a constant bar size regardless of the current signal measurement. Then, the bar's length was computed based upon the current signal rate such that bar length = (current signal/max allowed signal) * bar width.
+To display the current signal rate in mMCPS, a bar was displayed in the upper left corner of the VGA. The mMCPS, as described previously, represents the signal rate, or number of photons hitting the sensor (@KVAM_2019). To draw the bar, the background of the bar was drawn in black so as to ensure a constant bar size regardless of the current signal measurement. Then, the bar's length was computed based upon the current signal rate such that bar length = (current signal/max allowed signal) * bar width.
 
 After experimenting with the graphical display, it was determined that the VGA drawing was too noisy due to instability in signal rate measurement. To remedy this issue, the current signal was updated once every 25 UART data transfers and assigned to the running sum of the past 25 extracted signal rate measurements. This allowed for less noisy (filtered) mMCPS measurements.
 
