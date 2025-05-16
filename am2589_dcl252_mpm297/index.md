@@ -103,13 +103,21 @@ These two software components were essential for operating the ToF sensor and st
 
 Additionally, the mechanical structure of the PicoScope was constructed to allow for accuracy, stability, and precision. The stepper motor was connected to a coupler and 8mm shaft - this made up the rotating structure of the ToF sensor allowing for complete 2-D scans. Then, a mount for the ToF sensor was connected to the shaft, and a lego structure housed the system providing extra stability and robustness. Moreover, an optical interrupter was integrated into the mechanical assembly to provide a reference point for the sensor's angle. Before scanning, the sensor was "zeroed" at the optical interrupter, providing an accurate angle reference for ToF distance and signal rate measurements. Below is an image of the mechanical assembly:
 
-INSERT IMAGE HERE - Dalton?
+![Top-down view of optical interrupter](mech1.jpeg)
+
+![Side profile of the optical interrupt mechanism](mech2.jpeg)
+
+![Top-down view of the entire system (cardboard shroud in place to protect against wire entanglement)](mech3.jpeg)
 
 In addition to the above software and hardware components, user-experience was a major component of this project. Three buttons making up a state machine allowed for easy control over the ToF sensor. Most notably, a state button was utilized to control and calibrate the ToF and initiate scanning. Moreover, the optical interrupt functioned as a "button" by being triggered when the ToF moved into the correct position. And, a reset/clear screen button was implemented to reset the ToF measurements and an emergency motor stop button was implemented for safety purposes.
 
 Lastly, VGA graphics were implemented to display the ToF measurements. Concentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sensor were reported in mm while signal rate measurements were report in milli-MegaCounts per Second (measurement of the number of photons returning to the sensor per second). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
 
-INSERT IMAGE HERE - Dalton?
+![Concentric circles indicating distance, no points collected](graphics1.png)
+
+![Pausing the LiDAR at a fixed angle, we demonstrate the color map for distance](graphics2.jpeg)
+
+![Representation of what actual data looks like](graphics3.png)
 
 Thus, the project comprised several hardware and software components that were logically integrated into a highly functional Time-of-Flight sensor.
 
@@ -153,10 +161,11 @@ char color = map_to_color(dist, 0, max_mm);
 drawPixel(x_pixel, y_pixel, color);
 ```
 
-
 #### Images
 
 ![A happy man displayed as a test homescreen](man.png)
+
+![Our final homescreen, with some topographical terrain](homescreen.png)
 
 To display custom images on the VGA output, we created a Python toolchain to convert regular images into a C array that matches the 16-color VGA palette. This approach allowed us to prepare image assets offline and store them in a format that could be directly used with our graphics rendering code.
 Image Conversion Workflow
