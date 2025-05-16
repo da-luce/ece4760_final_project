@@ -57,13 +57,15 @@ The purpose of this project was to construct a 2-Dimensional LiDAR capable of sc
 
 Generally, Time-of-Flight sensors can measure surrounding terrain by emitting photons and sensing the duration of time before photons return back to the sensor. Note that from this point forward Time-of-Flight will be abbreviated with the acronym ToF.
 
-The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating the use of infrared radiation. Infrared radiation is often used for this application because it can reduce interference from external light sources. In fact, infrared light is less affected by Rayleigh scattering, a scientific phenomenon where atmospheric particles cause light to scatter. The intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4 [@hyperphysics_bluesky]:
+The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating light in the infrared spectrum. Infrared radiation is a good option for Time-of-Flight sensors because it helps mitigate the unwanted effects of Rayleigh scattering, a scientific phenomenon where atmospheric particles cause light to scatter. To see why, the intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4 [@hyperphysics_bluesky]:
 
 $$
 \text{Intensity of Scattered Light} \propto \frac{1}{\lambda^4}
 $$
 
-Thus, infrared light—specifically at a wavelength of 940 nm-is an appropriate choice for a ToF sensor. One can estimate the distance to an object using a simplified formula based on the speed of light:
+Thus, infrared light—specifically at a wavelength of 940 nm-is an appropriate choice for a ToF sensor as it produces less scattering intensity compared to other forms of light. Because infrared radiation is less likely to scatter, reflected photons have a higher chance of returning back to the sensor and producing accurate measurements.
+
+One can estimate the distance to an object using a simplified formula based on the speed of light:
 
 $$
 \text{Distance} \approx \frac{t \cdot c}{2}
@@ -71,7 +73,10 @@ $$
 
 where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light.
 
-Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor's ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference. Interestingly, the properties of the objects which reflect the emitted IR radiation can also have a significant impact on the quality of ToF measurements. Shiny objects, such as metals, are great reflectors of IR radiation. These objects may be easier to detect utilizing the ToF sensor. Objects that absorb IR radiation, such as objects with dark surfaces, may be much more difficult to detect with the sensor.
+Additional environmental factors aside from Rayleigh scattering can interefere with the ToF's measurements. Ambient light sources, for example, can emit photons that would interfere with the sensor's ability to detect its own emitted photons that have reflected off objects. And, the properties of the objects being scanned can impact the quality of the sensor's readings. Shiny objects, including metal, are good reflectors of IR radiation and could potentially provide more accurate distance measurements compared to darker objects, which usually absorb infrared radiation. 
+
+During lab, objects farther away from the sensor provided less accurate distance measurements, illustrating the potentially deleterious effects of Rayleigh scattering and ambient light sources - if an object is farther away from the sensor, environmental obstacles have more opportunity to interfere with the sensor's measurements.
+
 
 Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light (Clark). This type of photodiode is exceedingly useful for detecting reflected photons. The diode is reverse-biased beyond its breakdown voltage, causing the presence of a strong electric field. A photon entering the depletion region of the diode can thus incite a current (avalanche) [@cova_apd].  This avalanche effect/current helps the sensor to accurately detect the arrival of its emitted photons [@cova_apd]. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche" [@charbon_spad]:
 
