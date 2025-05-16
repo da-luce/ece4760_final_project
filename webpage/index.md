@@ -8,7 +8,8 @@ link-citations: true
 
 ## Project Introduction
 
-The project involves building a 2D lidar system using a
+We have constructed a Time-of-Flight system capable of scanning and extracting measurememts from surrounding terrain in 2 dimensions. A Time-of-Flight sensor was mounted on a mechanical structure that rotated 360 degrees clockwise and counter-clockwise to allow for complete 2-dimensional scans. Various design choices, including hte integration of an optical interrupter, were made to enhance the user experience and provide precise measurements. An Arduino DUE extracted distance and signal rate measurements from the sensor and communicated them to the RP2040 via UART. And measurmeents were graphically displayed on a VGA in real-time to visualize the surrounding terrain scanned by the sensor.
+
 [Raspberry Pi Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf),
 [Adafruit VL53L4CX ToF sensor](https://www.adafruit.com/product/5425), and
 [28BYJ-48 stepper motor](https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf) with a
@@ -32,7 +33,6 @@ TODO: check these costs
 | Linear Rail Shaft Guide    | Acts as mounting point for ToF sensor onto the shaft | $1.90 |
 | LEGOs                      | Base structure for prototyping the LiDAR system      | $5    |
 | Coupler                    | Connects the stepper motor shaft to the 8mm shaft    | $6.99 |
-| Shaft (constructed in lab) | Pieces together stepper motor, coupler, and mount    | ~$2   |
 | **Total**                  |                                                      | ~$50  |
 
 ### Links
@@ -224,7 +224,6 @@ To display the current signal rate in mMCPS, a bar was displayed in the upper le
 After experimenting with the graphical display, it was determined that the VGA drawing was too noisy due to instability in signal rate measurement. To remedy this issue, the current signal was updated once every 25 UART data transfers and assigned to the running sum of the past 25 extracted signal rate measurements. This allowed for less noisy (filtered) mMCPS measurements.
 
 Interestingly, the correlation between signal strength and quality of distance measurement was graphically displayed - higher quality/more accurate measurements corresponded with larger values in the signal bar.
-
 
 #### Polar Grid
 
