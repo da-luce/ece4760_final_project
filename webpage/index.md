@@ -8,8 +8,6 @@ link-citations: true
 
 ## Project Introduction
 
-![Test Image](test.png)
-
 The project involves building a 2D lidar system using a
 [Raspberry Pi Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf),
 [Adafruit VL53L4CX ToF sensor](https://www.adafruit.com/product/5425), and
