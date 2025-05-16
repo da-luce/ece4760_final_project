@@ -55,14 +55,11 @@ body {
     }
 }
 
-
-
-
-  
-  
-body img {
+body img,
+body video {
     width: 100%; /* Makes the image scale to the width of the container */
     height: auto; /* Maintains the aspect ratio */
+    border-radius: 5px;
 }
 
 a, a:visited {
