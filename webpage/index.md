@@ -8,7 +8,7 @@ link-citations: true
 
 ## Project Introduction
 
-We have constructed a Time-of-Flight system, *PicoScope* capable of scanning and extracting measurememts from surrounding terrain in 2 dimensions. A Time-of-Flight sensor was mounted on a mechanical structure that rotated 360 degrees clockwise and counter-clockwise to allow for complete 2-dimensional scans. Various design choices, including the integration of an optical interrupter, were made to enhance the user experience and provide precise measurements. An Arduino DUE extracted distance and signal rate measurements from the sensor and communicated them to the RP2040 via UART. And measurmeents were graphically displayed on a VGA in real-time to visualize the surrounding terrain scanned by the sensor. Three buttons - a state button, clear/reset button, and motor stop button - were integrated into the design to allow for user control over the scanning process. Testing revealed that the system provided accurate, precise, and stable distance measurements, demonstrating its potential suitability for a wide range of scientiifc applications.
+We have constructed a Time-of-Flight system, *PicoScope* capable of scanning and extracting measurements from surrounding terrain in 2 dimensions. A Time-of-Flight sensor was mounted on a mechanical structure that rotated 360 degrees clockwise and counter-clockwise to allow for complete 2-dimensional scans. Various design choices, including the integration of an optical interrupter, were made to enhance the user experience and provide precise measurements. An Arduino DUE extracted distance and signal rate measurements from the sensor and communicated them to the RP2040 via UART. And measurmeents were graphically displayed on a VGA in real-time to visualize the surrounding terrain scanned by the sensor. Three buttons - a state button, clear/reset button, and motor stop button - were integrated into the design to allow for user control over the scanning process. Testing revealed that the system provided accurate, precise, and stable distance measurements, demonstrating its potential suitability for a wide range of scientiifc applications.
 
 [Raspberry Pi Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf),
 [Adafruit VL53L4CX ToF sensor](https://www.adafruit.com/product/5425), and
@@ -63,7 +63,7 @@ $$
 \text{Intensity of Scattered Light} \propto \frac{1}{\lambda^4}
 $$
 
-Thus, infrared light—specifically at a wavelength of 940 nm-is an appropriate choice for a ToF sensor as it produces less scattering intensity compared to other forms of light. Because infrared radiation is less likely to scatter, reflected photons have a higher chance of returning back to the sensor and producing accurate measurements.
+Thus, infrared light — specifically at a wavelength of 940 nm - is an appropriate choice for a ToF sensor as it produces less scattering intensity compared to other forms of light. Because infrared radiation is less likely to scatter, reflected photons have a higher chance of returning back to the sensor and producing accurate measurements.
 
 One can estimate the distance to an object using a simplified formula based on the speed of light:
 
@@ -77,14 +77,13 @@ Additional environmental factors aside from Rayleigh scattering can interefere w
 
 During lab, objects farther away from the sensor provided less accurate distance measurements, illustrating the potentially deleterious effects of Rayleigh scattering and ambient light sources - if an object is farther away from the sensor, environmental obstacles have more opportunity to interfere with the sensor's measurements.
 
-
 Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light (@clark_vl53l4cx). This type of photodiode is exceedingly useful for detecting reflected photons. The diode is reverse-biased beyond its breakdown voltage, causing the presence of a strong electric field. A photon entering the depletion region of the diode can thus incite a current (avalanche) [@cova_apd].  This avalanche effect/current helps the sensor to accurately detect the arrival of its emitted photons [@cova_apd]. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche" [@charbon_spad]:
 
 ![Diagram of SPAD](SPAD_Diagram.png)
 
-The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract measurements of surrounding terrain.
+The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract measurements of surrounding terrain (@clark_vl53l4cx).
 
-Thus, despite some challenges, a number of relevant physical factors highlight the suitability of a ToF sensor structure for scanning terrain in scientific applications, providing inspiration and a rationale for the PicoScope Project.
+Thus, despite challenges, a number of relevant physical factors highlight how ToF sensors can effectively scan terrain in scientific applications, providing inspiration and a rationale for the PicoScope Project.
 
 ### Logical Structure
 
@@ -92,9 +91,9 @@ The logical structure of this project consisted of the development of a few key 
 
 Initially software logic for interfacing with the stepper motor via PIO state machines and with the ToF sensor were developed. Using the list of MACROs and functions provided in ECE4760's motor_library.h file, the direction and pace of the motor was continuously updated via an interrupt service routine. Because the interrupt handler was called after the stepper motor executed a command, it was also a suitable function for processing the distance measurements produced by the ToF sensor.
 
-Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting open-source Arduino libraries for the sensor. These libraries allowed for distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040 – ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. After further analysis of the library, it was determined that the call-stack of the relevant Arduino functions for our ToF sensor project was too complex. A superior solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
+Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting Arduino libraries for the sensor. These libraries allowed for the extraction of distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040. Ideally, only the I2C Read and Write functions in the library would have had to be modified to allow for compatibility of all other Arduino functions with the Pico. However, it was determined that the call-stack of the relevant Arduino functions were too complex and the process of modifying the relevant functions would be too laborious. A superior solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
 
-These two software components formed a strong foundation for the PicoScope. The pin-out diagram of the sensor below illustrates the hardware interface (SCL and SDA) that allows for the I2C communication with the Arduino DUE [@charbon_spad]:
+These two software components formed a strong base for the PicoScope. The pin-out diagram of the sensor below illustrates the hardware interface (SCL and SDA) that allows for the I2C communication with the Arduino DUE [@charbon_spad]:
 
 ![Time-of-Flight (ToF) Sensor](tof_sensor.png)
 
@@ -108,9 +107,9 @@ Moreover, an optical interrupter was integrated into the mechanical design to ac
 
 ![Top-down view of the entire system (cardboard shroud in place to protect against wire entanglement)](mech3.jpeg)
 
-In addition to the above software and hardware components, user-experience was a major component of this project. Three buttons making up a state machine allowed for easy control over the ToF sensor. Most notably, a state button was utilized to control and calibrate the ToF and initiate scanning. Moreover, the optical interrupt functioned as a "button"; it was triggered when the ToF moved into the correct position. A reset/clear screen button was implemented to reset the ToF measurements and an emergency motor stop button was implemented for safety purposes.
+In addition to the above software and hardware components, user-experience was a major component of this project. Three buttons allowed for easy user control over the ToF sensor. Most notably, a state button was utilized to control and calibrate the ToF and initiate scanning. Moreover, the optical interrupter functioned as a "button"; it was triggered when the ToF moved into the correct position. A reset/clear screen button was implemented to reset the ToF measurements, and an emergency motor stop button was implemented for safety purposes (e.g., to stop the motor on command).
 
-Lastly, VGA graphics were implemented to display the ToF measurements. Concentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sensor were reported in mm while signal rate, which measures the intensity of the signal received by the sensor from its reflected photons, was reported in milli-Mega Counts per Second (@KVAM_2019). Each photon received by the sensor is a count for this measurement (@KVAM_2019). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
+Lastly, VGA graphics were implemented to display the ToF measurements. Concentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sensor were reported in mm while signal rate, which measures the intensity of the signal received by the sensor from its reflected photons, was reported in milli-Mega Counts per Second (@KVAM_2019). Each photon received by the sensor is a count for this measurement (@KVAM_2019). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate. Below are images displaying the graphical VGA displays of our ToF setup:
 
 ![Concentric circles indicating distance, no points collected](graphics1.png)
 
@@ -118,13 +117,13 @@ Lastly, VGA graphics were implemented to display the ToF measurements. Concentri
 
 ![Representation of what actual data looks like](graphics3.png)
 
-Thus, the project consisted of multiple hardware and software components that were logically integrated into a precise 2D LiDAR system.
+Thus, the project consisted of multiple hardware and software components. All components were combined to form a high-functioning ToF system.
 
 ### Hardware/Software Tradeoffs
 
-There were a few hardware/software tradeoffs present in the project. One initial difficulty included providing compatibility between the ToF sensor's software library and the RP2040. The ToF sensor's software library was designed only for Arduino; as such, all relevant functions would need to be modified to allow for use with the RP2040. At first it seemed that modifyig the I2C Read and Write functions would adapt all functions so that they could be used with the RP2040; however, further investigation of the library indicated that this process would be too difficult. Therefore, instead of attempting to alter the software to provide RP2040 functionality, an Arduino DUE was integrated into the hardware setup. The Arduino DUE extracted measurements from the sensor and communicated them to the RP2040 via UART communication protocol. Thus, the hardware modification eliminated software difficulties caused by the Sensor's software library.
+There were a few hardware/software tradeoffs present in the project. One initial difficulty included providing compatibility between the ToF sensor's software library and the RP2040. The ToF sensor's software library was designed only for Arduino; as such, all relevant functions would need to be modified to allow for use with the RP2040. At first it seemed that modifyig the I2C Read and Write functions would adapt all functions so that they could be used with the RP2040; however, further investigation of the library indicated that this process would be too difficult. Therefore, instead of attempting to alter the software to provide RP2040 functionality, an Arduino DUE was integrated into the hardware setup. The Arduino DUE directly extracted measurements from the sensor and communicated them to the RP2040 via UART communication protocol. Thus, the hardware modification eliminated software difficulties caused by the sensor's software library.
 
-Moreover, button debouncing comprised an additional HW/SW tradeoff for the project. Button debouncing was implemented via software - a state machine for checking button presses was coded in C. However, it is possible to implement the same functionality using hardware components. For example, an RC circuit can be used for button debouncing. The circuit, which consists of resistors, a capacitor, a switch and contacts to power and ground, can help to filter the vibrations and bouncing that can occur during a button press. This hardware would have simplified the code in this project. Alternatively, software logic for button debouncing helped to simplify the hardware set-up, indicating another HW/SW tradeoff [@ganssle_debouncing].
+Moreover, button debouncing comprised an additional HW/SW tradeoff for the project. Button debouncing was implemented via software - a state machine for checking button presses was coded in C. However, it is possible to implement the same functionality using hardware components. For example, an RC circuit can be used for button debouncing. The circuit, which consists of resistors, a capacitor, a switch and contacts to power and ground, can help to filter the vibrations and bouncing that can occur during a button press [@ganssle_debouncing]. This hardware would have simplified the code in this project. Alternatively, software logic for button debouncing helped to simplify the hardware set-up, indicating another HW/SW tradeoff.
 
 ---
 
