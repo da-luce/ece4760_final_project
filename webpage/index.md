@@ -33,7 +33,7 @@ TODO: check these costs
 | Linear Rail Shaft Guide    | Acts as mounting point for ToF sensor onto the shaft | $1.90 |
 | LEGOs                      | Base structure for prototyping the LiDAR system      | $5    |
 | Coupler                    | Connects the stepper motor shaft to the 8mm shaft    | $6.99 |
-| **Total**                  |                                                      | ~$50  |
+| **Total**                  |                                                      | ~$45  |
 
 ### Links
 
