@@ -248,10 +248,10 @@ void add_signal(int32_t new_signal) {
     static float sum = 0.0f;
 // ################### END AI-GENERATED CODE ######################
   
-    sum+=new_signal;
+    sum += new_signal;
     count++;
-    if (count>=25) {
-        current_signal =(int32_t)(sum/25.0f);      
+    if (count >= 25) {
+        current_signal = (int32_t)(sum / 25.0f);      
         count = 0;
         sum = 0.0f;
     }
@@ -548,13 +548,13 @@ static PT_THREAD (protothread_vga(struct pt *pt))
         writeString(screentext);
 
 
-        // Calculate filled bar length based on signal light
+        // Find bar length
         float signal_bar_length = (current_signal * SIGNAL_BAR_WIDTH) / SIGNAL_MAX_MMCPS;
 
         // Clamp the signal_bar_length for graphical display
         if (signal_bar_length > SIGNAL_BAR_WIDTH) signal_bar_length = SIGNAL_BAR_WIDTH;
 
-       // Draw filled bar, maintain constant bar size
+       // Fill bar and maintain constant bar size
         fillRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, SIGNAL_BAR_WIDTH, SIGNAL_BAR_HEIGHT, BLACK);
         fillRect(SIGNAL_BAR_X, SIGNAL_BAR_Y, signal_bar_length, SIGNAL_BAR_HEIGHT, CYAN);
       
