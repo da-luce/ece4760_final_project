@@ -394,9 +394,6 @@ static PT_THREAD (protothread_vga(struct pt *pt))
 
     while (true) {
 
-        // Wait on semaphore
-        // PT_SEM_WAIT(pt, &vga_semaphore);
-
         check_button(&clear_button);
         check_button(&state_button);
         check_button(&zero_gate);
