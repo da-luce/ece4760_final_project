@@ -23,7 +23,7 @@ TODO: check these costs
 <!--Can't use reference style links because --citeproc breaks them... sad-->
 
 | Material                   | Purpose                                              | Cost  |
-| -------------------------- | ---------------------------------------------------- | ----- |
+|:-------------------------- |:---------------------------------------------------- | -----:|
 | Raspberry Pi Pico          | Microcontroller used to control the LiDAR system     | $4    |
 | Adafruit VL53L4CX          | Time-of-Flight sensor for distance measurements      | $16   |
 | 28BYJ-48 Stepper Motor     | Provides rotational motion for LiDAR scanning        | $3    |
@@ -90,7 +90,7 @@ The logical structure of this project consisted of the development of a few key 
 
 Initially software logic for interfacing with the stepper motor via PIO state machines and with the ToF sensor were developed. Using the list of macros and functions provided in ECE4760's `motor_library.h` file, the direction and pace of the motor was continuously updated via an interrupt service routine. Because the interrupt handler was called after the stepper motor executed a command, it was also a suitable function for processing the distance measurements produced by the ToF sensor.
 
-Extraction of ToF sensor measurements on the VL53L4CX was achieved by adapting open-source Arduino libraries for the sensor. These libraries allowed for distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040-–-ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. After further analysis of the library, it was determined that the call-stack of the relevant Arduino functions for our ToF sensor project was too complex. A superior solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
+Extraction of ToF sensor measurements on the VL53L4CX was achieved by adapting open-source Arduino libraries for the sensor. These libraries allowed for distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040---ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. After further analysis of the library, it was determined that the call-stack of the relevant Arduino functions for our ToF sensor project was too complex. A superior solution included the integration of an Arduino DUE into our hardware setup. Measurements from the ToF sensor were ultimately extracted by the Arduino DUE and transported to the RP2040 via UART communication protocol.
 
 These two software components formed a strong foundation for PicoScope. The pin-out diagram of the sensor below illustrates the hardware interface (SCL and SDA) that allows for the I2C communication with the Arduino DUE [@charbon_spad]:
 
@@ -108,7 +108,7 @@ Moreover, an optical interrupter was integrated into the mechanical design to ac
 
 In addition to the above software and hardware components, user-experience was a major component of this project. Three buttons allowed for easy user control over the ToF sensor. Most notably, a state button was utilized to control and calibrate the ToF and initiate scanning. Moreover, the optical interrupter functioned as a "button"; it was triggered when the ToF moved into the correct position. A reset/clear screen button was implemented to reset the ToF measurements, and an emergency motor stop button was implemented for safety purposes (e.g., to stop the motor on command).
 
-Lastly, VGA graphics were implemented to display the ToF measurements. Concentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sensor were reported in mm while signal rate, which measures the intensity of the signal received by the sensor from its reflected photons, was reported in milli-Mega Counts per Second [@KVAM_2019]. Each photon received by the sensor is a count for this measurement [@KVAM_2019]. Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
+Lastly, VGA graphics were implemented to display the ToF measurements. Concentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sensor were reported in mm while signal rate, which measures the intensity of the signal received by the sensor from its reflected photons, was reported in milli-Mega Counts per Second [@KVAM_2019]. Each photon received by the sensor is a count for this measurement [@KVAM_2019]. Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate. Below are images showing the VGA display of our ToF setup:
 
 ![Concentric circles indicating distance, no points collected](graphics1.png)
 
@@ -227,7 +227,7 @@ void drawImage(short x0, short y0, short width, short height, const unsigned cha
 
 #### Signal Bar
 
-To display the current signal rate in mMCPS, a bar was displayed in the upper left corner of the VGA. The mMCPS, as described previously, represents the signal rate, or number of photons hitting the sensor [@KVAM_2019]. To draw the bar, the background of the bar was drawn in black so as to ensure a constant bar size regardless of the current signal measurement. Then, the bar's length was computed based upon the current signal rate such that bar length = (current signal/max allowed signal) * bar width.
+To display the current signal rate in mMCPS, a bar was displayed in the upper left corner of the VGA. The mMCPS, as described previously, represents the signal rate, or number of photons hitting the sensor [@KVAM_2019]. To draw the bar, the background of the bar was drawn in black so as to ensure a constant bar size regardless of the current signal measurement. Then, the bar's length was computed based upon the current signal rate such that `bar_length = (current_signal/max_allowed_signal) * bar_width`.
 
 After experimenting with the graphical display, it was determined that the VGA drawing was too noisy due to instability in signal rate measurement. To remedy this issue, the current signal was updated once every 25 UART data transfers and assigned to the running sum of the past 25 extracted signal rate measurements. This allowed for less noisy (filtered) mMCPS measurements.
 
@@ -264,7 +264,7 @@ By storing the result of `current_angle` in a temporary variable, we guaranteed 
 
 ### Mechanical Assembly
 
-One of the most challenging parts of this lab was the actual mechanical assembly. This biggest challenge is that we have a rotating structure--and wires and twisting do not generally mix very well. The most obvious solution would be to use a slip ring connector, but these can be rather pricey ($25-40!).
+One of the most challenging parts of this lab was the actual mechanical assembly. This biggest challenge is that we have a rotating structure---and wires and twisting do not generally mix very well. The most obvious solution would be to use a slip ring connector, but these can be rather pricey ($25-40!).
 
 Instead, we designed our LiDAR to only rotate 360° before reversing direction. In this fashion, we avoided overly twisting the wires, but still maintained a full 360° FOV. To build the device, we fixed a small stepper motor to a base built with LEGOs. We choose LEGOs as they were accessible, flexible, and easy to work with. Then, we fixed a four inch 8 mm shaft to the motor using a small coupler. From there, we fixed a linear mount to the shaft, and fixed the ToF sensor onto that. In order to wire the LiDAR to the Arduino Due, we used a ribbon cable with jumper wires soldered onto either end. This choice in wire was critical, as the normal solid core wires were far too stiff to permit the motion we required.
 
@@ -410,12 +410,12 @@ When the wiring was free and unobstructed, the stepper motor avoided over-torqui
 
 ### VL53L4CX Accuracy
 
-| Actual Object Distance (mm) | Reported Distance  |
-| --------------------------- | ------------------------------------- |
-| 0                           | ~0                                    |
-| 50                          | 49                                    |
-| 500                         | 501                                   |
-| 1000                        | 1002                                  |
+| Actual Object Distance (mm) | Reported Distance (mm)  |
+|:---------------------------:|:-----------------------:|
+| 0                           | ~0                      |
+| 50                          | 49                      |
+| 500                         | 501                     |
+| 1000                        | 1002                    |
 
 The ToF sensor demonstrated excellent precision and repeatability. The small discrepancies seen in the distance measurements (e.g., 49 mm vs. 50 mm) were primarily due to limitations in our testing setup, not the sensor itself. For reference, we used a meter stick and placed a piece of wood above it to align target distances. This method introduced small alignment and parallax errors, especially at longer distances. Despite this, the reported measurements were remarkably close to the actual values, confirming the sensor's accuracy. With a more controlled calibration environment (e.g., laser-aligned setup or fixed mounts), we would have observed even greater accuracy.
 
@@ -467,4 +467,4 @@ The group does not approve the video for inclusion on the course YouTube channel
 
 © 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
 
-# References
+## References
