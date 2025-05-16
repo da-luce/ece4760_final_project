@@ -190,7 +190,8 @@ char map_to_color_index(int value, int min_val, int max_val) {
 ![Our final homescreen, with some topographical terrain](homescreen.png)
 
 To display custom images on the VGA output, we created a Python toolchain to convert regular images into a C array that matches the 16-color VGA palette. This approach allowed us to prepare image assets offline and store them in a format that could be directly used with our graphics rendering code.
-Image Conversion Workflow
+
+##### Image Conversion Workflow
 
 We used Python with the [`Pillow`](https://pypi.org/project/pillow/) and [`numpy`](https://numpy.org/) libraries to process the image:
 
