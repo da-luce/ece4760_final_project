@@ -107,7 +107,7 @@ Lastly, VGA graphics were implemented to display the ToF measurements. Concentri
 
 ![Concentric circles indicating distance, no points collected](graphics1.png)
 
-![Pausing the LiDAR at a fixed angle, we demonstrate the color map for distance](graphics2.jgeg)
+![Pausing the LiDAR at a fixed angle, we demonstrate the color map for distance](graphics2.jpeg)
 
 ![Representation of what actual data looks like](graphics3.png)
 
