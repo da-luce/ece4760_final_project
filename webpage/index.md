@@ -45,7 +45,7 @@ TODO: check these costs
 - [8mm Shaft on McMaster-Carr](https://www.mcmaster.com/products/shafts/diameter~8-mm/shafts-3~/)  
 - [Linear Rail Shaft Guide on Amazon](https://www.amazon.com/Aluminum-Linear-Support-Motion-Diameter/dp/B08JTPG54L?crid=VE5NLH316WIC&dib=eyJ2IjoiMSJ9.8u7yLVsXJBCCXM-_QTPta-R2lmSJKFH-DtzfCBahL9cnmPkF2szSko9g0C1rEBCG6bWblfNmAMwnvw4zKdipPjAAkPqK9mF_uiAwiPyp-3CHeSUozXEmkEz0_U7f2gGTDtdbu5OqW56t3uetVcu8oFVF8yaxu7_8Y5Cf46Fdh_mlrRXYPnfe326K4AS7tn2qRFR2RoI1jNnCYq0fCcVEPHziCsNV_U2Tc7l1DSdM3b0.j-Z2p5phNmA9W1UhB2zbppoalZmnu23CJ87fPc1kSMs&dib_tag=se&keywords=8mm+linear+mount&qid=1747017395&sprefix=8mm+linear+moun%2Caps%2C85&sr=8-3)  
 - [LEGOs Millennium Falcon](https://www.lego.com/en-us/product/millennium-falcon-75192)  
-- [Coupler on DigiKey](https://www.digikey.com/en/products/detail/adafruit-industries-llc/1176/5356856?)  
+- [Coupler on Amazon](https://www.amazon.com/dp/B09954NX1D?ref=ppx_yo2ov_dt_b_fed_asin_title)  
 
 ---
 
