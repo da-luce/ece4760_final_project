@@ -140,13 +140,35 @@ Discuss tricky parts, hardware, and software choices.
 Graphics for displaying the state of the ToF sensor were implemented via a VGA. The program consisted of four screen states - one for displaying an introduction to the user, one for prompting the user to calibrate the sensor, one for prompting the user to initiate ToF scanning, and a final screen for displaying the ToF sensor's realtime measurements. In addition to these states, the VGA could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA communicated various measurements extracted from the sensor. The VGA displayed real-time 2-D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and concentric circles were utilized to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
 
 - FSM / some description of different screens and modes
-- drawing points in polar form, a clear representation for angle and distance
+
+
+#### Converting Polar Measurements to Screen Positions
+
+As the stepper motor rotates the ToF sensor, it provides the current angle of the sensor, while the ToF sensor measures the distance to the nearest object in that direction. Together, these form polar coordinates (`dist`, `angle`) that need to be converted into 2D coordinates (`x_pixel`, `y_pixel`) to show on the VGA display. The x position is calculated from the cosine of the angle, and the y from the sine. Because screen coordinates define increasing y as downward, we subtract the vertical offset to preserve the expected spatial orientation. This (x, y) position represents the detected point in space and is drawn to the screen using a color that reflects its distance.
 
 ```c
 int x_pixel = CENTER_X + (int) (dist * PX_PER_MM * cos(angle));
 int y_pixel = CENTER_Y - (int) (dist * PX_PER_MM * sin(angle));
 char color = map_to_color(dist, 0, max_mm);
 drawPixel(x_pixel, y_pixel, color);
+```
+
+#### Color Map
+
+To make the polar grid visually convey distance more intuitively, we designed it so that points are colored along a rainbow gradient, starting from red at the closest distances and transitioning through shades of orange, yellow, green, blue, and finally pink at the farthest distances. This color progression allows viewers to quickly interpret relative distance based on color alone. Although `vga16_graphics.h` provides a predefined enum `colors`, its ordering is not aligned with a rainbow ordering, placing greens and blues before reds and yellows. Consequently, if we simply looped through the enum values in order, the resulting colors would jump around; this motivated the creation of `rainbow_colors`, a custom array of 14 colors (excluding `WHITE` and `BLACK` from the 16 VGA colors) arranged to represent a rainbow gradient. The function `map_to_color` then maps a value (distance) to the appropriate color. It linearly scales the input value between a min_val and max_val (in our case, `0` and `max_mm=3000`) to an index from 0 to 13, which selects the corresponding color from the array. This approach ensures smooth color transitions across the grid and makes it easy to map different data ranges by adjusting `min_val` and `max_val` without modifying `rainbow_colors`.
+
+```c
+const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW,
+  GREEN, MED_GREEN, DARK_GREEN,
+  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE,
+  MAGENTA, PINK, LIGHT_PINK} ;
+
+char map_to_color_index(int value, int min_val, int max_val) {
+    if (value <= min_val) return 0;
+    if (value >= max_val) return 13;
+
+    return rainbow_colors[(value - min_val) * 13 / (max_val - min_val)];
+}
 ```
 
 #### Images
@@ -227,24 +249,6 @@ drawTrianglePointerOutline((int) angle_deg, max_mm * PX_PER_MM, WHITE);
 ```
 
 By storing the result of `current_angle` in a temporary variable, we guaranteed that both calls used the exact same angle, eliminating flicker and improving rendering stability.
-
-#### Color Map
-
-To make the polar grid visually convey distance more intuitively, we designed it so that points are colored along a rainbow gradient, starting from red at the closest distances and transitioning through shades of orange, yellow, green, blue, and finally pink at the farthest distances. This color progression allows viewers to quickly interpret relative distance based on color alone. Although `vga16_graphics.h` provides a predefined enum `colors`, its ordering is not aligned with a rainbow ordering, placing greens and blues before reds and yellows. Consequently, if we simply looped through the enum values in order, the resulting colors would jump around; this motivated the creation of `rainbow_colors`, a custom array of 14 colors (excluding `WHITE` and `BLACK` from the 16 VGA colors) arranged to represent a rainbow gradient. The function `map_to_color` then maps a value (distance) to the appropriate color. It linearly scales the input value between a min_val and max_val (in our case, `0` and `max_mm=3000`) to an index from 0 to 13, which selects the corresponding color from the array. This approach ensures smooth color transitions across the grid and makes it easy to map different data ranges by adjusting `min_val` and `max_val` without modifying `rainbow_colors`.
-
-```c
-const char rainbow_colors[14] = {RED, DARK_ORANGE, ORANGE, YELLOW,
-  GREEN, MED_GREEN, DARK_GREEN,
-  CYAN, LIGHT_BLUE, BLUE, DARK_BLUE,
-  MAGENTA, PINK, LIGHT_PINK} ;
-
-char map_to_color_index(int value, int min_val, int max_val) {
-    if (value <= min_val) return 0;
-    if (value >= max_val) return 13;
-
-    return rainbow_colors[(value - min_val) * 13 / (max_val - min_val)];
-}
-```
 
 ### Mechanical Assembly
 
