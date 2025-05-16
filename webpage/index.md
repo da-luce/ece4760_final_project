@@ -142,7 +142,20 @@ Discuss tricky parts, hardware, and software choices.
 
 ### Graphics
 
-Graphics for displaying the state of the ToF sensor were implemented via a VGA. The program consisted of four screen states - one for displaying an introduction to the user, one for prompting the user to calibrate the sensor, one for prompting the user to initiate ToF scanning, and a final screen for displaying the ToF sensor's realtime measurements. In addition to these states, the VGA could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA communicated various measurements extracted from the sensor. The VGA displayed real-time 2-D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and concentric circles were utilized to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
+Graphics for displaying the state of the ToF sensor were implemented via a VGA. The program consisted of three screen states:
+
+1. a home screen for displaying an introduction to the user
+
+2. a prompt screen asking the user to push a button, initiating ToF scanning
+
+3. a scan screen for displaying the ToF sensor's realtime measurements
+
+| Home Screen                     | Prompt Screen                       | Scan Screen                     |
+|---------------------------------|-------------------------------------|---------------------------------|
+| ![Home Screen](home_screen.png) | ![Prompt Screen](prompt_screen.jpg) | ![Scan Screen](scan_screen.png) |
+
+
+In addition to these states, the VGA could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA communicated various measurements extracted from the sensor. The VGA display showed real-time 2D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and concentric circles were utilized to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
 
 - FSM / some description of different screens and modes
 
