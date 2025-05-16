@@ -19,4 +19,5 @@ pandoc index.md -o index.html \
     --mathjax \
     --toc \
     --highlight-style=zenburn \
-    --lua-filter=highlight-todo.lua
+    --lua-filter=highlight-todo.lua \
+    --citeproc

@@ -2,6 +2,8 @@
 title: "[ECE 4760](https://ece4760.github.io/) SP25 Final Project: [PicoScope](index.html)"
 subtitle: "Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589)"
 toc-title: "Table of Contents"
+bibliography: references.bib
+link-citations: true
 ---
 
 ## Project Introduction
@@ -30,7 +32,7 @@ TODO: check these costs
 | [Linear Rail Shaft Guide][mount]   | Acts as mounting point for ToF sensor onto the shaft | $1.90 |
 | [LEGOs][lego]                      | Base structure for prototyping the LiDAR system      | $5    |
 | [Coupler][coupler]                 | Connects the stepper motor shaft to the 8mm shaft    | $6.99 |
-| Shaft (constructed in lab)         | Pieces together stepper motor, coupler, and mount    | ~$2   |                             
+| Shaft (constructed in lab)         | Pieces together stepper motor, coupler, and mount    | ~$2   |
 | **Total**                          |                                                      | ~$50  |
 
 [pico]: https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf
@@ -55,7 +57,7 @@ The purpose of this project was to construct a 2-Dimensional LiDAR capable of sc
 
 Generally, Time-of-Flight sensors can measure surrounding terrain by emitting photons and sensing the duration of time before photons return back to the sensor. Note that from this point forward Time-of-Flight will be abbreviated with the acronym ToF.
 
-The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating the use of infrared radiation. Infrared radiation is often used for such applications as it is “invisible” and can reduce interference from external light sources. In fact, infrared light is less susceptible to Rayleigh scattering, a well-known phenomenon where small atmospheric particles cause light to scatter. The intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4 (“Blue Sky”):
+The ToF sensor utilized in the lab employed a wavelength of 940nm, indicating the use of infrared radiation. Infrared radiation is often used for such applications as it is “invisible” and can reduce interference from external light sources. In fact, infrared light is less susceptible to Rayleigh scattering, a well-known phenomenon where small atmospheric particles cause light to scatter. The intensity of Rayleigh scattering is inversely proportional to the wavelength of the scattered light raised to the power of 4 [@hyperphysics_bluesky]:
 
 $$
 \text{Intensity of Scattered Light} \propto \frac{1}{\lambda^4}
@@ -67,11 +69,11 @@ $$
 \text{Distance} \approx \frac{t \cdot c}{2}
 $$
 
-where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light. 
+where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light.
 
 Of course, environmental factors can interfere with ToF measurements - aside from light scattering, ambient light sources can emit additional photons that can often interfere with the sensor’s ability to detect surrounding objects. This may explain the phenomenon observed where weaker signals were derived from objects farther away from the sensor. In other words, farther objects increase the chances of environmental interference. Interestingly, the properties of the objects which reflect the emitted IR radiation can also have a significant impact on the quality of ToF measurements. Shiny surfaces, including metals and glass, are often great reflectors of IR radiation. These objects may be easier to detect utilizing the ToF sensor compared to objects that absorb IR radiation, such as objects with dark surfaces.
 
-Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light. This type of photodiode is exceedingly useful for detecting photons. When a photon enters the depletion region of the diode, a photogenerated carrier is created. And the strong electric field caused by the reverse-biased diode ensures that the carrier leads to an avalanche of additional carriers via a process called impact ionization - photogenerated carriers get accelerated by the electric field and collide with other bounded carriers, freeing them and creating an avalanche effect (Cova et al.).  This avalanche effect allows for amplification of the signal caused by the reflected photon. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche" (Charbon):
+Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light. This type of photodiode is exceedingly useful for detecting photons. When a photon enters the depletion region of the diode, a photogenerated carrier is created. And the strong electric field caused by the reverse-biased diode ensures that the carrier leads to an avalanche of additional carriers via a process called impact ionization - photogenerated carriers get accelerated by the electric field and collide with other bounded carriers, freeing them and creating an avalanche effect [@cova_apd].  This avalanche effect allows for amplification of the signal caused by the reflected photon. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche" [@charbon_spad] :
 
 <p align="center">
   <a href="https://www.sto.nato.int/publications/STO%20Meeting%20Proceedings/STO-MP-IST-SET-198/MP-IST-SET-198-C1-03.pdf">
@@ -103,19 +105,19 @@ Additionally, the mechanical structure of the PicoScope was constructed to allow
 
 INSERT IMAGE HERE - Dalton?
 
-In addition to the above software and hardware components, user-experience was a major component of this project. Three buttons making up a state machine allowed for easy control over the ToF sensor. Most notably, a state button was utilized to control and calibrate the ToF and intiiate scanning. Moreover, the optical iterrupter functioned as a "button" by being triggered when the ToF moved into the correct position. And, a reset/clear screen button was implemented to reset the ToF measurements and an emergency motor stop button was implemented for safety purposes. 
+In addition to the above software and hardware components, user-experience was a major component of this project. Three buttons making up a state machine allowed for easy control over the ToF sensor. Most notably, a state button was utilized to control and calibrate the ToF and initiate scanning. Moreover, the optical interrupt functioned as a "button" by being triggered when the ToF moved into the correct position. And, a reset/clear screen button was implemented to reset the ToF measurements and an emergency motor stop button was implemented for safety purposes.
 
-Lastly, VGA graphics were implemented to display the ToF measurements. Cocentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sesnsor were reported in mm while signal rate measurements were report in milli-MegaCounts per Second (measurement of the number of photons returning to the sesnor per second). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
+Lastly, VGA graphics were implemented to display the ToF measurements. Concentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sensor were reported in mm while signal rate measurements were report in milli-MegaCounts per Second (measurement of the number of photons returning to the sensor per second). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
 
 INSERT IMAGE HERE - Dalton?
 
-Thus, the project comprised several hardware and sfotware components that were logically integrated into a highly functional Time-of-Flight sensor.
+Thus, the project comprised several hardware and software components that were logically integrated into a highly functional Time-of-Flight sensor.
 
 ### Hardware/Software Tradeoffs
 
-The project involved several hardware/software tradeoffs. One initial difficulty, as mentioned previously, was ensuring compatibility between the ToF sensor’s software library and the RP2040. Because the sensor’s library was designed for Arduino, its functions were not usable by the Pico.  Initially, it seemed that modifying the basic I2C read and write functions of the sensor would adapt the higher-level functions for RP2040 compatibility. However, further analysis indicated that this process would be too complex. Therefore, instead of attempting to extensively modify the library, an Arduino DUE microcontroller was integrated into the hardware setup to extract measurements from the ToF. This hardware modification helped eliminate the extensive software difficulties presented by the sensor's library, highlighting a major hardware/software tradeoff of the project. Ultimately, the sensor's measurements were communicated to the RP2040 from the Arduino via UART.
+The project involved several hardware/software tradeoffs. One initial difficulty, as mentioned previously, was ensuring compatibility between the ToF sensor;s software library and the RP2040. Because the sensor’s library was designed for Arduino, its functions were not usable by the Pico.  Initially, it seemed that modifying the basic I2C read and write functions of the sensor would adapt the higher-level functions for RP2040 compatibility. However, further analysis indicated that this process would be too complex. Therefore, instead of attempting to extensively modify the library, an Arduino DUE microcontroller was integrated into the hardware setup to extract measurements from the ToF. This hardware modification helped eliminate the extensive software difficulties presented by the sensor's library, highlighting a major hardware/software tradeoff of the project. Ultimately, the sensor's measurements were communicated to the RP2040 from the Arduino via UART.
 
-Moreover, button debouncing comprised an additional HW/SW tradeoff for the project. Button debouncing was implemented via software - a state machine for checking button presses was coded in C. However, it is possible to implement the same functionality using hardware components. For example, an RC circuit can be used for button debounicng. The circuit, which consists of resistors, a capcitor, a switch and contacts to power and ground, can help to filter the vibrations and bouncing that can occur during a button press. This hardware would have simplified the code in this project. Alternatively, software logic for button debouncing helped to simplify the hardware set-up, indicating another HW/SW tradeoff (Ganssle). 
+Moreover, button debouncing comprised an additional HW/SW tradeoff for the project. Button debouncing was implemented via software - a state machine for checking button presses was coded in C. However, it is possible to implement the same functionality using hardware components. For example, an RC circuit can be used for button debouncing. The circuit, which consists of resistors, a capacitor, a switch and contacts to power and ground, can help to filter the vibrations and bouncing that can occur during a button press. This hardware would have simplified the code in this project. Alternatively, software logic for button debouncing helped to simplify the hardware set-up, indicating another HW/SW tradeoff [@ganssle_debouncing].
 
 ---
 
@@ -195,9 +197,9 @@ void drawImage(short x0, short y0, short width, short height, const unsigned cha
 
 To display the current signal rate in mMCPS, a bar was displayed in the uppr left corner of the VGA. The mMCPS, as described previously, represents the signal rate, or number of photons hitting the sensor. To draw the bar, the background of the bar was drawn in black so as to ensure a constant bar size regardless of the current signal measurement. Then, the bar's length was computed based upon the current signal rate such that bar length = (current signal/max allowed signal) * bar width.
 
-After experimenting with the graphical display, it was determined that the VGA drawing was too noisy due to instability in signal rate measurement. To remedy this issue, the current signal was updated once every 25 UART data transfers and assigned to the running sum of the past 25 extracted signal rate measurements. This allowed for less noisy (filtered) mMCPS measurments. 
+After experimenting with the graphical display, it was determined that the VGA drawing was too noisy due to instability in signal rate measurement. To remedy this issue, the current signal was updated once every 25 UART data transfers and assigned to the running sum of the past 25 extracted signal rate measurements. This allowed for less noisy (filtered) mMCPS measurments.
 
-Interestingly, the correlation between signal strength and qualtiy of distance measurement was graphically displayed - higher quality/more accurate measurements corresponded with larger values in the signal bar.
+Interestingly, the correlation between signal strength and quality of distance measurement was graphically displayed - higher quality/more accurate measurements corresponded with larger values in the signal bar.
 
 
 #### Polar Grid
@@ -389,7 +391,6 @@ TODO: importance of smudge correction
 | 500                         | 502                                   |
 | 1000                        | 1001                                  |
 
-
 ## Conclusions
 
 Analyze your results and discuss improvements.
@@ -416,17 +417,6 @@ The group does not approve this report for inclusion on the course website.
 
 The group does not approve the video for inclusion on the course YouTube channel.
 
-## Works Cited  
-
-“Blue Sky.” *HyperPhysics*, [hyperphysics.phy-astr.gsu.edu/hbase/atmos/blusky.html](http://hyperphysics.phy-astr.gsu.edu/hbase/atmos/blusky.html). Accessed 15 May 2025.  
-
-Charbon, Edoardo. “SPAD Image Sensors for Quantum and Classical Imaging.” *NATO Science & Technology Organization*.  
-
-Clark, Liz. *Adafruit VL53L4CX Time of Flight Distance Sensor*, Adafruit, 3 Oct. 2024, [cdn-learn.adafruit.com/downloads/pdf/adafruit-vl53l4cx-time-of-flight-distance-sensor.pdf](cdn-learn.adafruit.com/downloads/pdf/adafruit-vl53l4cx-time-of-flight-distance-sensor.pdf). 
-
-Cova, S., et al. “Avalanche photodiodes and quenching circuits for single-photon detection.” *Applied Optics*, vol. 35, no. 12, 20 Apr. 1996, p. 1956. [https://doi.org/10.1364/ao.35.001956](https://doi.org/10.1364/ao.35.001956).  
-
-Ganssle, Jack G. *A Guide to Debouncing*, The John and Marcia Price College of Engineering, June 2008, [my.eng.utah.edu/~cs5780/debouncing.pdf](my.eng.utah.edu/~cs5780/debouncing.pdf). 
-
-
 © 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
+
+# References
