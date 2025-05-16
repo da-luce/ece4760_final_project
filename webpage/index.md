@@ -77,9 +77,7 @@ Of course, environmental factors can interfere with ToF measurements - aside fro
 
 Finally, the ToF sensor characteristics include physical phenomena crucial for achieving accurate distance measurements. The sensor employs the use of SPADs - Single Photon Avalanche Diodes - to detect reflected light (Clark). This type of photodiode is exceedingly useful for detecting reflected photons. The diode is reverse-biased beyond its breakdown voltage, causing the presence of a strong electric field. A photon entering the depletion region of the diode can thus incite a current (avalanche) [@cova_apd].  This avalanche effect/current helps the sensor to accurately detect the arrival of its emitted photons [@cova_apd]. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche" [@charbon_spad]:
 
-<p align="center">
-    <img src="SPAD_Diagram.png" alt="Diagram of SPAD" width="400" />
-</p>
+![Diagram of SPAD](SPAD_Diagram.png)
 
 The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract measurements of surrounding terrain.
 
@@ -95,35 +93,25 @@ Extraction of ToF sensor measurements on the VL53L5CX was achieved by adapting o
 
 These two software components formed a strong foundation for our ToF sensor project. The pin-out diagram of the sensor below illustrates the hardware interface that allows for the I2C communication with the Arduino DUE. Most notably, SDA and SCL pins allow for the I2C communication [@charbon_spad]:
 
-<p align="center">
-    <img src="tof_sensor.png" alt="ToF Sensor" width="400" />
-</p>
+![Time-of-Flight (ToF) Sensor](tof_sensor.png)
 
 Additionally, the mechanical structure of the PicoScope was constructed to achieve accuracy and stability in measurement. The stepper motor was connected to a coupler and 8mm shaft - this made up the rotating structure of the ToF sensor allowing for complete 2-D scans. Then, a mount for the ToF sensor was connected to the shaft, and a lego structure housed the system providing extra stability. Moreover, an optical interrupter was integrated into the mechanical assembly to provide a reference point for the sensor's angle. Before scanning, the sensor was "zeroed" at the optical interrupter, providing an accurate angle reference for ToF distance and signal rate measurements. Below are images of the mechanical assembly:
 
-<p align="center">
-    <img src="mech1.jpeg" alt="Top-down view of optical interrupter" width="400" />
-</p>
-<p align="center">
-    <img src="mech2.jpeg" alt="Side profile of the optical interrupt mechanism" width="400" />
-</p>
-<p align="center">
-    <img src="mech3.jpeg" alt="Top-down view of the entire system (cardboard shroud in place to protect against wire entanglement)" width="400" />
-</p>
+![Top-down view of optical interrupter](mech1.jpeg)
+
+![Side profile of the optical interrupt mechanism](mech2.jpeg)
+
+![Top-down view of the entire system (cardboard shroud in place to protect against wire entanglement)](mech3.jpeg)
 
 In addition to the above software and hardware components, user-experience was a major component of this project. Three buttons making up a state machine allowed for easy control over the ToF sensor. Most notably, a state button was utilized to control and calibrate the ToF and initiate scanning. Moreover, the optical interrupt functioned as a "button" by being triggered when the ToF moved into the correct position. And, a reset/clear screen button was implemented to reset the ToF measurements and an emergency motor stop button was implemented for safety purposes.
 
 Lastly, VGA graphics were implemented to display the ToF measurements. Concentric circles were drawn on the VGA to indicate readable distance measurements, and a bar was drawn to display signal rate measurements. Distance measurements from the ToF sensor were reported in mm while signal rate measurements were report in milli-MegaCounts per Second (measurement of the number of photons returning to the sensor per second). Interestingly, graphical depictions of both measurements highlighted a correlation between accuracy and increased signal rate value. Below is an image displaying the graphical VGA display of our ToF setup:
 
-<p align="center">
-    <img src="graphics1.png" alt="Concentric circles indicating distance, no points collected" width="400" />
-</p>
-<p align="center">
-    <img src="graphics2.jpeg" alt="Pausing the LiDAR at a fixed angle, we demonstrate the color map for distance" width="400" />
-</p>
-<p align="center">
-    <img src="graphics3.png" alt="Representation of what actual data looks like" width="400" />
-</p>
+![Concentric circles indicating distance, no points collected](graphics1.png)
+
+![Pausing the LiDAR at a fixed angle, we demonstrate the color map for distance](graphics2.jgeg)
+
+![Representation of what actual data looks like](graphics3.png)
 
 Thus, the project comprised several hardware and software components that were logically integrated into a highly functional Time-of-Flight sensor.
 
