@@ -51,7 +51,7 @@ TODO: check these costs
 
 ## High-Level Design
 
-The purpose of this project was to construct a 2-Dimensional LiDAR capable of scanning distances up to approximately 3 meters in distance. The high-level design of the project consisted of a few key components: the mechanical structure upon which the Time-of-Flight sensor was mounted, the software logic for interfacing with a stepper motor for rotating the Time-of-Flight Sensor, Arduino code and UART communication for extracting readings from the sensor, and graphics for visualizing measurements. Additionally, various mechanisms were implemented to allow for sensor calibration, including an optical-interrupter which was used to provide a reference point for the angle of the stepper motor.
+The purpose of this project was to construct a 2-Dimensional LiDAR capable of scanning distances up to approximately 3 meters in distance. The high-level design of the project consisted of a few major components: the mechanical structure for mounting and rotating the Time-of-Flight sensor, the software logic for controlling the stepper motor (which rotated the mechanical structure), Arduino code and UART communication for extracting readings from the sensor, and graphics for visualizing measurements. Additionally, various hardware and software mechanisms were implemented to enhance the user experience. For example, an optical-interrupter was integrated into the mechanical design to help calibrate the sensor.
 
 ### Time-of-Flight Sensors: Rationale, Background Math, and Project Inspiration
 
