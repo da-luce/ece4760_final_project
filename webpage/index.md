@@ -195,7 +195,7 @@ To display the current signal rate in mMCPS, a bar was displayed in the upper le
 
 After experimenting with the graphical display, it was determined that the VGA drawing was too noisy due to instability in signal rate measurement. To remedy this issue, the current signal was updated once every 25 UART data transfers and assigned to the running sum of the past 25 extracted signal rate measurements. This allowed for less noisy (filtered) mMCPS measurements.
 
-Interestingly, the correlation between signal strength and quality of distance measurement was graphically displayed: higher quality (more accurate) measurements corresponded with larger values in the signal bar.
+Interestingly, a graphical correlation between signal strength and quality of distance measurement was displayed: higher quality (more accurate) measurements corresponded with larger mMCPS values in the signal bar on the VGA.
 
 #### Polar Grid
 
