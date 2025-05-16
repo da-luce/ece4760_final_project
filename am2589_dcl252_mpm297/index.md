@@ -135,15 +135,11 @@ Discuss tricky parts, hardware, and software choices.
 
 ### Hardware Schematic
 
-TODO: could someone help check this wiring
-
-![A [Fritzing](https://fritzing.org/) schematic of our breadboard](hard_schematic.png)
+![A [Fritzing](https://fritzing.org/) schematic of our breadboard](schematic_hard.png)
 
 ### Software Schematic
 
-TODO: the threading structure doesn't make that much sense. I forget why I put the button checks in their own thread...
-
-![Software Schematic](soft_schematic.png)
+![Software Schematic](schematic_soft.png)
 
 ### Graphics
 
