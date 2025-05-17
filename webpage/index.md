@@ -403,7 +403,7 @@ When the wiring was free and unobstructed, the stepper motor avoided over-torqui
 
 The ToF sensor demonstrated excellent precision and repeatability. The small discrepancies seen in the distance measurements (e.g., 49 mm vs. 50 mm) were primarily due to limitations in our testing setup, not the sensor itself. For reference, we used a meter stick and placed a piece of wood above it to align target distances. This method introduced small errors, especially holding the wood at longer distances. Despite this, the reported measurements were remarkably close to the actual values, confirming the sensor's accuracy. With a more controlled calibration environment (e.g., laser-aligned setup or fixed mounts), we would have observed even greater accuracy.
 
-The VL53L4CX also supports some more advanced features such as smudge correction and multi-zone detection, which we did not fully utilize in this project (for instance, adding smudge correction did not result in any observable difference in our scans). There was also a setting that permitted the user to calibrate the sensor using a fixed, known distance. This could have been used during the [`WAITING1`](#states) state.
+The VL53L4CX also supports several advanced features, such as cross-talk correction, smudge correction, and multi-zone detection, which we did not fully utilize in this project. For instance, adding smudge correction did not result in any observable difference in our scans. There was also a setting that permitted the user to calibrate the sensor using a fixed distance, which also did not result in any observable difference. These calibration functions could have been used during the [`WAITING1`](#states) state.
 
 ### Scans
 
@@ -499,9 +499,12 @@ The group approves the video for inclusion on the course YouTube channel.
 
 ### Arnav
 
-- Setting up the stepper motor
-- Displaying the distances using the rainbow gradient with the polar grid and angle arrow
-- Writing Arduino code to use the ToF sensor and send data over UART
+- Set up the stepper motor and driver to work with the Pico
+- Implemented Arduino code to read the ToF sensor and send data to the Pico over UART TX
+- Extensively explored calibration when debugging accuracy issues with the VL53L4CX sensor
+- Updated VGA graphics to use a [rainbow gradient](#color-map) for distance
+- Implemented a [polar grid](#polar-grid) with angles and distances; tuned to maximize screen usage
+- Added an [angle arrow](#angle-arrow) indicating the ToF's real-time orientation
 
 ### Dalton
 
