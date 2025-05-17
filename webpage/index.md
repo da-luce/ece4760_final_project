@@ -449,6 +449,8 @@ The group approves this report for inclusion on the course website.
 
 The group approves the video for inclusion on the course YouTube channel.
 
+© 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
+
 ## Appendix B: Code
 
 [GitHub Repository](https://github.com/da-luce/ece4760_final_project)
@@ -528,7 +530,5 @@ The group approves the video for inclusion on the course YouTube channel.
 - Debugged and tested code and mechanical assembly.
 - Soldered wires and pins for the hardware set-up. 
 - Contributed to and refined VGA graphics - specifically ensuring proper scaling and labeling for distance visualization and graphically displayed the signal rate measurements.
-
-© 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
 
 ## References
