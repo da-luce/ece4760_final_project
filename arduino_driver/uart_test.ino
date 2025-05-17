@@ -1,3 +1,5 @@
+// Code structured from example code here: https://github.com/stm32duino/VL53L4CX
+
 /**k
  ******************************************************************************
  * @file    VL53L4CX_Sat_HelloWorld.ino
@@ -175,12 +177,12 @@ void loop()
     //   int16_t range_val = pMultiRangingData->RangeData[j].RangeMilliMeter;
     //   sendInt16(range_val);
     // }
-    // If we want to include ambient light measurement
+    // If we want to include signal light measurement
     for (j = 0; j < no_of_object_found; j++) {
       int16_t range_val = pMultiRangingData->RangeData[j].RangeMilliMeter;
-      int32_t ambient_mcps = (int32_t)(pMultiRangingData->RangeData[j].SignalRateRtnMegaCps/65536.0f* (1000));
+      int32_t signal_mcps = (int32_t)(pMultiRangingData->RangeData[j].SignalRateRtnMegaCps/65536.0f* (1000));
       // float ambient_mcps = pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0f;
-      sendInt16(range_val, ambient_mcps);
+      sendInt16(range_val, signal_mcps);
     }
     // SerialPort.println("");
     if (status == 0) {
