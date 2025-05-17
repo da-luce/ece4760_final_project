@@ -114,7 +114,7 @@ Graphics for displaying the state of the ToF sensor were implemented via a VGA. 
 
 | Home Screen                     | Prompt Screen                       | Scan Screen                     |
 |---------------------------------|-------------------------------------|---------------------------------|
-| ![Home Screen](home_screen.png) | ![Prompt Screen](prompt_screen.jpg) | ![Scan Screen](scan_screen.png) |
+| ![Home Screen](homescreen.png) | ![Prompt Screen](prompt_screen.jpg) | ![Scan Screen](scan_screen.png) |
 
 In addition to these states, the VGA display could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA display communicated various measurements extracted from the sensor, showing real-time 2D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and concentric circles were utilized to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
 
@@ -159,11 +159,11 @@ To display custom images on the VGA output, we created a Python toolchain to con
 
 We used Python with the [`Pillow`](https://pypi.org/project/pillow/) and [`numpy`](https://numpy.org/) libraries to process the image:
 
-1. Resize the image to the VGA resolution of `160 x 120`
+1. Resize the image to the VGA aspect ratio of `160 x 120`
 2. Quantize the image colors to the 16-color VGA palette
 3. Convert the pixel data into a flat C array for use in our embedded code
 
-This script outputs a .c file with the image data, which we can include in our project. For example
+This script outputs a `.c` file with the image data, which we can include in our project. For example
 
 ```c
 #define IMAGE_WIDTH 160
@@ -234,7 +234,7 @@ Instead, we designed our LiDAR to only rotate 360° before reversing direction. 
 
 Even given this more flexible cable, things would still frequently get tied up. If we were to attempt a second prototype, we would mount the whole system on a rotating platform. This way, all sensitive electronic connections would be stationary relative to each other, and a slip ring delivering ground and power could be connected.
 
-To zero the motor (to define a set zero angle), we mounted an optical interrupter to the LEGO base. To trigger it, we used one of the M4 threads in the coupler to fix a larger M4 bolt. On the head of the bolt, we hot glued a GPIO header to serve as a more precise way to block the [optical interrupter](https://www.rohm.com/electronics-basics/photointerrupters/what-is-a-photointerrupter). We found the header alone was not sufficient, so we place some of te PVC wire coating around the header, and this was sufficient to accurately and precisely zero the motor. Interesting, we found that the zeroing was too bouncy to start, thus, we found we needed to debounce the interrupter to get a reliable reading. To do this, we simply used the same debouncing code as the other buttons, and effectively treated the interrupter as a button.
+To zero the motor (define a set zero angle), we mounted an optical interrupter to the LEGO base. To trigger it, we used one of the M4 threads in the coupler to fix a larger M4 bolt. On the head of the bolt, we hot glued a GPIO header to serve as a more precise way to block the [optical interrupter](https://www.rohm.com/electronics-basics/photointerrupters/what-is-a-photointerrupter). We found the header alone was not sufficient, so we place some of te PVC wire coating around the header, and this was sufficient to accurately and precisely zero the motor. Interesting, we found that the zeroing was too bouncy to start, thus, we found we needed to debounce the interrupter to get a reliable reading. To do this, we simply used the same debouncing code as the other buttons, and effectively treated the interrupter as a button.
 
 ### Generalized Button Code
 
@@ -350,8 +350,6 @@ To display an boot screen, we added a boolean flag, which when true, will displa
 
 ## Results of the Design
 
-Data, results, scope traces, etc.
-
 ### Zeroing Mechanism
 
 When the wiring was free and unobstructed, the stepper motor avoided over-torquing and consistently returned accurately to the zero position. Zeroing worked reliably throughout testing.
@@ -381,13 +379,13 @@ When the wiring was free and unobstructed, the stepper motor avoided over-torqui
 | 500                         | 501                     |
 | 1000                        | 1002                    |
 
-The ToF sensor demonstrated excellent precision and repeatability. The small discrepancies seen in the distance measurements (e.g., 49 mm vs. 50 mm) were primarily due to limitations in our testing setup, not the sensor itself. For reference, we used a meter stick and placed a piece of wood above it to align target distances. This method introduced small alignment and parallax errors, especially at longer distances. Despite this, the reported measurements were remarkably close to the actual values, confirming the sensor's accuracy. With a more controlled calibration environment (e.g., laser-aligned setup or fixed mounts), we would have observed even greater accuracy.
+The ToF sensor demonstrated excellent precision and repeatability. The small discrepancies seen in the distance measurements (e.g., 49 mm vs. 50 mm) were primarily due to limitations in our testing setup, not the sensor itself. For reference, we used a meter stick and placed a piece of wood above it to align target distances. This method introduced small errors, especially holding the wood at longer distances. Despite this, the reported measurements were remarkably close to the actual values, confirming the sensor's accuracy. With a more controlled calibration environment (e.g., laser-aligned setup or fixed mounts), we would have observed even greater accuracy.
 
-The VL53L4CX also supports advanced features such as smudge correction, signal threshold tuning, and multi-zone detection, which we did not fully utilize in this project (for instance, adding smudge correction did not result in any observable difference in our scans). There was also a setting that permitted the user to calibrate the sensor using a fixed, known distance. This could have been used during the [`WAITING1`](#states) state.
+The VL53L4CX also supports some more advanced features such as smudge correction and multi-zone detection, which we did not fully utilize in this project (for instance, adding smudge correction did not result in any observable difference in our scans). There was also a setting that permitted the user to calibrate the sensor using a fixed, known distance. This could have been used during the [`WAITING1`](#states) state.
 
 ### Scans
 
-While the VL53L4CX sensor is well-suited for measuring slow-moving objects, large sudden jumps in distance can cause inaccurate readings, resulting in poor scan quality. Additionally, the maximum report rate of about 8 ms per measurement is not fast enough for extremely precise scans. Furthermore, movement from the stepper motor and wire tugging introduced additional noise into the measurements, affecting overall scan reliability.
+While the VL53L4CX sensor is well-suited for measuring slow-moving objects, large sudden jumps in distance can cause inaccurate readings, resulting in poor scan quality. Additionally, the maximum report rate of about 8 ms per measurement is not fast enough for extremely dense scans. Furthermore, movement from the stepper motor and wire tugging introduced additional noise into the measurements, affecting the consistency of the scan.
 
 <figure>
     <video width="640" height="480" controls>
@@ -397,7 +395,7 @@ While the VL53L4CX sensor is well-suited for measuring slow-moving objects, larg
       <figcaption>Example of a scan being collected.</figcaption>
 </figure>
 
-We also set up a test environment to demonstrate the scan's effectiveness. By placing a large piece of wood next to the sensor, we showed that it reliably appears in the scan output (see the following image).
+We also set up a test environment to demonstrate the scan's effectiveness. By placing a large piece of wood next to the sensor, we showed that it reliably appears in the scan output (see the following images).
 
 ![Test setup with a large wooden object placed near the sensor](wood.jpeg)
 
@@ -408,26 +406,30 @@ We also set up a test environment to demonstrate the scan's effectiveness. By pl
 Analyze your results and discuss improvements.
 
 TODO: add more than just on mechanics!
-- Note that DMA and FIFO for uart was broke :/
+
 - Note that GPIO 15 would trigger 22 :/
 
 Our 2D LiDAR system achieved its primary goal of capturing rotational distance measurements using a Raspberry Pi Pico, a ToF sensor, and a stepper motor. The implementation was successful in demonstrating the core functionality of a low-cost scanning system capable of mapping its surroundings in real-time.
 
-One of the most significant engineering challenges we faced was the mechanical assembly, particularly the issue of wire entanglement during rotation. By designing the system to sweep back and forth over 360°, we avoided the need for an expensive slip ring while still maintaining full angular coverage. However, this introduced complexity in cable management and occasional interference, even when using a flexible ribbon cable. A future improvement would be to mount the entire sensor on a rotating platform, isolating electronic components from moving parts and allowing a slip ring to only carry power and ground.
+One of the most significant challenges we faced was the mechanical assembly, particularly the issue of wire entanglement during rotation. By designing the system to sweep back and forth over 360°, we avoided the need for an expensive slip ring while still maintaining full angular coverage. However, this introduced complexity in cable management, even when using a flexible ribbon cable. A future improvement would be to mount the entire sensor on a rotating platform, isolating electronic components from moving parts and allowing a slip ring to only carry power and ground.
 
-The use of LEGOs as the structural framework provided a convenient and adaptable platform, but a custom 3D-printed or machined chassis would offer greater precision, durability, and compactness. Additionally, our zeroing mechanism using an optical interrupter worked well after incorporating debouncing, though it required careful alignment and tuning. Integrating a mechanical end-stop or magnetic encoder could provide a more robust and repeatable zeroing process.
+The use of LEGOs as the structural framework provided a convenient and adaptable platform, but a custom 3D-printed chassis would offer better precision and compactness. Additionally, our zeroing mechanism using an optical interrupter worked well after incorporating debouncing, though it required careful alignment. Integrating a mechanical end-stop or magnetic encoder could provide a more robust and repeatable zeroing process.
 
-We also observed that the VL53L4CX sensor appears to be optimized more for high-accuracy measurements rather than performance in dynamic or high-speed environments like LiDAR scanning. While it delivers precise distance readings under static or slow-moving conditions, its update rate and timing constraints limited how fast we could reliably rotate the sensor and still obtain accurate readings. A sensor designed specifically for fast time-of-flight sampling in motion could significantly improve the responsiveness and resolution of our system.
+We also observed that the VL53L4CX sensor appears to be optimized more for high-accuracy measurements rather than performance in dynamic or high-speed environments like LiDAR scanning. While it delivers precise distance readings under static or slow-moving conditions, its update rate limited how fast we could reliably rotate the sensor and still obtain accurate readings. A sensor designed specifically for fast time-of-flight sampling in motion could significantly improve the responsiveness and resolution of our system.
 
-Similarly, the small 28BYJ-48 stepper motor, while cost-effective and easy to control, imposed limitations on scan speed and torque. Its relatively low speed made high-resolution scans time-consuming, and its low torque occasionally caused missed steps or jitter. Replacing it with a larger stepper motor or even a continuous-rotation servo could drastically improve angular velocity and positional stability, enabling smoother and faster scans. A motor with built-in position feedback (like a servo or closed-loop stepper) would further enhance precision and eliminate the need for separate zeroing hardware.
+Similarly, the small 28BYJ-48 stepper motor, while cost-effective and easy to control, imposed limitations on scan speed and torque. Its relatively low speed made high-resolution scans time-consuming, and its low torque occasionally caused missed steps or jitter. Replacing it with a larger stepper motor or even a continuous-rotation servo could drastically improve angular velocity and positional stability, enabling smoother and faster scans. A motor with built-in position feedback (like a servo with closed loop feedback) would further enhance precision and eliminate the need for separate zeroing hardware.
+
+On the software side, we tried to optimize UART communication between the Arduino Due and the RP2040 by using DMA and FIFO to process our 4-byte measurement packets efficiently. However, we encountered a hardware limitation: although the RP2040 UART features a 32-byte RX FIFO, it lacks support for triggering interrupts based on FIFO fill level. Instead, the UART only generates interrupts for each individual received byte. This constraint, as observed by this [community forum discussion](https://forums.raspberrypi.com/viewtopic.php?t=337698), limited our ability to batch UART reads and necessitated a byte-by-byte interrupt handler. Despite this inefficiency, the LiDAR still functioned perfectly fine with the slow update rate of the ToF sensor. 
+
+On the hardware side, we encountered an anomaly where grounding GPIO 15 also caused GPIO 22 to read low, even though they were configured as independent inputs (while setting up input buttons with internal pull-up resistors). Scope measurements confirmed that grounding GPIO 15 unintentionally pulled GPIO 22 low as well (but not vice versa!). This pointed to a short or PCB fault on the Pico board. Reassigning the input from GPIO 22 to GPIO 26 resolved the issue, confirming that the problem was hardware-related rather than due to software misconfiguration.
 
 Overall, our project demonstrated a functional and extensible LiDAR system that could serve as the foundation for further development, including real-time mapping, obstacle detection, or autonomous navigation. With minor refinements in mechanical design and electrical isolation, the system's performance, accuracy, and reliability could be significantly improved.
 
 ## Appendix A: Permissions
 
-The group does not approve this report for inclusion on the course website.
+The group approves this report for inclusion on the course website.
 
-The group does not approve the video for inclusion on the course YouTube channel.
+The group approves the video for inclusion on the course YouTube channel.
 
 © 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
 
