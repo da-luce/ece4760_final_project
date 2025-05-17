@@ -519,7 +519,7 @@ The group approves the video for inclusion on the course YouTube channel.
 
 ### Mac
 
-- Researched and extracted Time-of-Flight measurements using Arduino functions for the ToF sensor.
+- Researched and extracted VL53L4CX sensor measurements (using its Arduino functions).
 - Attempted to modify the sensor's Arduino library for compatibility with the RP2040; after much work, this process became too complex and we instead integrated an Arduino Due into the Hardware set-up
 - Researched and helped set up initial UART protocol between Arduino and Pico.
 - Modified UART receive function and Arduino functions to provide functionality for signal rate measurements.
