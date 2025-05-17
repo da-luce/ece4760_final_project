@@ -403,12 +403,6 @@ We also set up a test environment to demonstrate the scan's effectiveness. By pl
 
 ## Conclusions
 
-Analyze your results and discuss improvements.
-
-TODO: add more than just on mechanics!
-
-- Note that GPIO 15 would trigger 22 :/
-
 Our 2D LiDAR system achieved its primary goal of capturing rotational distance measurements using a Raspberry Pi Pico, a ToF sensor, and a stepper motor. The implementation was successful in demonstrating the core functionality of a low-cost scanning system capable of mapping its surroundings in real-time.
 
 One of the most significant challenges we faced was the mechanical assembly, particularly the issue of wire entanglement during rotation. By designing the system to sweep back and forth over 360°, we avoided the need for an expensive slip ring while still maintaining full angular coverage. However, this introduced complexity in cable management, even when using a flexible ribbon cable. A future improvement would be to mount the entire sensor on a rotating platform, isolating electronic components from moving parts and allowing a slip ring to only carry power and ground.
@@ -496,7 +490,7 @@ The group approves the video for inclusion on the course YouTube channel.
 - Wrote the [image](#images) handling and conversion code for rendering bitmaps on screen
 - Added and configured multiple [VGA screens](#graphics) to support system output
 
-### Max
+### Mac
 
 - Something
 
