@@ -124,6 +124,16 @@ Discuss tricky parts, hardware, and software choices.
 
 ![Software Schematic](schematic_soft.png)
 
+### States
+
+![State Diagram](state_diagram.drawio.png)
+
+The program operates as a finite state machine to manage the LiDAR system's behavior based on user input. It begins in the `WAITING1` state, during which the system is idle and allows for [sensor calibration](#vl53l4cx-accuracy). If the user holds a the green state button, the system transitions to the `ZEROING` state, which is responsible for aligning the stepper motor with the zero position via the optical interrupter.
+
+Once the zero position is reach, the system automatically enters the `WAITING2` state, signaling readiness to begin data collection. When the user presses the button again, the program transitions to the `LIDAR` state, actively rotating the motor and collecting distance data from the ToF sensor. Pressing the button once more returns the system to the initial `WAITING1` state, completing the control loop.
+
+To display an boot screen, we added a boolean flag, which when true, will display the an [image](#images) and instructions during the `WAITING1` state. After the initial boot, the flag is set to false and all further `WAITING1` states do not display the boot screen.
+
 ### Graphics
 
 Graphics for displaying the state of the ToF sensor were implemented via a VGA. The program consisted of three screen states:
@@ -358,16 +368,6 @@ while (true) {
 
 A yield of three milliseconds proved sufficient to debounce the mechanical buttons without noticeably impacting overall system responsiveness.
 
-### States
-
-![State Diagram](state_diagram.drawio.png)
-
-The program operates as a finite state machine to manage the LiDAR system's behavior based on user input. It begins in the `WAITING1` state, during which the system is idle and allows for [sensor calibration](#vl53l4cx-accuracy). If the user holds a the green state button, the system transitions to the `ZEROING` state, which is responsible for aligning the stepper motor with the zero position via the optical interrupter.
-
-Once the zero position is reach, the system automatically enters the `WAITING2` state, signaling readiness to begin data collection. When the user presses the button again, the program transitions to the `LIDAR` state, actively rotating the motor and collecting distance data from the ToF sensor. Pressing the button once more returns the system to the initial `WAITING1` state, completing the control loop.
-
-To display an boot screen, we added a boolean flag, which when true, will display the an [image](#images) and instructions during the `WAITING1` state. After the initial boot, the flag is set to false and all further `WAITING1` states do not display the boot screen.
-
 ---
 
 ## Results of the Design
@@ -499,7 +499,9 @@ The group approves the video for inclusion on the course YouTube channel.
 
 ### Arnav
 
-- Something
+- Setting up the stepper motor
+- Displaying the distances using the rainbow gradient with the polar grid and angle arrow
+- Writing Arduino code to use the ToF sensor and send data over UART
 
 ### Dalton
 
