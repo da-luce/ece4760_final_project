@@ -46,7 +46,7 @@ Finally, the ToF sensor characteristics include physical phenomena that are impo
 
 The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract accurate distance measurements of surrounding terrain [@clark_vl53l4cx].
 
-Thus, despite challenges, a number of factors demonstrate how ToF sensors can effectively scan terrain for scientific applications, providing both inspiration and a rationale for the *PicoScope* Project.
+Thus a number of factors demonstrate how ToF sensors can effectively scan terrain for scientific applications, providing both inspiration and a rationale for the *PicoScope* Project.
 
 ### Logical Structure
 
