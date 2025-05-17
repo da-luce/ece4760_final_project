@@ -487,7 +487,14 @@ The group approves the video for inclusion on the course YouTube channel.
 
 ### Dalton
 
-- Something
+- Developed the [state handling system](#states) for managing scan modes and control flow
+- Wrote the initial UART RX receive function for parsing measurement data
+- Refactored [button input code](#generalized-button-code) to be more modular and generic
+- Organized and cleaned the [breadboard](#hardware-schematic) setup, including shortening wires and shrink-wrapping VGA cables
+- Implemented the initial stepper motor loop for rotational control
+- Created the initial VGA display graphics used for data visualization
+- Wrote the [image](#images) handling and conversion code for rendering bitmaps on screen
+- Added and configured multiple [VGA screens](#graphics) to support system output
 
 ### Max
 
