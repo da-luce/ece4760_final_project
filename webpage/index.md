@@ -62,7 +62,7 @@ These two software components made up the primary software components for *PicoS
 
 Additionally, the mechanical structure of PicoScope facilitated accurate and stable measurements. A coupler was connected to a stepper motor, and an 8mm shaft connected the coupler to a mount for the ToF sensor---this structure rotated the ToF sensor to complete 2-D scans of the surrounding terrain. A lego structure housed the stepper motor system providing extra stability to the system.
 
-Moreover, an optical interrupter was utilized in the mechanical design as a reference point for the sensor's angle. The angles of all distance and signal rate measurements were reported relative to this reference point. Below are images of the mechanical assembly:
+Moreover, an optical interrupter was utilized in the mechanical design as a reference point for the sensor's angle. The angles of all distance and signal rate measurements were reported relative to this reference point. Below are images of the mechanical assembly (#mechanical-assembly):
 
 ![Top-down view of optical interrupter](mech1.jpeg)
 
@@ -524,7 +524,7 @@ The group approves the video for inclusion on the course YouTube channel.
 - Researched and helped set up initial UART protocol between Arduino and Pico.
 - Modified UART receive function and Arduino functions to provide functionality for signal rate measurements.
 - Designed and constructed the mechanical assembly of the LiDAR system.
-- Debugged and tested code and mechanical assembly.
+- Debugged and tested code and [mechanical assembly](#mechanical-assembly).
 - Soldered wires and pins for the hardware set-up. 
 - Contributed to and refined VGA graphics - specifically ensuring proper scaling and labeling for distance visualization and graphically displayed the signal rate measurements.
 
