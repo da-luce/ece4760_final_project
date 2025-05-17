@@ -449,6 +449,7 @@ The group does not approve the video for inclusion on the course YouTube channel
 | [LEGOs][legos]                   | Base structure for prototyping the LiDAR system      | [~\$5][legos-cost] |
 | [Coupler][coupler]               | Connects the stepper motor shaft to the 8 mm shaft   | [\$4.95][coupler-cost] |
 | **Total**                        |                                                      | **~\$45**        |
+
 [pico]: https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf  
 [pico-cost]: https://www.adafruit.com/product/4864  
 
@@ -475,5 +476,19 @@ The group does not approve the video for inclusion on the course YouTube channel
 
 [coupler]: https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/1300/1176_Web.pdf  
 [coupler-cost]: https://www.digikey.com/en/products/detail/adafruit-industries-llc/1176/5356856  
+
+## Appendix D: Tasks
+
+### Arnav
+
+- Something
+
+### Dalton
+
+- Something
+
+### Max
+
+- Something
 
 ## References
