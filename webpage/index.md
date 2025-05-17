@@ -148,7 +148,7 @@ Graphics for displaying the state of the ToF sensor were implemented via a VGA. 
 
 | Home Screen                     | Prompt Screen                       | Scan Screen                     |
 |---------------------------------|-------------------------------------|---------------------------------|
-| ![Home Screen](homescreen.png) | ![Prompt Screen](prompt_screen.jpg) | ![Scan Screen](scan_screen.png) |
+| ![Home Screen](home_screen.png) | ![Prompt Screen](prompt_screen.jpg) | ![Scan Screen](scan_screen.png) |
 
 In addition to these states, the VGA display could be cleared by the user at any point during sensor operation. While scanning terrain, the VGA display communicated various measurements extracted from the sensor, showing real-time 2D distance measurements at the correct scale as well as real-time signal strength measurements. To ensure accurate representation of the measurements, the current angle of the sensor was displayed, and concentric circles were utilized to label the distances of the objects in the immediate vicinity of the ToF sensor. The descriptions below go into further detail about the graphics rendered for the project.
 
@@ -237,7 +237,7 @@ To improve spatial orientation and help users interpret both distance from the T
 
 #### Angle Arrow
 
-To indicate the current orientation of the ToF sensor relative to the zero gate, we added a triangular arrow that orbits just beyond the outermost distance ring of the polar grid, pointing toward the center. As the ToF sensor rotates through angles, the arrow moves smoothly around the circle, providing a clear and continuous indication of the sensor's current direction. Initially, we computed the arrow's position using radian-based (floating-point) `sin()` and `cos()` calls each frame, but this introduced noticeable lag, occasionally causing the pointer to skip nearly 20° between updates. To resolve this, we precomputed sine and cosine values for all 360 degrees and scaled each value by a constant factor (`SCALE = 1024`) so the values can be stored as `int`s in lookup tables. Using these, we constructed the triangle with basic vector geometry: its tip points along the current angle, and its base is centered perpendicular to that direction. The coordinates of the triangle's vertices are calculated from the scaled trig values and rendered using three lines, resulting in a lightweight visual marker of the real-time sweep of the sensor.
+To indicate the current orientation of the ToF sensor relative to the zero gate, we added a triangular arrow that orbits just beyond the outermost distance ring of the polar grid, pointing toward the center. As the ToF sensor rotates through angles, the arrow moves smoothly around the circle, providing a clear and continuous indication of the sensor's current direction. Initially, we computed the arrow's position using radian-based (floating-point) `sin()` and `cos()` calls each frame, but this introduced noticeable lag, occasionally causing the pointer to skip nearly 20° between updates. To resolve this, we precomputed sine and cosine values for all 360 degrees and scaled each value by a constant factor (`SCALE = 1024`) so that each value can be stored as an `int` in the lookup tables. Using these, we constructed the triangle with basic vector geometry: its tip points along the current angle, and its base is centered perpendicular to that direction. The coordinates of the triangle's vertices are calculated from the scaled trig values and rendered using three lines, resulting in a lightweight visual marker of the real-time sweep of the sensor.
 
 ##### Volatile Variables
 
@@ -449,8 +449,6 @@ The group approves this report for inclusion on the course website.
 
 The group approves the video for inclusion on the course YouTube channel.
 
-© 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
-
 ## Appendix B: Code
 
 [GitHub Repository](https://github.com/da-luce/ece4760_final_project)
@@ -501,12 +499,13 @@ The group approves the video for inclusion on the course YouTube channel.
 
 ### Arnav
 
-- Set up the stepper motor and driver to work with the Pico
+- Initially wired up and integrated the stepper motor and driver to work with the Pico
 - Implemented Arduino code to read the ToF sensor and send data to the Pico over UART TX
-- Extensively explored calibration when debugging accuracy issues with the VL53L4CX sensor
+- Extensively explored calibration when debugging initial accuracy issues (1+ meter off) with the VL53L4CX sensor
 - Updated VGA graphics to use a [rainbow gradient](#color-map) for distance
-- Implemented a [polar grid](#polar-grid) with angles and distances; tuned to maximize screen usage
+- Implemented a [polar grid](#polar-grid) with angles and distances; tuned distance to pixel conversion to maximize screen usage
 - Added an [angle arrow](#angle-arrow) indicating the ToF's real-time orientation
+- Helped with the [image](#images) handling for rendering bitmaps
 
 ### Dalton
 
@@ -529,5 +528,7 @@ The group approves the video for inclusion on the course YouTube channel.
 - Debugged and tested code and mechanical assembly.
 - Soldered wires and pins for the hardware set-up. 
 - Contributed to and refined VGA graphics - specifically ensuring proper scaling and labeling for distance visualization and graphically displayed the signal rate measurements.
+
+© 2025 Mac Marsh (mpm297) ∙ Dalton Luce (dcl252) ∙ Arnav Muthiayen (am2589) — Cornell University
 
 ## References
