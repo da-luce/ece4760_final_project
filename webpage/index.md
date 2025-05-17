@@ -80,7 +80,7 @@ Lastly, VGA graphics were implemented to display the ToF measurements. Concentri
 
 ![Representation of what actual data looks like](graphics3.png)
 
-Thus, the project consisted of multiple hardware and software components. All components were combined to form a high-functioning ToF system.
+Thus, the project consisted of multiple hardware and software components. All components were combined to form a functioning LiDAR system.
 
 ### Hardware/Software Tradeoffs
 
