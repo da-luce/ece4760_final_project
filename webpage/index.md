@@ -64,7 +64,7 @@ Additionally, the mechanical structure of PicoScope facilitated accurate and sta
 
 Moreover, an optical interrupter was utilized in the mechanical design as a reference point for the sensor's angle. The angles of all distance and signal rate measurements were reported relative to this reference point. Below are images of the mechanical assembly:
 
-#### Mechancial Assembly Photos
+#### Mechanical Assembly Photos
 
 ![Top-down view of optical interrupter](mech1.jpeg)
 
