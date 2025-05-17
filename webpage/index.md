@@ -98,6 +98,28 @@ Discuss tricky parts, hardware, and software choices.
 
 ![A [Fritzing](https://fritzing.org/) schematic of our breadboard](schematic_hard.png)
 
+#### GPIO Connections
+
+| Component                       | GPIO Pin |
+|:--------------------------------|---------:|
+| Motor IN1                       |        2 |
+| Motor IN2                       |        3 |
+| Motor IN3                       |        4 |
+| Motor IN4                       |        5 |
+| UART TX                         |        8 |
+| UART RX                         |        9 |
+| Zero Gate (Optical Interrupter) |       12 |
+| Stop Button                     |       15 |
+| VGA Hsync                       |       16 |
+| VGA Vsync                       |       17 |
+| VGA Green (470 Ω)               |       18 |
+| VGA Green (330 Ω)               |       19 |
+| VGA Blue (330 Ω)                |       20 |
+| VGA Red (330 Ω)                 |       21 |
+| State Button                    |       22 |
+| Clear Button                    |       28 |
+
+
 ### Software Schematic
 
 ![Software Schematic](schematic_soft.png)
