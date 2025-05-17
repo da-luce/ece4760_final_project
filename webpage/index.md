@@ -46,7 +46,7 @@ Finally, the ToF sensor includes characteristics that help to facilitate accurat
 
 The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract accurate distance measurements from surrounding terrain [@clark_vl53l4cx].
 
-Thus a number of factors demonstrate how ToF sensors can effectively scan terrain for scientific applications, providing both inspiration and a rationale for the *PicoScope* Project.
+Thus a number of factors demonstrate how ToF sensors can effectively scan terrain for scientific applications, providing both inspiration and a rationale for PicoScope.
 
 ### Logical Structure
 
@@ -54,9 +54,9 @@ The logical structure of this project consisted of the development of a few majo
 
 Initially software logic for interfacing with the stepper motor via PIO state machines and with the ToF sensor were developed. Using the list of macros and functions provided in ECE4760's `motor_library.h` file, the direction and pace of the motor was continuously updated via an interrupt service routine. Because the interrupt handler was called after the stepper motor executed a command, it was also a suitable function for processing the distance measurements produced by the ToF sensor.
 
-Extraction of ToF sensor measurements on the VL53L4CX was achieved by adapting Arduino libraries for the sensor. These libraries allowed for distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040---ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. After further analysis of the library, it was determined that the call-stack of the relevant Arduino functions for the *PicoScope* project was too complex. A better solution included the integration of an Arduino Due into the hardware setup. Measurements from the ToF sensor were ultimately extracted directly by the Arduino Due and transported to the RP2040 via UART communication protocol.
+Extraction of ToF sensor measurements on the VL53L4CX was achieved by adapting Arduino libraries for the sensor. These libraries allowed for distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040---ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. After further analysis of the library, it was determined that the call-stack of the relevant Arduino functions for PicoScope was too complex. A better solution included the integration of an Arduino Due into the hardware setup. Measurements from the ToF sensor were ultimately extracted directly by the Arduino Due and transported to the RP2040 via UART communication protocol.
 
-These two software components made up the primary software components for *PicoScope* Project. The pin-out diagram of the sensor below illustrates the hardware interface (SCL and SDA) of the ToF sensor that allows for I2C communication with the Arduino Due [@charbon_spad]:
+These two software components made up the primary software components of PicoScope. The pin-out diagram of the sensor below illustrates the hardware interface (SCL and SDA) of the ToF sensor that allows for I2C communication with the Arduino Due [@charbon_spad]:
 
 ![Time-of-Flight (ToF) Sensor](tof_sensor.png)
 
