@@ -657,7 +657,11 @@ int main() {
     // VGA CONFIGURATION -------------------------------------------------------
     initVGA();
 
+  
     // UART CONFIGURATION
+
+    // From: https://github.com/da-luce/ece4760_final_project/blob/main/Hunter-Adams-RP2040-Demos/src/main.c
+
     uart_init(UART_ID, BAUD_RATE); // Set up our UART with a basic baud rate.
     // Set the TX and RX pins by using the function select on the GPIO
     gpio_set_function(UART_TX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
