@@ -516,6 +516,13 @@ The group approves the video for inclusion on the course YouTube channel.
 
 ### Mac
 
-- Something
+- Researched and extracted Time-of-Flight measurements using Arduino functions for the ToF sensor.
+- Attempted to modify the sensor's Arduino library for compatibility with the RP2040; after much work, this process became too complex and we instead integrated an Arduino Due into the Hardware set-up
+- Researched and helped set up initial UART protocol between Arduino and Pico.
+- Modified UART receive function and Arduino functions to provide functionality for signal rate measurements.
+- Designed and constructed the mechanical assembly of the LiDAR system.
+- Debugged and tested code and mechanical assembly.
+- Soldered wires and pins for the hardware set-up. 
+- Contributed to and refined VGA graphics - specifically ensuring proper scaling and labeling for distance visualization and graphically displayed the signal rate measurements.
 
 ## References
