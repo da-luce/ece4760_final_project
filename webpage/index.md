@@ -14,7 +14,7 @@ The final video demonstration may be found [here](https://www.youtube.com/watch?
 
 ## High-Level Design
 
-The purpose of this project was to construct a 2-dimensional LiDAR (Light Detection and Ranging) capable of scanning up to approximately 3 meters in distance. The high-level design of the project consisted of a few major components: the mechanical structure for mounting and rotating the Time-of-Flight sensor, the software logic for controlling the stepper motor (which rotated the mechanical structure), Arduino code and UART communication for extracting readings from the sensor, and graphics for visualizing measurements. Additionally, various hardware mechanisms and software processes were implemented to enhance the user's experience. For example, an optical-interrupter was integrated into the hardware design to help calibrate the sensor to ensure precise measurements.
+The purpose of this project was to construct a 2-dimensional LiDAR (Light Detection and Ranging) capable of scanning up to approximately 3 meters in distance. The high-level design of the project consisted of a few major components: the mechanical structure for mounting and rotating the Time-of-Flight sensor, the software logic for controlling the stepper motor (which rotated the mechanical structure), Arduino code and UART communication for extracting readings from the sensor, and graphics for visualizing measurements. Additionally, various hardware mechanisms and software processes were implemented to enhance the user's experience. For example, an optical-interrupter was integrated into the hardware design to help calibrate the sensor.
 
 ### Time-of-Flight Sensors: Rationale, Background Math, and Project Inspiration
 
@@ -26,7 +26,7 @@ $$
 \text{Intensity of Scattered Light} \propto \frac{1}{\lambda^4}
 $$
 
-Thus, infrared light---specifically at a wavelength of 940 nm---is an appropriate choice for a ToF sensor as it produces less scattering intensity compared to other forms of light. Because infrared radiation is less likely to scatter, reflected photons have a higher chance of returning back to the sensor and producing accurate measurements.
+Thus, infrared light---specifically at a wavelength of 940 nm---is good choice for LiDAR sensors, as it causes less scattering intensity compared to other forms of light. Because infrared radiation is less likely to scatter, reflected photons have a higher chance of returning back to the sensor and producing accurate distance measurements.
 
 One can estimate the distance to an object using a simplified formula based on the speed of light:
 
@@ -36,15 +36,15 @@ $$
 
 where $t$ is the time it takes for a photon to travel to the object and back (time-of-flight), and $c$ is the speed of light.
 
-Additional environmental factors aside from Rayleigh scattering can interfere with the ToF's measurements. Ambient light sources, for example, could possibly emit photons that would interfere with the sensor's ability to detect its own emitted photons that have reflected off objects. And, the properties of the objects being scanned could potentially impact the quality of the sensor's readings. It is well-known that shiny objects, including metal, are good reflectors of IR radiation. It thus stands to reason that shiny objects could potentially provide more accurate distance measurements compared to darker objects, which typically absorb infrared radiation. 
+Additional environmental factors aside from Rayleigh scattering can interfere with the ToF's measurements. Ambient light sources, for example, could possibly emit photons that would interfere with the sensor's ability to detect its own emitted photons that have reflected off objects. And, the properties of the objects being scanned could potentially impact the quality of the sensor's readings. It is well-known that shiny objects, including metal, are good reflectors of IR radiation. It thus stands to reason that shiny objects could potentially provide more accurate distance measurements compared to darker objects, which oftentimes absorb infrared radiation. 
 
 During laboratory experiments, objects farther away from the sensor provided less accurate distance measurements, illustrating the potentially deleterious effects of Rayleigh scattering and ambient light sources: if an object is farther away from the sensor, environmental obstacles presumably have more opportunity/time to interfere with the sensor's measurements.
 
-Finally, the ToF sensor characteristics include physical phenomena that are important for achieving accurate distance measurements. The sensor employs the use of Single Photon Avalanche Diodes (SPADs) to detect reflected light [@clark_vl53l4cx]. This type of photodiode is quite useful for detecting reflected photons. The diode is reverse-biased beyond its breakdown voltage, causing the presence of a strong electric field. A photon entering the depletion region of the diode can thus incite a current (avalanche) [@cova_apd].  This avalanche effect/current helps the sensor to accurately detect the arrival of its emitted/reflected photons [@cova_apd]. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche" [@charbon_spad]:
+Finally, the ToF sensor includes characteristics that help to facilitate accurate measurements. The sensor employs the use of Single Photon Avalanche Diodes (SPADs) to detect reflected light [@clark_vl53l4cx]. This type of photodiode is quite useful for detecting reflected photons. The diode is reverse-biased beyond its breakdown voltage, causing the presence of a strong electric field. A photon entering the depletion region of the diode can thus incite a current (avalanche) [@cova_apd].  This avalanche effect/current helps the sensor to accurately detect the arrival of its emitted/reflected photons [@cova_apd]. Below is a diagram illustrating this effect. Note that SPADs operate above the breakdown voltage in the Geiger regime, allowing for the aforementioned "avalanche" [@charbon_spad]:
 
 ![Diagram of SPAD](SPAD_Diagram.png)
 
-The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract accurate distance measurements of surrounding terrain [@clark_vl53l4cx].
+The VL53L4CX Time-of-Flight Sensor houses an array of SPADS, utilizing their photodetecting abilities to extract accurate distance measurements from surrounding terrain [@clark_vl53l4cx].
 
 Thus a number of factors demonstrate how ToF sensors can effectively scan terrain for scientific applications, providing both inspiration and a rationale for the *PicoScope* Project.
 
@@ -56,13 +56,13 @@ Initially software logic for interfacing with the stepper motor via PIO state ma
 
 Extraction of ToF sensor measurements on the VL53L4CX was achieved by adapting Arduino libraries for the sensor. These libraries allowed for distance and signal strength measurements. Originally, an attempt was made to adapt the relevant functions of the libraries to make them compatible with the RP2040---ideally, only the I2C Read and Write functions would have had to be modified to ensure compatibility of all other functions with the Pico. After further analysis of the library, it was determined that the call-stack of the relevant Arduino functions for the *PicoScope* project was too complex. A better solution included the integration of an Arduino Due into the hardware setup. Measurements from the ToF sensor were ultimately extracted directly by the Arduino Due and transported to the RP2040 via UART communication protocol.
 
-These two software components formed a strong software foundation for *PicoScope* Project. The pin-out diagram of the sensor below illustrates the hardware interface (SCL and SDA) of the ToF sensor that allows for I2C communication with the Arduino Due [@charbon_spad]:
+These two software components made up the primary software components for *PicoScope* Project. The pin-out diagram of the sensor below illustrates the hardware interface (SCL and SDA) of the ToF sensor that allows for I2C communication with the Arduino Due [@charbon_spad]:
 
 ![Time-of-Flight (ToF) Sensor](tof_sensor.png)
 
-Additionally, the mechanical structure of PicoScope was constructed to achieve accurate and stable measurements. A coupler was connected to a stepper motor, and an 8mm shaft connected the coupler to a mount for the ToF sensor---this structure rotated the ToF sensor to complete 2-D scans of the surrounding terrain. A lego structure housed the stepper motor system providing extra stability.
+Additionally, the mechanical structure of PicoScope facilitated accurate and stable measurements. A coupler was connected to a stepper motor, and an 8mm shaft connected the coupler to a mount for the ToF sensor---this structure rotated the ToF sensor to complete 2-D scans of the surrounding terrain. A lego structure housed the stepper motor system providing extra stability to the system.
 
-Moreover, an optical interrupter was integrated into the mechanical design to act as a reference point for the sensor's angle. The angles of all distance and signal rate measurements were reported relative to this reference point. Below are images of the mechanical assembly:
+Moreover, an optical interrupter was utilized in the mechanical design as a reference point for the sensor's angle. The angles of all distance and signal rate measurements were reported relative to this reference point. Below are images of the mechanical assembly:
 
 ![Top-down view of optical interrupter](mech1.jpeg)
 
